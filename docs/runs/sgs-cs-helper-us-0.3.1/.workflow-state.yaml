@@ -1,0 +1,165 @@
+# Workflow State — US-0.3.1 Create Core Database Schema
+# Generated: 2026-02-05
+# Flow: Unified Work Delivery Workflow (Flow 2)
+
+meta:
+  branch_slug: sgs-cs-helper-us-0.3.1
+  product_slug: sgs-cs-helper
+  user_story_id: US-0.3.1
+  docs_root: sgs-cs-hepper
+  tooling_root: a-z-copilot-flow
+  base_branch: main
+  dev_mode: standard
+  created_at: 2026-02-05T21:00:00+07:00
+  updated_at: 2026-02-05T22:15:00+07:00
+
+status:
+  current_phase: 5
+  phase_name: done
+  phase_status: completed
+  current_task: null
+  last_action: "Phase 5 Done Check complete - all DoD criteria met"
+  next_action: "User commits, pushes, and creates PR"
+  blockers: []
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: 2026-02-05T21:00:00+07:00
+    completed_at: 2026-02-05T21:30:00+07:00
+    approved_at: 2026-02-05T21:35:00+07:00
+    artifacts:
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/diagrams/flow-overview.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+    decisions:
+      - id: D-001
+        decision: "Follow Tech Stack Instructions schema exactly"
+        rationale: "Authoritative source, ensures consistency"
+      - id: D-002
+        decision: "Use OrderStatus enum instead of String"
+        rationale: "Type safety, IDE autocomplete, DB constraint"
+      - id: D-003
+        decision: "Store OVERDUE as status value (not computed)"
+        rationale: "Background job can update, simpler queries"
+      - id: D-004
+        decision: "User-Order relation with required foreign key"
+        rationale: "Audit trail - every order must have uploader"
+      - id: D-005
+        decision: "Add three indexes for query performance"
+        rationale: "Most common filter/sort fields for dashboard"
+      - id: D-006
+        decision: "Optional staffCode on User model"
+        rationale: "Only STAFF users use it, flexible auth"
+
+  phase_1_spec:
+    status: approved
+    started_at: 2026-02-05T21:35:00+07:00
+    completed_at: 2026-02-05T21:50:00+07:00
+    approved_at: 2026-02-05T22:00:00+07:00
+    requirements_count:
+      functional: 7
+      non_functional: 4
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+    review:
+      verdict: PASS
+      score: "23/23"
+      reviewer: Copilot
+
+  phase_2_tasks:
+    status: approved
+    started_at: 2026-02-05T22:00:00+07:00
+    completed_at: 2026-02-05T22:15:00+07:00
+    approved_at: 2026-02-05T22:30:00+07:00
+    tasks_summary:
+      total: 4
+      by_root:
+        sgs-cs-hepper: 4
+      estimated_effort: "1.5 hours"
+    test_plan:
+      included: true
+      test_cases_count: 14
+      coverage_target: "100% validation"
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+
+  phase_3_imin-progress
+    started_at: 2026-02-05T22:30:00+07:00
+    completed_at: 2026-02-05T23:15:00+07:00
+    status: completed
+    tasks:
+      - id: T-001
+        title: "Add OrderStatus Enum"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T22:35:00+07:00
+        completed_at: 2026-02-05T22:40:00+07:00
+        reviewed_by: user-manual
+        depends_on: []
+        test_cases: [TC-001, TC-002]
+      - id: T-002
+        title: "Expand User Model"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T22:45:00+07:00
+        completed_at: 2026-02-05T22:50:00+07:00
+        reviewed_by: user-manual
+        depends_on: [T-001]
+        test_cases: [TC-003, TC-004]
+      - id: T-003
+        title: "Expand Order Model with Indexes"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T22:55:00+07:00
+        completed_at: 2026-02-05T23:00:00+07:00
+        reviewed_by: user-manual
+        depends_on: [T-002]
+        test_cases: [TC-005, TC-006, TC-007, TC-008]
+      - id: T-004
+        title: "Finalize & Verify Schema"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T23:10:00+07:00
+        completed_at: 2026-02-05T23:15:00+07:00
+        reviewed_by: user-manual
+        depends_on: [T-003]
+        test_cases: [TC-009, TC-010, TC-011]
+
+  phase_4_tests:
+    status: skipped
+    reason: "Schema-only changes - no automated tests required"
+
+  phase_5_done:
+    status: completed
+    completed_at: 2026-02-05T23:30:00+07:00
+    dod_results:
+      total_criteria: 17
+      passed: 17
+      failed: 0
+    artifacts:
+      - path: 05_done/done-check.md
+        status: complete
+
+context:
+  work_type: feature
+  affected_roots:
+    - sgs-cs-hepper
+  acceptance_criteria:
+    - AC1: User model with id, email, name, role, staffCode, timestamps
+    - AC2: Order model with jobNumber, registeredDate, requiredDate, priority, status
+    - AC3: Config model with key-value pairs
+    - AC4: Role enum includes SUPER_ADMIN, ADMIN, STAFF
+    - AC5: OrderStatus enum includes IN_PROGRESS, COMPLETED, OVERDUE
+    - AC6: Indexes on frequently queried fields
+    - AC7: pnpm prisma generate succeeds
+  assumptions:
+    - Database connection configured later
+    - No data migration needed (fresh schema)
+    - Prisma 7.x adapter pattern already configured
+  session_decisions: []
