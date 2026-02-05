@@ -72,9 +72,10 @@ RULES:
   - Blocked By: ~~US-0.1.1~~ ✅
   - ✅ Completed: 2026-02-05
 
-- [ ] **US-0.3.2** — Seed Initial Data
-  - Status: `PLANNED`
-  - Blocked By: US-0.3.1
+- [x] **US-0.3.2** — Seed Initial Data
+  - Status: `DONE`
+  - Blocked By: ~~US-0.3.1~~ ✅
+  - ✅ Completed: 2026-02-05
 
 ---
 
