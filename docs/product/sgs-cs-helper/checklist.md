@@ -39,9 +39,10 @@ RULES:
   - Blocked By: None
   - ✅ Completed: 2026-02-05
 
-- [ ] **US-0.1.2** — Configure Development Environment
-  - Status: `PLANNED`
+- [x] **US-0.1.2** — Configure Development Environment
+  - Status: `DONE`
   - Blocked By: ~~US-0.1.1~~ ✅
+  - ✅ Completed: 2026-02-05
 
 ---
 
@@ -176,9 +177,10 @@ RULES:
   - Bị chặn bởi: None
   - ✅ Hoàn thành: 2026-02-05
 
-- [ ] **US-0.1.2** — Cấu hình Môi trường Phát triển
-  - Trạng thái: `PLANNED`
+- [x] **US-0.1.2** — Cấu hình Môi trường Phát triển
+  - Trạng thái: `DONE`
   - Bị chặn bởi: ~~US-0.1.1~~ ✅
+  - ✅ Hoàn thành: 2026-02-05
 
 ---
 

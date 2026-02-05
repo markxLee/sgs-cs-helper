@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Generated files
+src/generated/
+coverage/
+*.tsbuildinfo
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+
+# Prisma
+prisma/migrations/
+
+# Old workflow state files with syntax issues
+docs/runs/sgs-cs-helper-us-0.1.1/.workflow-state.yaml
+docs/runs/sgs-cs-helper-us-0.3.1/.workflow-state.yaml
