@@ -1,0 +1,184 @@
+# Workflow State — US-0.2.1 Super Admin Seeded Login
+# Generated: 2026-02-05
+# Flow: Unified Work Delivery Workflow (Flow 2)
+
+meta:
+  branch_slug: sgs-cs-helper-us-0.2.1
+  product_slug: sgs-cs-helper
+  user_story_id: US-0.2.1
+  docs_root: sgs-cs-hepper
+  tooling_root: a-z-copilot-flow
+  base_branch: main
+  dev_mode: standard
+  created_at: 2026-02-05T20:30:00+07:00
+  updated_at: 2026-02-05T20:30:00+07:00
+
+status:
+  current_phase: 5
+  phase_name: done
+  phase_status: complete
+  current_task: null
+  last_action: "Phase 5 Done Check completed"
+  next_action: "Ready for merge/PR"
+  blockers: []
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: 2026-02-05T20:30:00+07:00
+    completed_at: 2026-02-05T20:45:00+07:00
+    approved_at: 2026-02-05T20:50:00+07:00
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/diagrams/flow-overview.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+    decisions:
+      - id: D-001
+        decision: "Use NextAuth.js v5 (Auth.js)"
+        rationale: "Official, well-maintained, Next.js 16 compatible"
+      - id: D-002
+        decision: "JWT session strategy"
+        rationale: "Simpler, stateless, sufficient for this app"
+      - id: D-003
+        decision: "Client Component for form"
+        rationale: "Need interactivity for form state and error display"
+      - id: D-004
+        decision: "Generic error messages"
+        rationale: "Security - prevent user enumeration attacks"
+      - id: D-005
+        decision: "Placeholder dashboard"
+        rationale: "Full dashboard features in later user stories"
+
+  phase_1_spec:
+    status: approved
+    started_at: 2026-02-05T20:50:00+07:00
+    completed_at: 2026-02-05T21:00:00+07:00
+    approved_at: 2026-02-05T21:05:00+07:00
+    requirements_count:
+      functional: 5
+      non_functional: 4
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+
+  phase_2_tasks:
+    status: approved
+    started_at: 2026-02-05T21:05:00+07:00
+    completed_at: 2026-02-05T21:20:00+07:00
+    approved_at: 2026-02-05T21:25:00+07:00
+    tasks_summary:
+      total: 7
+      by_root:
+        sgs-cs-hepper: 7
+    test_plan:
+      included: true
+      test_cases_count: 15
+      coverage_target: 80%
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+
+  phase_3_impl:
+    status: complete
+    started_at: 2026-02-05T21:30:00+07:00
+    completed_at: 2026-02-05T22:30:00+07:00
+    tasks:
+      - id: T-001
+        title: Install NextAuth.js dependency
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T21:30:00+07:00
+        reviewed_at: 2026-02-05T21:35:00+07:00
+        depends_on: []
+      - id: T-002
+        title: Create NextAuth configuration
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T21:40:00+07:00
+        reviewed_at: 2026-02-05T21:45:00+07:00
+        depends_on: [T-001]
+      - id: T-003
+        title: Create NextAuth API route
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T21:50:00+07:00
+        reviewed_at: 2026-02-05T21:52:00+07:00
+        depends_on: [T-002]
+      - id: T-004
+        title: Create NextAuth type extensions
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T21:55:00+07:00
+        reviewed_at: 2026-02-05T21:58:00+07:00
+        depends_on: [T-002]
+      - id: T-005
+        title: Create Login page and form
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T22:00:00+07:00
+        reviewed_at: 2026-02-05T22:10:00+07:00
+        depends_on: [T-003]
+      - id: T-006
+        title: Create Dashboard placeholder
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T22:15:00+07:00
+        reviewed_at: 2026-02-05T22:20:00+07:00
+        depends_on: [T-003]
+      - id: T-007
+        title: Integration testing & verification
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: 2026-02-05T22:25:00+07:00
+        reviewed_at: 2026-02-05T22:30:00+07:00
+        depends_on: [T-005, T-006]
+
+  phase_4_tests:
+    status: complete
+    started_at: 2026-02-05T22:35:00+07:00
+    completed_at: 2026-02-05T23:00:00+07:00
+    current_batch: 1
+    total_batches_estimate: 1
+    coverage_target: 70%
+    coverage_actual: 57.89%
+    tests_passed: 21
+    tests_failed: 0
+    batches:
+      batch_1:
+        status: complete
+        tests_written: 15
+        tests_passed: 15
+        files:
+          - src/lib/auth/__tests__/config.test.ts
+
+  phase_5_done:
+    status: complete
+    started_at: 2026-02-05T23:00:00+07:00
+    completed_at: 2026-02-05T23:10:00+07:00
+    artifacts:
+      - path: 05_done/done-check.md
+        status: complete
+    acceptance_criteria_met: 6/6
+    ready_to_merge: true
+
+context:
+  work_type: feature
+  affected_roots:
+    - sgs-cs-hepper
+  acceptance_criteria:
+    - AC1: Login page exists at /login
+    - AC2: Super Admin credentials seeded (already done US-0.3.2)
+    - AC3: Successful login redirects to dashboard
+    - AC4: Invalid credentials show error message
+    - AC5: Session is created and persisted
+    - AC6: Super Admin role is correctly assigned
+  dependencies_satisfied:
+    - US-0.1.1: Project initialized
+    - US-0.3.1: Database schema created
+    - US-0.3.2: Super Admin user seeded
+  session_decisions: []

@@ -48,21 +48,22 @@ RULES:
 
 ### Epic 0.2: Authentication System
 
-- [ ] **US-0.2.1** — Super Admin Seeded Login
-  - Status: `PLANNED`
-  - Blocked By: US-0.1.1, US-0.3.1
+- [x] **US-0.2.1** — Super Admin Seeded Login
+  - Status: `DONE`
+  - Blocked By: ~~US-0.1.1~~ ✅, ~~US-0.3.1~~ ✅
+  - ✅ Completed: 2026-02-05
 
 - [ ] **US-0.2.2** — Admin Google OAuth Login
   - Status: `PLANNED`
-  - Blocked By: US-0.2.1, US-0.3.1
+  - Blocked By: ~~US-0.2.1~~ ✅, ~~US-0.3.1~~ ✅
 
 - [ ] **US-0.2.3** — Staff Shared Code Login
   - Status: `PLANNED`
-  - Blocked By: US-0.2.1, US-0.3.1
+  - Blocked By: ~~US-0.2.1~~ ✅, ~~US-0.3.1~~ ✅
 
 - [ ] **US-0.2.4** — Role-Based Route Protection
   - Status: `PLANNED`
-  - Blocked By: US-0.2.1, US-0.2.2, US-0.2.3
+  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.2, US-0.2.3
 
 ---
 
@@ -187,8 +188,9 @@ RULES:
 ### Epic 0.2: Hệ thống Xác thực
 
 - [ ] **US-0.2.1** — Đăng nhập Super Admin (Seeded)
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-0.1.1, US-0.3.1
+  - Trạng thái: `IN_PROGRESS`
+  - Bị chặn bởi: ~~US-0.1.1~~ ✅, ~~US-0.3.1~~ ✅
+  - 🔄 Đang triển khai
 
 - [ ] **US-0.2.2** — Đăng nhập Admin bằng Google OAuth
   - Trạng thái: `PLANNED`
