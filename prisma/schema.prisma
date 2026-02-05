@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// PLACEHOLDER MODELS - Will be detailed in US-0.3.1
+// ============================================
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  name      String?
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  jobNumber      String   @unique
+  status         String   @default("pending")
+  registeredDate DateTime
+  requiredDate   DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Config {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
