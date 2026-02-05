@@ -23,6 +23,12 @@ enum Role {
   STAFF
 }
 
+enum OrderStatus {
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String?  @unique
@@ -30,20 +36,44 @@ model User {
   role      Role     @default(STAFF)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // For STAFF with shared code
+  staffCode String?
+
+  // Relations
+  orders    Order[]  @relation("UploadedBy")
 }
 
 model Order {
-  id             String   @id @default(cuid())
-  jobNumber      String   @unique
-  status         String   @default("pending")
-  registeredDate DateTime
-  requiredDate   DateTime
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String      @id @default(cuid())
+  jobNumber       String      @unique
+  registeredDate  DateTime
+  requiredDate    DateTime
+  priority        Int         @default(0)
+  status          OrderStatus @default(IN_PROGRESS)
+
+  // Parsed data
+  registeredBy    String?
+  sampleCount     Int         @default(1)
+  description     String?
+
+  // Tracking
+  completedAt     DateTime?
+  uploadedAt      DateTime    @default(now())
+  uploadedById    String
+  uploadedBy      User        @relation("UploadedBy", fields: [uploadedById], references: [id])
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([status])
+  @@index([registeredDate])
+  @@index([requiredDate])
 }
 
 model Config {
-  id    String @id @default(cuid())
-  key   String @unique
-  value String
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }

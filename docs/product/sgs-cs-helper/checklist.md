@@ -34,14 +34,14 @@ RULES:
 
 ### Epic 0.1: Project Setup
 
-- [ ] **US-0.1.1** — Initialize Project Structure
-  - Status: `IN_PROGRESS`
+- [x] **US-0.1.1** — Initialize Project Structure
+  - Status: `DONE`
   - Blocked By: None
-  - 🔄 Currently in progress
+  - ✅ Completed: 2026-02-05
 
 - [ ] **US-0.1.2** — Configure Development Environment
   - Status: `PLANNED`
-  - Blocked By: US-0.1.1
+  - Blocked By: ~~US-0.1.1~~ ✅
 
 ---
 
@@ -67,9 +67,10 @@ RULES:
 
 ### Epic 0.3: Database Schema
 
-- [ ] **US-0.3.1** — Create Core Database Schema
-  - Status: `PLANNED`
-  - Blocked By: US-0.1.1
+- [x] **US-0.3.1** — Create Core Database Schema
+  - Status: `DONE`
+  - Blocked By: ~~US-0.1.1~~ ✅
+  - ✅ Completed: 2026-02-05
 
 - [ ] **US-0.3.2** — Seed Initial Data
   - Status: `PLANNED`
@@ -139,13 +140,13 @@ RULES:
 
 | Phase | Epic | Stories | Ready to Start |
 |-------|------|---------|----------------|
-| 0 | 0.1 Project Setup | 2 | 🔄 US-0.1.1 in progress |
-| 0 | 0.2 Authentication | 4 | ⏳ Blocked |
-| 0 | 0.3 Database Schema | 2 | ⏳ Blocked |
+| 0 | 0.1 Project Setup | 2 | ✅ US-0.1.1 done, US-0.1.2 ready |
+| 0 | 0.2 Authentication | 4 | ⏳ Blocked by US-0.3.1 |
+| 0 | 0.3 Database Schema | 2 | ✅ US-0.3.1 ready |
 | 1 | 1.1 Upload & Parsing | 3 | ⏳ Blocked |
 | 1 | 1.2 Dashboard | 5 | ⏳ Blocked |
 | 1 | 1.3 Completion | 3 | ⏳ Blocked |
-| **Total** | | **17** | **1 ready** |
+| **Total** | | **17** | **2 ready** |
 
 ---
 
@@ -169,14 +170,14 @@ RULES:
 
 ### Epic 0.1: Thiết lập Dự án
 
-- [ ] **US-0.1.1** — Khởi tạo Cấu trúc Dự án
-  - Trạng thái: `IN_PROGRESS`
+- [x] **US-0.1.1** — Khởi tạo Cấu trúc Dự án
+  - Trạng thái: `DONE`
   - Bị chặn bởi: None
-  - 🔄 Đang triển khai
+  - ✅ Hoàn thành: 2026-02-05
 
 - [ ] **US-0.1.2** — Cấu hình Môi trường Phát triển
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-0.1.1
+  - Bị chặn bởi: ~~US-0.1.1~~ ✅
 
 ---
 
@@ -203,8 +204,9 @@ RULES:
 ### Epic 0.3: Schema Cơ sở dữ liệu
 
 - [ ] **US-0.3.1** — Tạo Schema Database Cốt lõi
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-0.1.1
+  - Trạng thái: `IN_PROGRESS`
+  - Bị chặn bởi: ~~US-0.1.1~~ ✅
+  - 🔄 Đang triển khai
 
 - [ ] **US-0.3.2** — Seed Dữ liệu Ban đầu
   - Trạng thái: `PLANNED`
@@ -274,13 +276,13 @@ RULES:
 
 | Phase | Epic | Stories | Sẵn sàng |
 |-------|------|---------|----------|
-| 0 | 0.1 Thiết lập | 2 | ✅ US-0.1.1 |
-| 0 | 0.2 Xác thực | 4 | ⏳ Đang chặn |
-| 0 | 0.3 Database | 2 | ⏳ Đang chặn |
+| 0 | 0.1 Thiết lập | 2 | ✅ US-0.1.1 xong, US-0.1.2 sẵn sàng |
+| 0 | 0.2 Xác thực | 4 | ⏳ Chờ US-0.3.1 |
+| 0 | 0.3 Database | 2 | ✅ US-0.3.1 sẵn sàng |
 | 1 | 1.1 Upload | 3 | ⏳ Đang chặn |
 | 1 | 1.2 Dashboard | 5 | ⏳ Đang chặn |
 | 1 | 1.3 Hoàn thành | 3 | ⏳ Đang chặn |
-| **Tổng** | | **17** | **1 sẵn sàng** |
+| **Tổng** | | **17** | **2 sẵn sàng** |
 
 ---
 
