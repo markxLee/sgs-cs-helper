@@ -1,5 +1,5 @@
 # Product Checklist: SGS CS Order Tracker
-<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-order-tracker -->
+<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-helper -->
 
 ---
 
@@ -8,7 +8,7 @@
 | Field | Value |
 |-------|-------|
 | **Product Name** | SGS CS Order Tracker |
-| **Product Slug** | `sgs-cs-order-tracker` |
+| **Product Slug** | `sgs-cs-helper` |
 | **Purpose** | Track execution state across phases, epics, and user stories |
 | **Total Stories** | 17 |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE` |
@@ -35,9 +35,9 @@ RULES:
 ### Epic 0.1: Project Setup
 
 - [ ] **US-0.1.1** — Initialize Project Structure
-  - Status: `PLANNED`
+  - Status: `IN_PROGRESS`
   - Blocked By: None
-  - ✅ Ready to start
+  - 🔄 Currently in progress
 
 - [ ] **US-0.1.2** — Configure Development Environment
   - Status: `PLANNED`
@@ -139,7 +139,7 @@ RULES:
 
 | Phase | Epic | Stories | Ready to Start |
 |-------|------|---------|----------------|
-| 0 | 0.1 Project Setup | 2 | ✅ US-0.1.1 |
+| 0 | 0.1 Project Setup | 2 | 🔄 US-0.1.1 in progress |
 | 0 | 0.2 Authentication | 4 | ⏳ Blocked |
 | 0 | 0.3 Database Schema | 2 | ⏳ Blocked |
 | 1 | 1.1 Upload & Parsing | 3 | ⏳ Blocked |
@@ -170,9 +170,9 @@ RULES:
 ### Epic 0.1: Thiết lập Dự án
 
 - [ ] **US-0.1.1** — Khởi tạo Cấu trúc Dự án
-  - Trạng thái: `PLANNED`
+  - Trạng thái: `IN_PROGRESS`
   - Bị chặn bởi: None
-  - ✅ Sẵn sàng bắt đầu
+  - 🔄 Đang triển khai
 
 - [ ] **US-0.1.2** — Cấu hình Môi trường Phát triển
   - Trạng thái: `PLANNED`

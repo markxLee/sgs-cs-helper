@@ -1,5 +1,5 @@
-# Idea Analysis: SGS CS Order Tracker
-<!-- Generated: 2026-02-05 | Idea Slug: sgs-cs-order-tracker -->
+# Idea Analysis: SGS CS Helper
+<!-- Generated: 2026-02-05 | Idea Slug: sgs-cs-helper -->
 
 ---
 
@@ -338,7 +338,7 @@ Team Chăm sóc Khách hàng của phòng Test Food tại SGS hiện không có 
 
 | Aspect | Value |
 |--------|-------|
-| Idea Slug | `sgs-cs-order-tracker` |
+| Idea Slug | `sgs-cs-helper` |
 | Primary Problem | Lack of visibility into order processing progress |
 | Primary Users | CS Staff, Admin |
 | Key Value | Real-time tracking, proactive alerts, efficiency |

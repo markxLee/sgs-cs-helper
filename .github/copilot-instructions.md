@@ -10,10 +10,10 @@ It defines how Copilot MUST behave in this project.
 
 ```yaml
 active_product:
-  slug: sgs-cs-order-tracker
+  slug: sgs-cs-helper
   name: SGS CS Order Tracker
   description: Order progress monitoring for CS team
-  tech_stack_file: docs/tech-stack/sgs-cs-order-tracker/instructions.md
+  tech_stack_file: docs/tech-stack/sgs-cs-helper/instructions.md
   activated_at: 2026-02-05
 
 COPILOT_MUST:
@@ -75,8 +75,8 @@ ON_EVERY_NEW_SESSION:
 ## Coding Conventions
 
 ```yaml
-# Active Tech Stack: sgs-cs-order-tracker
-# Full details: docs/tech-stack/sgs-cs-order-tracker/instructions.md
+# Active Tech Stack: sgs-cs-helper
+# Full details: docs/tech-stack/sgs-cs-helper/instructions.md
 
 error_handling: Server Actions with try-catch, return typed errors
 imports: Absolute imports with @/ alias, group by type

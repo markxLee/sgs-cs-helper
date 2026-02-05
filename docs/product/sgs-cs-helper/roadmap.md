@@ -1,5 +1,5 @@
 # Product Roadmap: SGS CS Order Tracker
-<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-order-tracker -->
+<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-helper -->
 
 ---
 
@@ -8,7 +8,7 @@
 | Field | Value |
 |-------|-------|
 | **Product Name** | SGS CS Order Tracker |
-| **Product Slug** | `sgs-cs-order-tracker` |
+| **Product Slug** | `sgs-cs-helper` |
 | **Roadmap Scope** | Milestone-based (MVP → Production) |
 | **Target Users** | CS Staff, Admin, Super Admin |
 | **Primary Goal** | Track order progress with proactive alerts |
@@ -25,7 +25,7 @@
 ### Epics
 
 #### Epic 0.1: Project Setup
-- Initialize Next.js 14 project with App Router
+- Initialize Next.js 16.0.10 project with App Router
 - Configure TypeScript, Tailwind CSS, shadcn/ui
 - Set up Prisma with PostgreSQL
 - Configure environment variables and Vercel deployment
@@ -164,7 +164,7 @@
 ### Epics
 
 #### Epic 0.1: Thiết lập Dự án
-- Khởi tạo Next.js 14 với App Router
+- Khởi tạo Next.js 16.0.10 với App Router
 - Cấu hình TypeScript, Tailwind CSS, shadcn/ui
 - Thiết lập Prisma với PostgreSQL
 - Cấu hình biến môi trường và deploy Vercel

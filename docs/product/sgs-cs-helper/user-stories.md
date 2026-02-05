@@ -1,5 +1,5 @@
 # User Stories: SGS CS Order Tracker
-<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-order-tracker -->
+<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-helper -->
 
 ---
 
@@ -8,7 +8,7 @@
 | Field | Value |
 |-------|-------|
 | **Product Name** | SGS CS Order Tracker |
-| **Product Slug** | `sgs-cs-order-tracker` |
+| **Product Slug** | `sgs-cs-helper` |
 | **Scope Covered** | Phase 0 (Foundation) + Phase 1 (MVP) |
 | **Total User Stories** | 17 |
 
@@ -57,7 +57,7 @@ Phase 1 MVP:                                    │
 - **Description**: As a developer, I need the project initialized with the correct folder structure, dependencies, and configuration so that I can start building features.
 
 - **Acceptance Criteria**:
-  - AC1: Next.js 14 project with App Router is created
+  - AC1: Next.js 16.0.10 project with App Router is created
   - AC2: TypeScript is configured with strict mode
   - AC3: Tailwind CSS and shadcn/ui are installed and configured
   - AC4: Prisma is installed and connected to PostgreSQL
@@ -475,7 +475,7 @@ These stories can be worked on in parallel after their dependencies are met:
 - **Mô tả**: Là developer, tôi cần dự án được khởi tạo với cấu trúc thư mục, dependencies và cấu hình đúng để có thể bắt đầu xây dựng tính năng.
 
 - **Tiêu chí nghiệm thu**:
-  - AC1: Next.js 14 với App Router được tạo
+  - AC1: Next.js 16.0.10 với App Router được tạo
   - AC2: TypeScript được cấu hình với strict mode
   - AC3: Tailwind CSS và shadcn/ui được cài đặt và cấu hình
   - AC4: Prisma được cài đặt và kết nối PostgreSQL

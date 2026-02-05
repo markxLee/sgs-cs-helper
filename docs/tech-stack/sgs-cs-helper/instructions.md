@@ -1,9 +1,9 @@
 ---
-applyTo: "sgs-cs-hepper/**"
+applyTo: "**/**"
 ---
 
 # SGS CS Order Tracker — Tech Stack Instructions
-<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-order-tracker -->
+<!-- Generated: 2026-02-05 | Product Slug: sgs-cs-helper -->
 
 ---
 
@@ -11,7 +11,8 @@ applyTo: "sgs-cs-hepper/**"
 
 - **Product**: SGS CS Order Tracker - Order progress monitoring for CS team
 - **Hosting**: Vercel (serverless)
-- **Architecture**: Full-stack Next.js with App Router
+- **Framework**: Next.js 16.0.10 with App Router
+- **Architecture**: Full-stack Next.js with React 19
 - **Database**: PostgreSQL via Vercel Postgres or Supabase
 - **Auth**: NextAuth.js with multiple providers (credentials, Google OAuth)
 - **File Processing**: Server-side Excel parsing with xlsx library
