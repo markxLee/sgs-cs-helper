@@ -10,7 +10,7 @@
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
 | **Purpose** | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 17 |
+| **Total Stories** | 19 |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE` |
 
 ---
@@ -53,17 +53,26 @@ RULES:
   - Blocked By: ~~US-0.1.1~~ ✅, ~~US-0.3.1~~ ✅
   - ✅ Completed: 2026-02-05
 
-- [ ] **US-0.2.2** — Admin Google OAuth Login
+- [x] **US-0.2.2** — Super Admin Dashboard & Admin Invitation
+  - Status: `DONE`
+  - Blocked By: ~~US-0.2.1~~ ✅, ~~US-0.3.1~~ ✅
+  - ✅ Completed: 2026-02-05
+
+- [ ] **US-0.2.3** — Admin Google OAuth Login
+  - Status: `PLANNED`
+  - Blocked By: ~~US-0.2.2~~ ✅
+
+- [ ] **US-0.2.4** — Admin Credentials Login
+  - Status: `PLANNED`
+  - Blocked By: ~~US-0.2.2~~ ✅
+
+- [ ] **US-0.2.5** — Staff Shared Code Login
   - Status: `PLANNED`
   - Blocked By: ~~US-0.2.1~~ ✅, ~~US-0.3.1~~ ✅
 
-- [ ] **US-0.2.3** — Staff Shared Code Login
+- [ ] **US-0.2.6** — Role-Based Route Protection
   - Status: `PLANNED`
-  - Blocked By: ~~US-0.2.1~~ ✅, ~~US-0.3.1~~ ✅
-
-- [ ] **US-0.2.4** — Role-Based Route Protection
-  - Status: `PLANNED`
-  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.2, US-0.2.3
+  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.3, US-0.2.4, US-0.2.5
 
 ---
 
@@ -87,7 +96,7 @@ RULES:
 
 - [ ] **US-1.1.1** — Upload Excel Files UI
   - Status: `PLANNED`
-  - Blocked By: US-0.2.3, US-0.3.1
+  - Blocked By: US-0.2.5, ~~US-0.3.1~~ ✅
 
 - [ ] **US-1.1.2** — Parse Excel and Extract Order Data
   - Status: `PLANNED`

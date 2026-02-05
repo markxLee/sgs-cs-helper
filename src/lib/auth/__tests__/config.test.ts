@@ -94,12 +94,13 @@ describe("NextAuth Configuration", () => {
         const jwtCallback = authConfig.callbacks?.jwt;
         expect(jwtCallback).toBeDefined();
         
-        const token = { sub: "123", id: "", role: "SUPER_ADMIN" as Role };
+        const token = { sub: "123", id: "", role: "SUPER_ADMIN" as Role, status: "ACTIVE" as const };
         const user = {
           id: "user-123",
           email: "admin@test.com",
           name: "Super Admin",
           role: "SUPER_ADMIN" as Role,
+          status: "ACTIVE" as const,
         };
 
         const result = await jwtCallback!(
@@ -118,7 +119,7 @@ describe("NextAuth Configuration", () => {
         const jwtCallback = authConfig.callbacks?.jwt;
         expect(jwtCallback).toBeDefined();
         
-        const token = { sub: "123", id: "existing-id", role: "SUPER_ADMIN" as Role };
+        const token = { sub: "123", id: "existing-id", role: "SUPER_ADMIN" as Role, status: "ACTIVE" as const };
 
         const result = await jwtCallback!(
           // @ts-expect-error - testing undefined user case
@@ -136,12 +137,13 @@ describe("NextAuth Configuration", () => {
         const jwtCallback = authConfig.callbacks?.jwt;
         expect(jwtCallback).toBeDefined();
         
-        const token = { sub: "123", id: "", role: "SUPER_ADMIN" as Role, customField: "value" };
+        const token = { sub: "123", id: "", role: "SUPER_ADMIN" as Role, status: "ACTIVE" as const, customField: "value" };
         const user = {
           id: "user-123",
           email: "admin@test.com",
           name: "Super Admin",
           role: "SUPER_ADMIN" as Role,
+          status: "ACTIVE" as const,
         };
 
         const result = await jwtCallback!(

@@ -42,12 +42,16 @@ async function main() {
       passwordHash,
       name: "Super Admin",
       role: "SUPER_ADMIN",
+      authMethod: "CREDENTIALS",
+      status: "ACTIVE",
     },
     create: {
       email,
       passwordHash,
       name: "Super Admin",
       role: "SUPER_ADMIN",
+      authMethod: "CREDENTIALS",
+      status: "ACTIVE",
     },
   });
   console.log(`   ✓ User: ${user.email} (${user.role})`);

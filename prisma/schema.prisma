@@ -23,6 +23,17 @@ enum Role {
   STAFF
 }
 
+enum AuthMethod {
+  CREDENTIALS
+  GOOGLE
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+}
+
 enum OrderStatus {
   IN_PROGRESS
   COMPLETED
@@ -34,8 +45,10 @@ model User {
   email     String?  @unique
   name      String?
   role      Role     @default(STAFF)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  authMethod AuthMethod @default(CREDENTIALS) // NEW
+  status     UserStatus @default(ACTIVE)      // NEW
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   // For STAFF with shared code
   staffCode    String?
