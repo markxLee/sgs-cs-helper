@@ -10,7 +10,7 @@
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
 | **Scope Covered** | Phase 0 (Foundation) + Phase 1 (MVP) |
-| **Total User Stories** | 17 |
+| **Total User Stories** | 19 |
 
 ---
 
@@ -22,12 +22,20 @@ Phase 0 Foundation:
                             │
                             └──► US-0.2.1 (Super Admin Login)
                                       │
-  US-0.3.1 (DB Schema) ───────────────┼──► US-0.2.2 (Admin Login)
+  US-0.3.1 (DB Schema) ───────────────┤
                                       │
-                                      └──► US-0.2.3 (Staff Login)
+  US-0.2.1 + US-0.3.1 ────────────────┼──► US-0.2.2 (Admin Dashboard & Invitation)
+                                      │              │
+                                      │              ├──► US-0.2.3 (Admin Google OAuth)
+                                      │              │
+                                      │              └──► US-0.2.4 (Admin Credentials)
+                                      │
+                                      └──► US-0.2.5 (Staff Login)
+                                                │
+  US-0.2.3 + US-0.2.4 + US-0.2.5 ──────────────► US-0.2.6 (Route Protection)
                                                 │
 Phase 1 MVP:                                    │
-  US-0.2.3 + US-0.3.1 ────────────────────────► US-1.1.1 (Upload UI)
+  US-0.2.5 + US-0.3.1 ────────────────────────► US-1.1.1 (Upload UI)
                                                       │
   US-1.1.1 ──────────────────────────────────────────► US-1.1.2 (Parse Excel)
                                                             │
@@ -111,25 +119,67 @@ Phase 1 MVP:                                    │
 
 ---
 
-**US-0.2.2: Admin Google OAuth Login**
+**US-0.2.2: Super Admin Dashboard & Admin Invitation**
 
-- **Description**: As an Admin, I can log in using my Google account so that I can access the system without remembering another password.
+- **Description**: As a Super Admin, I can access a dashboard to manage Admin users by inviting them via email, so that I can control who has Admin access to the system.
 
 - **Acceptance Criteria**:
-  - AC1: "Login with Google" button exists on login page
-  - AC2: Only invited Admin emails can log in
-  - AC3: Successful login redirects to dashboard
-  - AC4: Non-invited users see "Not authorized" message
-  - AC5: Admin role is correctly assigned
-  - AC6: Session is created and persisted
+  - AC1: Super Admin dashboard exists at `/admin/users`
+  - AC2: "Invite Admin" form with email input field
+  - AC3: Super Admin can choose auth method: "Google OAuth" or "Email/Password"
+  - AC4: If "Email/Password" chosen, Super Admin creates initial password for Admin
+  - AC5: Invited Admin is stored in database with `ADMIN` role and `pending` status
+  - AC6: Super Admin can see list of all invited/active Admin users
+  - AC7: Super Admin can revoke/delete Admin access
+  - AC8: Email validation ensures valid email format
 
 - **Blocked By**: US-0.2.1, US-0.3.1
 
-- **Notes**: Requires Google OAuth credentials configuration.
+- **Notes**: Admin invitation is stored in User table. Auth method determines how Admin can login.
 
 ---
 
-**US-0.2.3: Staff Shared Code Login**
+**US-0.2.3: Admin Google OAuth Login**
+
+- **Description**: As an invited Admin with Gmail, I can log in using my Google account so that I can access the system without remembering a password.
+
+- **Acceptance Criteria**:
+  - AC1: "Login with Google" button exists on login page
+  - AC2: Only invited Admin emails (with Google auth method) can log in
+  - AC3: Gmail must match an existing invited Admin record
+  - AC4: Non-invited users see "Not authorized" message
+  - AC5: First successful login updates Admin status from `pending` to `active`
+  - AC6: Admin role is correctly assigned in session
+  - AC7: Session is created and persisted
+  - AC8: Successful login redirects to `/dashboard`
+
+- **Blocked By**: US-0.2.2
+
+- **Notes**: Requires Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET).
+
+---
+
+**US-0.2.4: Admin Credentials Login**
+
+- **Description**: As an invited Admin, I can log in with the email and password created by Super Admin so that I can access the system without Google account.
+
+- **Acceptance Criteria**:
+  - AC1: Email/password form exists on login page (same as Super Admin)
+  - AC2: Only invited Admins (with Password auth method) can log in
+  - AC3: Credentials validated against Admin record in database
+  - AC4: Invalid credentials show "Invalid email or password" message
+  - AC5: First successful login updates Admin status from `pending` to `active`
+  - AC6: Admin role is correctly assigned in session
+  - AC7: Session is created and persisted
+  - AC8: Successful login redirects to `/dashboard`
+
+- **Blocked By**: US-0.2.2
+
+- **Notes**: Password is hashed with bcrypt. Super Admin creates the initial password.
+
+---
+
+**US-0.2.5: Staff Shared Code Login**
 
 - **Description**: As a Staff member, I can log in with a shared team code so that I can quickly access the system without individual accounts.
 
@@ -146,7 +196,7 @@ Phase 1 MVP:                                    │
 
 ---
 
-**US-0.2.4: Role-Based Route Protection**
+**US-0.2.6: Role-Based Route Protection**
 
 - **Description**: As a system, I need to protect routes based on user roles so that unauthorized users cannot access restricted areas.
 
@@ -154,10 +204,10 @@ Phase 1 MVP:                                    │
   - AC1: Unauthenticated users are redirected to login
   - AC2: STAFF can access: dashboard, upload, mark done
   - AC3: ADMIN can access: dashboard, upload, mark done, settings
-  - AC4: SUPER_ADMIN can access: all routes including user management
+  - AC4: SUPER_ADMIN can access: all routes including user management (`/admin/*`)
   - AC5: Unauthorized access shows "Access Denied" page
 
-- **Blocked By**: US-0.2.1, US-0.2.2, US-0.2.3
+- **Blocked By**: US-0.2.1, US-0.2.3, US-0.2.4, US-0.2.5
 
 - **Notes**: Implemented via NextAuth.js middleware.
 

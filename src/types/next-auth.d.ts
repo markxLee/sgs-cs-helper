@@ -1,4 +1,4 @@
-import { Role } from "@/generated/prisma/client";
+import { Role, UserStatus } from "@/generated/prisma/client";
 import { DefaultSession, DefaultUser } from "next-auth";
 import { DefaultJWT } from "next-auth/jwt";
 
@@ -8,36 +8,40 @@ import { DefaultJWT } from "next-auth/jwt";
  * Extends the default NextAuth types to include custom user properties:
  * - id: User's database ID
  * - role: User's role (SUPER_ADMIN, ADMIN, STAFF)
+ * - status: User's status (PENDING, ACTIVE, REVOKED)
  */
 
 declare module "next-auth" {
   /**
    * Extended Session interface
-   * Adds id and role to the user object in session
+   * Adds id, role and status to the user object in session
    */
   interface Session {
     user: {
       id: string;
       role: Role;
+      status: UserStatus;
     } & DefaultSession["user"];
   }
 
   /**
    * Extended User interface
-   * Adds role to the user object returned from authorize()
+   * Adds role and status to the user object returned from authorize()
    */
   interface User extends DefaultUser {
     role: Role;
+    status: UserStatus;
   }
 }
 
 declare module "next-auth/jwt" {
   /**
    * Extended JWT interface
-   * Adds id and role to the JWT token
+   * Adds id, role and status to the JWT token
    */
   interface JWT extends DefaultJWT {
     id: string;
     role: Role;
+    status: UserStatus;
   }
 }

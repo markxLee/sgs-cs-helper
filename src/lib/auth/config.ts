@@ -26,6 +26,7 @@ export const authConfig: NextAuthConfig = {
         const email = credentials.email as string;
         const password = credentials.password as string;
 
+
         // Find user by email (case-insensitive)
         const user = await prisma.user.findFirst({
           where: {
@@ -46,6 +47,16 @@ export const authConfig: NextAuthConfig = {
           return null;
         }
 
+        // Check if user is configured for credentials auth
+        if (user.authMethod !== "CREDENTIALS") {
+          return null;
+        }
+
+        // Check if user is active (reject PENDING/REVOKED)
+        if (user.status !== "ACTIVE") {
+          return null;
+        }
+
         // Verify password
         const isValidPassword = await verifyPassword(password, user.passwordHash);
         if (!isValidPassword) {
@@ -58,6 +69,7 @@ export const authConfig: NextAuthConfig = {
           email: user.email,
           name: user.name,
           role: user.role,
+          status: user.status,
         };
       },
     }),
@@ -85,6 +97,7 @@ export const authConfig: NextAuthConfig = {
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
+        token.status = user.status;
       }
       return token;
     },
@@ -99,6 +112,7 @@ export const authConfig: NextAuthConfig = {
         session.user.email = token.email ?? "";
         session.user.name = token.name ?? "";
         session.user.role = token.role;
+        session.user.status = token.status;
       }
       return session;
     },

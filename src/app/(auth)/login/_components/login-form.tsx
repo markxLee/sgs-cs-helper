@@ -51,7 +51,7 @@ export function LoginForm() {
       }
 
       // Success - redirect to dashboard
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch {
       setError("An unexpected error occurred. Please try again.");
