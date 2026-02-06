@@ -10,7 +10,7 @@
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
 | **Purpose** | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 19 |
+| **Total Stories** | 21 |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE` |
 
 ---
@@ -66,13 +66,25 @@ RULES:
   - Status: `PLANNED`
   - Blocked By: ~~US-0.2.2~~ ✅
 
-- [ ] **US-0.2.5** — Staff Shared Code Login
-  - Status: `PLANNED`
+- [x] **US-0.2.5** — Staff Code Login (Per-User)
+  - Status: `DONE`
   - Blocked By: ~~US-0.2.1~~ ✅, ~~US-0.3.1~~ ✅
+  - ✅ Completed: 2026-02-06
+  - Branch: `feature/sgs-cs-helper-us-0.2.5`
 
 - [ ] **US-0.2.6** — Role-Based Route Protection
   - Status: `PLANNED`
-  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.3, US-0.2.4, US-0.2.5
+  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.3, US-0.2.4, ~~US-0.2.5~~ ✅
+
+- [ ] **US-0.2.7** — Staff User Management
+  - Status: `PLANNED`
+  - Blocked By: ~~US-0.2.2~~ ✅
+  - Notes: Admin/Super Admin can create staff users with unique codes
+
+- [ ] **US-0.2.8** — Login Mode Configuration
+  - Status: `PLANNED`
+  - Blocked By: ~~US-0.2.2~~ ✅
+  - Notes: System-wide setting for quick code vs full login
 
 ---
 
@@ -96,7 +108,7 @@ RULES:
 
 - [ ] **US-1.1.1** — Upload Excel Files UI
   - Status: `PLANNED`
-  - Blocked By: US-0.2.5, ~~US-0.3.1~~ ✅
+  - Blocked By: ~~US-0.2.5~~ ✅, ~~US-0.3.1~~ ✅
 
 - [ ] **US-1.1.2** — Parse Excel and Extract Order Data
   - Status: `PLANNED`

@@ -21,6 +21,9 @@ declare module "next-auth" {
       id: string;
       role: Role;
       status: UserStatus;
+      canUpload: boolean;
+      canUpdateStatus: boolean;
+      staffCode: string | null;
     } & DefaultSession["user"];
   }
 
@@ -31,6 +34,9 @@ declare module "next-auth" {
   interface User extends DefaultUser {
     role: Role;
     status: UserStatus;
+    canUpload: boolean;
+    canUpdateStatus: boolean;
+    staffCode: string | null;
   }
 }
 
@@ -43,5 +49,8 @@ declare module "next-auth/jwt" {
     id: string;
     role: Role;
     status: UserStatus;
+    canUpload: boolean;
+    canUpdateStatus: boolean;
+    staffCode: string | null;
   }
 }
