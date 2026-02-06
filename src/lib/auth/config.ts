@@ -23,6 +23,7 @@ export const authConfig: NextAuthConfig = {
         if (credentials?.email && credentials?.password) {
           const email = credentials.email as string;
           const password = credentials.password as string;
+          
           const user = await prisma.user.findFirst({
             where: {
               email: {
@@ -31,13 +32,17 @@ export const authConfig: NextAuthConfig = {
               },
             },
           });
+          
           if (!user || !user.passwordHash || user.authMethod !== "CREDENTIALS" || user.status !== "ACTIVE") {
             return null;
           }
+          
           const isValidPassword = await verifyPassword(password, user.passwordHash);
+          
           if (!isValidPassword) {
             return null;
           }
+          
           return {
             id: user.id,
             email: user.email,
