@@ -1,0 +1,164 @@
+meta:
+  branch_slug: sgs-cs-helper-us-0.2.7
+  docs_root: sgs-cs-helper
+  tooling_root: a-z-copilot-flow
+  feature_name: Staff User Management
+  dev_mode: standard
+  created_at: 2026-02-06T00:00:00Z
+  last_updated: 2026-02-06T06:00:00Z
+  affected_roots:
+    - root: sgs-cs-helper
+      role: primary
+
+status:
+  current_phase: 5
+  phase_name: done
+  phase_status: complete
+  current_task: null
+  last_action: "Phase 5 Done Check completed - All DoD criteria met"
+  next_action: "Commit changes and create PR"
+  blockers: []
+  batch_mode: true
+  batch_tasks: ["T-001", "T-002", "T-003", "T-004", "T-005", "T-006", "T-007", "T-008"]
+  batch_completed_at: 2026-02-06T09:00:00Z
+  done_check_completed_at: 2026-02-06T10:00:00Z
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: 2026-02-06T06:00:00Z
+    completed_at: 2026-02-06T06:30:00Z
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/diagrams/flow-overview.md
+        status: complete
+      - path: 00_analysis/diagrams/sequence-main.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+    decisions:
+      - id: D-001
+        decision: "Reuse Admin Management pattern from /admin/users"
+        rationale: "Proven pattern, consistency, developer familiarity"
+      - id: D-002
+        decision: "Extend Admin Layout to allow ADMIN + SUPER_ADMIN"
+        rationale: "AC10 requires both roles to manage staff"
+      - id: D-003
+        decision: "Auto-generate staff codes only (no manual input)"
+        rationale: "Security - prevents weak/predictable codes"
+      - id: D-004
+        decision: "6-character uppercase alphanumeric codes [A-Z0-9]"
+        rationale: "36^6 = 2.1B combinations, low collision rate"
+      - id: D-005
+        decision: "Retry up to 10 times for code collision"
+        rationale: ">99.9999% success rate with 10 retries"
+  
+  phase_1_spec:
+    status: approved
+    started_at: 2026-02-06T07:00:00Z
+    completed_at: 2026-02-06T07:30:00Z
+    requirements_count:
+      functional: 8
+      non_functional: 5
+    acceptance_criteria_total: 67
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+      - path: 01_spec/spec-review.md
+        status: complete
+
+  phase_2_tasks:
+    status: approved
+    started_at: 2026-02-06T08:00:00Z
+    completed_at: 2026-02-06T08:30:00Z
+    approved_at: 2026-02-06T08:35:00Z
+    tasks_summary:
+      total: 8
+      by_root:
+        sgs-cs-helper: 8
+    test_plan:
+      included: true
+      test_cases_count: 24
+      coverage_target: 80%
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+
+  phase_3_impl:
+    status: awaiting-review
+    started_at: 2026-02-06T08:40:00Z
+    completed_at: 2026-02-06T09:00:00Z
+    mode: batchcompleted-pending-review
+        depends_on: []
+        test_cases: [TC-001, TC-002, TC-003]
+        implemented_at: 2026-02-06T08:45:00Z
+      - id: T-002
+        title: "Create Staff Code Generation Utility"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: []
+        test_cases: [TC-004, TC-005, TC-006, TC-007]
+        implemented_at: 2026-02-06T08:47:00Z
+      - id: T-003
+        title: "Create Staff Server Actions"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: [T-002]
+        test_cases: [TC-008, TC-009, TC-010, TC-011, TC-012, TC-013, TC-014]
+        implemented_at: 2026-02-06T08:50:00Z
+      - id: T-004
+        title: "Create Staff Management Page"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: [T-001]
+        test_cases: []
+        implemented_at: 2026-02-06T08:52:00Z
+      - id: T-005
+        title: "Create Staff Form Component"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: [T-003, T-004]
+        test_cases: [TC-015, TC-016, TC-017]
+        implemented_at: 2026-02-06T08:55:00Z
+      - id: T-006
+        title: "Create Staff List Component"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: [T-003, T-004]
+        test_cases: [TC-018, TC-019]
+        implemented_at: 2026-02-06T08:57:00Z
+      - id: T-007
+        title: "Create Edit Staff Dialog"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: [T-003, T-006]
+        test_cases: [TC-020, TC-021]
+        implemented_at: 2026-02-06T08:58:30Z
+      - id: T-008
+        title: "Add Status Change & Code Regeneration"
+        root: sgs-cs-helper
+        status: completed-pending-review
+        depends_on: [T-003, T-006]
+        test_cases: [TC-022, TC-023, TC-024]
+        implemented_at: 2026-02-06T09:00:00Z
+        depends_on: [T-003, T-006]
+        test_cases: [TC-020, TC-021]
+      - id: T-008
+        title: "Add Status Change & Code Regeneration"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: [T-003, T-006]
+        test_cases: [TC-022, TC-023, TC-024]
+
+context:
+  session_decisions:
+    - "Work type: feature"
+    - "Affected roots: sgs-cs-helper only"
+    - "Pattern: Reuse Admin Management from US-0.2.2"
+    - "Code generation: Auto-generate 6-char alphanumeric"
+    - "Route: /admin/staff with extended layout protection"
+    - "Components: 7 components (1 modified, 6 new)"
+    - "Database: No migration needed (schema from US-0.2.5)"

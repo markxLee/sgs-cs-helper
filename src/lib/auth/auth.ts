@@ -9,4 +9,7 @@ import { authConfig } from "./config";
  * - signOut: Server-side sign out function
  * - auth: Get current session (for Server Components/API routes)
  */
-export const { handlers, signIn, signOut, auth } = NextAuth(authConfig);
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
+  secret: process.env.NEXTAUTH_SECRET,
+});

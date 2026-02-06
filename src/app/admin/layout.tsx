@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 /**
  * Admin Layout
@@ -22,25 +23,59 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  // Redirect to dashboard if not Super Admin
-  if (session.user.role !== "SUPER_ADMIN") {
+  // Redirect to dashboard if not Admin or Super Admin
+  const allowedRoles: string[] = ["ADMIN", "SUPER_ADMIN"];
+  
+  if (!allowedRoles.includes(session.user.role)) {
     redirect("/");
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Admin Dashboard
-          </h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              {session.user.name || session.user.email}
-            </span>
-            <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
-              {session.user.role}
-            </span>
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-8">
+              <h1 className="text-xl font-semibold text-gray-900">
+                Admin Dashboard
+              </h1>
+              <nav className="flex items-center gap-4">
+                <Link
+                  href="/admin"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/admin/staff"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Staff
+                </Link>
+                {session.user.role === "SUPER_ADMIN" && (
+                  <Link
+                    href="/admin/users"
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Admins
+                  </Link>
+                )}
+                <Link
+                  href="/dashboard"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Dashboard
+                </Link>
+              </nav>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                {session.user.name || session.user.email}
+              </span>
+              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
+                {session.user.role}
+              </span>
+            </div>
           </div>
         </div>
       </header>

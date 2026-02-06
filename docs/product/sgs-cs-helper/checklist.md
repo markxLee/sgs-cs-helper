@@ -76,9 +76,11 @@ RULES:
   - Status: `PLANNED`
   - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.3, US-0.2.4, ~~US-0.2.5~~ ✅
 
-- [ ] **US-0.2.7** — Staff User Management
-  - Status: `PLANNED`
+- [x] **US-0.2.7** — Staff User Management
+  - Status: `DONE`
   - Blocked By: ~~US-0.2.2~~ ✅
+  - ✅ Completed: 2026-02-06
+  - Branch: `feature/sgs-cs-helper-us-0.2.7`
   - Notes: Admin/Super Admin can create staff users with unique codes
 
 - [ ] **US-0.2.8** — Login Mode Configuration
