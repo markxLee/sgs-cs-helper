@@ -76,9 +76,26 @@ async function main() {
   });
   console.log(`   ✓ ${staffCode.key}: ${staffCode.value}`);
 
+  // Login mode config
+  const loginModeValue = process.env.LOGIN_MODE || "quick_code";
+  const loginMode = await prisma.config.upsert({
+    where: { key: "login_mode" },
+    update: { value: loginModeValue },
+    create: { key: "login_mode", value: loginModeValue },
+  });
+  console.log(`   ✓ ${loginMode.key}: ${loginMode.value}`);
+
   console.log("\n✅ Seed completed successfully!");
   console.log(`   - Super Admin: ${user.email}`);
   console.log(`   - Configs: 2 records`);
+
+  // 5. Set permissions for STAFF users
+  console.log("🔑 Setting permissions for STAFF users...");
+  const updated = await prisma.user.updateMany({
+    data: { canUpload: true, canUpdateStatus: true },
+    where: { role: "STAFF" }
+  });
+  console.log(`   ✓ Updated ${updated.count} STAFF users with permissions`);
 }
 
 main()

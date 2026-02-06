@@ -1,5 +1,5 @@
-# Copilot Instructions — sgs-cs-hepper
-<!-- Version: 1.1 | Last Updated: 2026-02-05 -->
+# Copilot Instructions — sgs-cs-helper
+<!-- Version: 1.2 | Last Updated: 2026-02-06 -->
 
 This file is read automatically by GitHub Copilot.
 It defines how Copilot MUST behave in this project.
@@ -29,7 +29,7 @@ COPILOT_MUST:
 
 ```yaml
 project:
-  name: sgs-cs-hepper
+  name: sgs-cs-helper
   type: documentation-and-code
   description: SGS CS Helper project
 ```

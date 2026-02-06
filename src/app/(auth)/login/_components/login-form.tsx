@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 /**
  * Login Form - Client Component
@@ -16,41 +16,65 @@ import { FormEvent, useState } from "react";
  */
 export function LoginForm() {
   const router = useRouter();
+  const [role, setRole] = useState("STAFF");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [staffCode, setStaffCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginMode, setLoginMode] = useState("quick_code");
+
+  // Fetch login mode config (simulate server action)
+  // In real app, use SWR or server action
+  useEffect(() => {
+    async function fetchLoginMode() {
+      // TODO: Replace with real server action
+      setLoginMode("quick_code"); // quick_code, full_login, both
+    }
+    fetchLoginMode();
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
     // Client-side validation
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
-    if (!password) {
-      setError("Password is required");
-      return;
+    if (role === "STAFF" && (loginMode === "quick_code" || loginMode === "both")) {
+      if (!staffCode.trim()) {
+        setError("Staff code is required");
+        return;
+      }
+    } else {
+      if (!email.trim()) {
+        setError("Email is required");
+        return;
+      }
+      if (!password) {
+        setError("Password is required");
+        return;
+      }
     }
 
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        redirect: false,
-      });
-
+      let result;
+      if (role === "STAFF" && (loginMode === "quick_code" || loginMode === "both")) {
+        result = await signIn("credentials", {
+          staffCode: staffCode.trim(),
+          redirect: false,
+        });
+      } else {
+        result = await signIn("credentials", {
+          email: email.trim(),
+          password,
+          redirect: false,
+        });
+      }
       if (result?.error) {
-        // Generic error message for security (no user enumeration)
-        setError("Invalid email or password");
+        setError("Invalid credentials");
         return;
       }
-
-      // Success - redirect to dashboard
       router.push("/");
       router.refresh();
     } catch {
@@ -62,6 +86,24 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+      {/* Role Selection */}
+      <div className="mb-4">
+        <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+          Role
+        </label>
+        <select
+          id="role"
+          name="role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          disabled={isLoading}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="STAFF">Staff</option>
+          <option value="ADMIN">Admin</option>
+          <option value="SUPER_ADMIN">Super Admin</option>
+        </select>
+      </div>
       {/* Error Message */}
       {error && (
         <div
@@ -73,49 +115,64 @@ export function LoginForm() {
       )}
 
       <div className="space-y-4">
-        {/* Email Field */}
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Email address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            placeholder="you@example.com"
-          />
-        </div>
-
-        {/* Password Field */}
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            placeholder="••••••••"
-          />
-        </div>
+        {/* Dynamic Input Fields */}
+        {role === "STAFF" && (loginMode === "quick_code" || loginMode === "both") ? (
+          <div>
+            <label htmlFor="staffCode" className="block text-sm font-medium text-gray-700">
+              Staff Code
+            </label>
+            <input
+              id="staffCode"
+              name="staffCode"
+              type="text"
+              required
+              value={staffCode}
+              onChange={(e) => setStaffCode(e.target.value)}
+              disabled={isLoading}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              placeholder="Enter your staff code"
+            />
+          </div>
+        ) : (
+          <>
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="you@example.com"
+              />
+            </div>
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="••••••••"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Submit Button */}

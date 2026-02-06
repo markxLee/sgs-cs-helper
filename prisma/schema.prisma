@@ -51,7 +51,9 @@ model User {
   updatedAt DateTime    @updatedAt
 
   // For STAFF with shared code
-  staffCode    String?
+  staffCode    String? @unique // Staff code for quick login, must be unique
+  canUpload     Boolean @default(false) // Permission: can upload orders
+  canUpdateStatus Boolean @default(false) // Permission: can update order status
   // For password-based auth (SUPER_ADMIN, ADMIN)
   passwordHash String?
 
@@ -90,5 +92,6 @@ model Config {
   id        String   @id @default(cuid())
   key       String   @unique
   value     String
+  // login_mode: quick_code, full_login, both
   updatedAt DateTime @updatedAt
 }

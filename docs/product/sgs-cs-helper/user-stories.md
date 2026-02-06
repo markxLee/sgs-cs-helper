@@ -179,20 +179,23 @@ Phase 1 MVP:                                    │
 
 ---
 
-**US-0.2.5: Staff Shared Code Login**
+**US-0.2.5: Staff Code Login (Per-User)**
 
-- **Description**: As a Staff member, I can log in with a shared team code so that I can quickly access the system without individual accounts.
+- **Description**: As a Staff member, I can log in with my personal staff code so that I can quickly access the system. Each staff has their own unique code assigned by Admin/Super Admin.
 
 - **Acceptance Criteria**:
-  - AC1: Simple code input field exists on login page
-  - AC2: Correct code grants access with STAFF role
+  - AC1: Code input field exists on login page (when quick login is enabled)
+  - AC2: Correct personal code grants access with STAFF role and user permissions
   - AC3: Incorrect code shows error message
-  - AC4: Staff session is created (can be anonymous/shared user)
+  - AC4: Staff session is created with individual user record (not anonymous)
   - AC5: Staff can access dashboard after login
+  - AC6: Staff code must be unique per user (no duplicates)
+  - AC7: Login respects system-wide login mode setting (quick code vs full login)
+  - AC8: Session includes permissions: canUpload, canUpdateStatus
 
 - **Blocked By**: US-0.2.1, US-0.3.1
 
-- **Notes**: Shared code is stored in Config table.
+- **Notes**: Staff code stored in User.staffCode field. Requires US-0.2.7 for staff creation and US-0.2.8 for login mode config.
 
 ---
 
@@ -202,14 +205,57 @@ Phase 1 MVP:                                    │
 
 - **Acceptance Criteria**:
   - AC1: Unauthenticated users are redirected to login
-  - AC2: STAFF can access: dashboard, upload, mark done
-  - AC3: ADMIN can access: dashboard, upload, mark done, settings
+  - AC2: STAFF can access: dashboard, upload (if canUpload), mark done (if canUpdateStatus)
+  - AC3: ADMIN can access: dashboard, upload, mark done, settings, staff management
   - AC4: SUPER_ADMIN can access: all routes including user management (`/admin/*`)
   - AC5: Unauthorized access shows "Access Denied" page
+  - AC6: Permission-based access control (canUpload, canUpdateStatus)
 
 - **Blocked By**: US-0.2.1, US-0.2.3, US-0.2.4, US-0.2.5
 
-- **Notes**: Implemented via NextAuth.js middleware.
+- **Notes**: Implemented via NextAuth.js middleware. Check both role and permissions.
+
+---
+
+**US-0.2.7: Staff User Management**
+
+- **Description**: As an Admin or Super Admin, I can create and manage staff users so that I can control who has access to the system and what they can do.
+
+- **Acceptance Criteria**:
+  - AC1: Staff management page exists at `/admin/staff`
+  - AC2: "Create Staff" form with: name, email (optional), permissions
+  - AC3: Staff code is auto-generated (unique 6-char alphanumeric)
+  - AC4: Staff code uniqueness is enforced (no duplicates)
+  - AC5: Can set permissions: canUpload (upload orders), canUpdateStatus (mark done)
+  - AC6: Can view list of all staff users with their codes and permissions
+  - AC7: Can edit staff permissions
+  - AC8: Can deactivate/reactivate staff (change status)
+  - AC9: Can regenerate staff code if needed
+  - AC10: Both Admin and Super Admin can manage staff
+
+- **Blocked By**: US-0.2.2
+
+- **Notes**: Staff code is shown to Admin for sharing with staff member. Code visible only at creation or regeneration.
+
+---
+
+**US-0.2.8: Login Mode Configuration**
+
+- **Description**: As an Admin or Super Admin, I can configure the system-wide login mode so that I can control whether staff can use quick code login or must use full username/password.
+
+- **Acceptance Criteria**:
+  - AC1: Setting exists in Config: `login_mode` with values: `quick_code`, `full_login`, `both`
+  - AC2: Admin settings page has toggle for login mode
+  - AC3: When `quick_code`: Only code input shown for staff on login page
+  - AC4: When `full_login`: Only email/password shown for staff on login page
+  - AC5: When `both`: Staff can choose between code or email/password
+  - AC6: Default mode is `quick_code`
+  - AC7: Setting change takes effect immediately (no restart needed)
+  - AC8: Super Admin and Admin can both change this setting
+
+- **Blocked By**: US-0.2.2
+
+- **Notes**: Stored in Config table. Affects login page UI dynamically.
 
 ---
 
@@ -479,11 +525,13 @@ Phase 1 MVP:                                    │
 | US-0.1.2 | Configure Development Environment | US-0.1.1 | 0 |
 | US-0.2.1 | Super Admin Seeded Login | US-0.1.1, US-0.3.1 | 0 |
 | US-0.2.2 | Admin Google OAuth Login | US-0.2.1, US-0.3.1 | 0 |
-| US-0.2.3 | Staff Shared Code Login | US-0.2.1, US-0.3.1 | 0 |
-| US-0.2.4 | Role-Based Route Protection | US-0.2.1, US-0.2.2, US-0.2.3 | 0 |
+| US-0.2.5 | Staff Code Login (Per-User) | US-0.2.1, US-0.3.1 | 0 |
+| US-0.2.6 | Role-Based Route Protection | US-0.2.1, US-0.2.3-5 | 0 |
+| US-0.2.7 | Staff User Management | US-0.2.2 | 0 |
+| US-0.2.8 | Login Mode Configuration | US-0.2.2 | 0 |
 | US-0.3.1 | Create Core Database Schema | US-0.1.1 | 0 |
 | US-0.3.2 | Seed Initial Data | US-0.3.1 | 0 |
-| US-1.1.1 | Upload Excel Files UI | US-0.2.3, US-0.3.1 | 1 |
+| US-1.1.1 | Upload Excel Files UI | US-0.2.5, US-0.3.1 | 1 |
 | US-1.1.2 | Parse Excel and Extract Order Data | US-1.1.1 | 1 |
 | US-1.1.3 | Store Order with Duplicate Detection | US-1.1.2 | 1 |
 | US-1.2.1 | Display Orders List | US-1.1.3 | 1 |
@@ -505,7 +553,8 @@ These stories can be worked on in parallel after their dependencies are met:
 |------------------|----------------------|
 | US-0.1.1 | US-0.1.2, US-0.3.1 |
 | US-0.3.1 | US-0.2.1, US-0.3.2 |
-| US-0.2.1 | US-0.2.2, US-0.2.3 |
+| US-0.2.1 | US-0.2.2, US-0.2.5 |
+| US-0.2.2 | US-0.2.7, US-0.2.8 |
 | US-1.2.1 | US-1.2.2, US-1.2.3, US-1.2.4, US-1.2.5, US-1.3.1 |
 
 ---
@@ -589,33 +638,81 @@ These stories can be worked on in parallel after their dependencies are met:
 
 ---
 
-**US-0.2.3: Đăng nhập Nhân viên bằng Mã chung**
+**US-0.2.5: Đăng nhập Nhân viên bằng Mã Cá nhân**
 
-- **Mô tả**: Là nhân viên, tôi có thể đăng nhập với mã chung của team để truy cập nhanh hệ thống mà không cần tài khoản riêng.
+- **Mô tả**: Là nhân viên, tôi có thể đăng nhập với mã nhân viên cá nhân để truy cập nhanh hệ thống. Mỗi nhân viên có mã riêng do Admin/Super Admin tạo.
 
 - **Tiêu chí nghiệm thu**:
-  - AC1: Ô nhập mã đơn giản tồn tại trên trang login
-  - AC2: Mã đúng cấp quyền truy cập với role STAFF
+  - AC1: Ô nhập mã tồn tại trên trang login (khi quick login được bật)
+  - AC2: Mã đúng cấp quyền truy cập với role STAFF và quyền của user
   - AC3: Mã sai hiển thị thông báo lỗi
-  - AC4: Session nhân viên được tạo
+  - AC4: Session nhân viên được tạo với thông tin user riêng (không ẩn danh)
   - AC5: Nhân viên có thể truy cập dashboard sau khi đăng nhập
+  - AC6: Mã nhân viên phải duy nhất (không trùng lặp)
+  - AC7: Đăng nhập tuân theo cấu hình chế độ login hệ thống
+  - AC8: Session bao gồm quyền: canUpload, canUpdateStatus
 
 - **Bị chặn bởi**: US-0.2.1, US-0.3.1
 
+- **Ghi chú**: Mã lưu trong User.staffCode. Cần US-0.2.7 để tạo nhân viên và US-0.2.8 để cấu hình chế độ login.
+
 ---
 
-**US-0.2.4: Bảo vệ Route theo Role**
+**US-0.2.6: Bảo vệ Route theo Role**
 
 - **Mô tả**: Là hệ thống, tôi cần bảo vệ routes dựa trên role của user để user không được phép không thể truy cập khu vực hạn chế.
 
 - **Tiêu chí nghiệm thu**:
   - AC1: User chưa xác thực được chuyển đến login
-  - AC2: STAFF có thể truy cập: dashboard, upload, mark done
-  - AC3: ADMIN có thể truy cập: dashboard, upload, mark done, settings
-  - AC4: SUPER_ADMIN có thể truy cập: tất cả routes kể cả quản lý user
+  - AC2: STAFF có thể truy cập: dashboard, upload (nếu canUpload), mark done (nếu canUpdateStatus)
+  - AC3: ADMIN có thể truy cập: dashboard, upload, mark done, settings, quản lý nhân viên
+  - AC4: SUPER_ADMIN có thể truy cập: tất cả routes kể cả quản lý user (`/admin/*`)
   - AC5: Truy cập không được phép hiển thị trang "Access Denied"
+  - AC6: Kiểm tra quyền dựa trên cả role và permissions (canUpload, canUpdateStatus)
 
-- **Bị chặn bởi**: US-0.2.1, US-0.2.2, US-0.2.3
+- **Bị chặn bởi**: US-0.2.1, US-0.2.3, US-0.2.4, US-0.2.5
+
+---
+
+**US-0.2.7: Quản lý Nhân viên**
+
+- **Mô tả**: Là Admin hoặc Super Admin, tôi có thể tạo và quản lý nhân viên để kiểm soát ai có quyền truy cập hệ thống và họ có thể làm gì.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Trang quản lý nhân viên tại `/admin/staff`
+  - AC2: Form "Tạo nhân viên" với: tên, email (tùy chọn), quyền
+  - AC3: Mã nhân viên tự động tạo (6 ký tự chữ-số duy nhất)
+  - AC4: Tính duy nhất của mã được đảm bảo (không trùng)
+  - AC5: Có thể đặt quyền: canUpload (upload đơn), canUpdateStatus (đánh dấu hoàn thành)
+  - AC6: Có thể xem danh sách tất cả nhân viên với mã và quyền của họ
+  - AC7: Có thể chỉnh sửa quyền nhân viên
+  - AC8: Có thể vô hiệu hóa/kích hoạt lại nhân viên (thay đổi status)
+  - AC9: Có thể tạo lại mã nhân viên nếu cần
+  - AC10: Cả Admin và Super Admin đều có thể quản lý nhân viên
+
+- **Bị chặn bởi**: US-0.2.2
+
+- **Ghi chú**: Mã nhân viên được hiển thị cho Admin để chia sẻ với nhân viên. Mã chỉ hiển thị khi tạo mới hoặc tạo lại.
+
+---
+
+**US-0.2.8: Cấu hình Chế độ Đăng nhập**
+
+- **Mô tả**: Là Admin hoặc Super Admin, tôi có thể cấu hình chế độ đăng nhập toàn hệ thống để kiểm soát nhân viên có thể dùng quick code hay phải đăng nhập đầy đủ.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Cấu hình trong Config: `login_mode` với giá trị: `quick_code`, `full_login`, `both`
+  - AC2: Trang cài đặt Admin có toggle cho chế độ login
+  - AC3: Khi `quick_code`: Chỉ hiện ô nhập mã cho nhân viên trên trang login
+  - AC4: Khi `full_login`: Chỉ hiện email/password cho nhân viên trên trang login
+  - AC5: Khi `both`: Nhân viên có thể chọn giữa mã hoặc email/password
+  - AC6: Chế độ mặc định là `quick_code`
+  - AC7: Thay đổi cấu hình có hiệu lực ngay (không cần restart)
+  - AC8: Super Admin và Admin đều có thể thay đổi cấu hình này
+
+- **Bị chặn bởi**: US-0.2.2
+
+- **Ghi chú**: Lưu trong bảng Config. Ảnh hưởng UI trang login động.
 
 ---
 
