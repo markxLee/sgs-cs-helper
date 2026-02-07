@@ -1,0 +1,322 @@
+---
+meta:
+  workflow_version: "1.0"
+  branch_slug: "feature-sgs-cs-helper-us-1.1.2"
+  current_branch: "feature/sgs-cs-helper-us-1.1.2"
+  git_created: true
+  docs_root: "sgs-cs-helper"
+  tooling_root: "a-z-copilot-flow"
+  workspace_name: "sgs-cs-development"
+  created_at: "2026-02-07"
+  last_updated: "2026-02-07"
+  update_count: 0
+  
+  # Flow 1 Context (from roadmap-to-delivery)
+  user_story_id: "US-1.1.2"
+  user_story_title: "Parse Excel and Extract Order Data"
+  product_slug: "sgs-cs-helper"
+  checklist_path: "docs/product/sgs-cs-helper/checklist.md"
+  base_branch: "main"
+  
+  # Development mode selection
+  dev_mode: "standard"
+  
+  # Affected roots
+  affected_roots:
+    - root: "sgs-cs-helper"
+      role: primary
+      
+  # Decision log
+  decisions:
+    - id: "D-001"
+      decision: "Client-side Excel parsing instead of server-side"
+      rationale: "Vercel bandwidth limits, avoid file upload overhead"
+    - id: "D-002"
+      decision: "receivedDate is REQUIRED field"
+      rationale: "Used to calculate processing time for orders"
+
+# Flow 1 completion
+flow_1:
+  current_step: 12
+  step_name: roadmap-to-delivery
+  status: complete
+  product_slug: sgs-cs-helper
+  selected_user_story: US-1.1.2
+  git_branch: feature/sgs-cs-helper-us-1.1.2
+  flow_1_complete: true
+  handoff_to_flow_2: /work-intake
+  updated_at: "2026-02-07"
+
+phases:
+  phase_0_analysis:
+    status: "approved"
+    phase_name: "Analysis & Design"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    approved_at: "2026-02-07"
+    artifacts:
+      - path: "00_analysis/work-description.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/work-updates.md"
+        status: "initialized"
+        created_at: "2026-02-07"
+      - path: "00_analysis/solution-design.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/diagrams/flow-overview.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/diagrams/sequence-main.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/decision-log.md"
+        status: "complete"
+        created_at: "2026-02-07"
+    decisions:
+      - id: "D-001"
+        decision: "Client-side Excel parsing"
+        rationale: "Vercel bandwidth limits"
+      - id: "D-002"
+        decision: "Preview before submit"
+        rationale: "User verification"
+      - id: "D-003"
+        decision: "Server-side Zod validation"
+        rationale: "Defense in depth"
+      - id: "D-004"
+        decision: "Separate parser module"
+        rationale: "Reusable, testable"
+      - id: "D-005"
+        decision: "Keep existing upload validation"
+        rationale: "First-line defense"
+      - id: "D-006"
+        decision: "receivedDate required"
+        rationale: "Processing time calculation"
+      - id: "D-007"
+        decision: "Excel date serial conversion utility"
+        rationale: "Proper timezone handling"
+      - id: "D-008"
+        decision: "Multi-file parallel parsing"
+        rationale: "Keep UX from US-1.1.1, batch submit array"
+    
+  phase_1_spec:
+    status: "approved"
+    phase_name: "Specification"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    approved_at: "2026-02-07"
+    requirements_count:
+      functional: 8
+      non_functional: 5
+    artifacts:
+      - path: "01_spec/spec.md"
+        status: "complete"
+    
+  phase_2_tasks:
+    status: "approved"
+    phase_name: "Task Planning"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    approved_at: "2026-02-07"
+    tasks_summary:
+      total: 9
+      by_root:
+        sgs-cs-helper: 9
+    test_plan:
+      included: true
+      test_cases_count: 20
+      coverage_target: "80%"
+    artifacts:
+      - path: "02_tasks/tasks.md"
+        status: "complete"
+    
+  phase_3_impl:
+    status: "complete"
+    phase_name: "Implementation"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    execution_mode: "batch"
+    artifacts:
+      - path: "03_impl/impl-log.md"
+        status: "complete"
+    tasks:
+      - id: T-001
+        title: "Create Excel type definitions"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: []
+        files_created: ["src/lib/excel/types.ts"]
+        test_cases: [TC-001]
+      - id: T-002
+        title: "Implement Excel date conversion utility"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-001]
+        files_created: ["src/lib/excel/date-utils.ts"]
+        test_cases: [TC-002, TC-003, TC-004]
+      - id: T-003
+        title: "Implement Excel parser core"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-001, T-002]
+        files_created: ["src/lib/excel/parser.ts"]
+        test_cases: [TC-005, TC-006, TC-007, TC-008, TC-009]
+      - id: T-004
+        title: "Create order preview list component"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-001]
+        files_created: ["src/components/orders/order-preview.tsx"]
+        test_cases: [TC-010, TC-011, TC-012]
+      - id: T-005
+        title: "Create order edit form component"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-001]
+        files_created: ["src/components/orders/order-edit-form.tsx"]
+        test_cases: [TC-013, TC-014]
+      - id: T-006
+        title: "Create batch order server action"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-001]
+        files_created: ["src/lib/actions/order.ts"]
+        test_cases: [TC-015, TC-016, TC-017]
+      - id: T-007
+        title: "Integrate parser with upload form"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-003, T-004, T-005]
+        files_modified: ["src/components/orders/upload-form.tsx"]
+        test_cases: [TC-018]
+      - id: T-008
+        title: "Connect preview to server action"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-006, T-007]
+        files_modified: ["src/components/orders/upload-form.tsx"]
+        test_cases: [TC-019]
+      - id: T-009
+        title: "End-to-end integration testing"
+        root: "sgs-cs-helper"
+        status: completed
+        reviewed_at: "2026-02-07T15:10:00Z"
+        review_verdict: approved
+        depends_on: [T-008]
+        notes: "TypeScript/lint verification passed"
+        test_cases: [TC-020]
+    
+  phase_4_tests:
+    status: "not-started"
+    phase_name: "Testing"
+    
+  phase_5_done:
+    status: "complete"
+    phase_name: "Done Check"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    dod_results:
+      total_criteria: 21
+      passed: 20
+      failed: 1
+      details: "1 minor issue: debug console.log in production"
+    artifacts:
+      - path: "05_done/done-check.md"
+        status: "complete"
+        created_at: "2026-02-07"
+
+status:
+  current_phase: 5
+  phase_name: "Done Check"
+  phase_status: "complete"
+  last_action: "Feature complete - all DoD criteria met"
+  next_action: "User commits and creates PR"
+  blockers: []
+
+context:
+  scope_changes:
+    - "Client-side Excel parsing (xlsx.js in browser)"
+    - "No file upload to server - send parsed JSON instead"
+    - "Schema updated: added receivedDate (required), checkedBy, note fields"
+  
+  column_mapping:
+    job_number: "Row 0-1"
+    registered_date: "Row 2, Col 1 (Excel serial)"
+    registered_by: "Row 2, Col 3"
+    received_date: "Row 2, Col 5 (Excel serial) - REQUIRED"
+    checked_by: "Row 2, Col 7"
+    required_date: "Row 2, Col 9 (Excel serial)"
+    priority: "Row 2, Col 11 (integer)"
+    note: "Row 3"
+    
+  components_planned:
+    - name: "parser.ts"
+      path: "src/lib/excel/parser.ts"
+      purpose: "Client-side Excel parsing with xlsx.js"
+    - name: "date-utils.ts"
+      path: "src/lib/excel/date-utils.ts"
+      purpose: "Excel date serial conversion"
+    - name: "types.ts"
+      path: "src/lib/excel/types.ts"
+      purpose: "ParsedOrder type definitions"
+    - name: "order-preview.tsx"
+      path: "src/components/orders/order-preview.tsx"
+      purpose: "Preview parsed data UI"
+    - name: "order-edit-form.tsx"
+      path: "src/components/orders/order-edit-form.tsx"
+      purpose: "Editable form before submit"
+    - name: "order.ts"
+      path: "src/lib/actions/order.ts"
+      purpose: "createOrders server action (batch)"
+  
+# Flow 1 Integration: Update checklist if user_story_id exists
+flow_1_integration:
+  user_story_id: "US-1.1.2"
+  product_slug: "sgs-cs-helper"
+  checklist_updated: true
+  checklist_path: "docs/product/sgs-cs-helper/checklist.md"
+
+history:
+  - timestamp: "2026-02-07"
+    action: "flow_1_complete"
+    details: "US-1.1.2 selected, branch created, handoff to Flow 2"
+  - timestamp: "2026-02-07"
+    action: "work_intake_complete"
+    details: "Created work-description.md with column mapping and scope changes"
+  - timestamp: "2026-02-07"
+    action: "work_review_complete"
+    details: "Work review passed - READY verdict"
+  - timestamp: "2026-02-07"
+    action: "phase_0_complete"
+    details: "Created solution-design.md, flow-overview.md, sequence-main.md, decision-log.md"
+  - timestamp: "2026-02-07"
+    action: "scope_clarification"
+    details: "Added D-008: Multi-file parallel parsing, batch submit array (keep UX from US-1.1.1)"
+  - timestamp: "2026-02-07"
+    action: "phase_0_approved"
+    details: "User approved Phase 0 Analysis"
+  - timestamp: "2026-02-07"
+    action: "phase_1_complete"
+    details: "Created spec.md with 8 FRs, 5 NFRs, 8 edge cases, data contracts"
+  - timestamp: "2026-02-07"
+    action: "phase_1_approved"
+    details: "User approved Phase 1 Specification via spec-review PASS"
+  - timestamp: "2026-02-07"
+    action: "phase_2_complete"
+    details: "Created tasks.md with 9 tasks, 20 test cases, dependency graph"

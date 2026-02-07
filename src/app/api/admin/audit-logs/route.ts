@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import type { Prisma } from "@/generated/prisma/client";
 
 const getAuditLogsSchema = z.object({
   adminId: z.string().optional(),
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const validatedParams = getAuditLogsSchema.parse(params);
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.AuditLogWhereInput = {};
 
     if (validatedParams.adminId) {
       where.userId = validatedParams.adminId;
