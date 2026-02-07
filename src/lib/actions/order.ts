@@ -17,6 +17,7 @@ import type {
   FailedOrder,
 } from "@/lib/excel/types";
 import type { Order } from "@/generated/prisma/client";
+import { broadcastBulkUpdate } from "@/lib/sse/broadcaster";
 
 // ============================================================================
 // Zod Schemas
@@ -173,6 +174,16 @@ export async function createOrders(
       ? `Successfully created ${created.length} order(s)`
       : `Created ${created.length} order(s), ${failed.length} failed`;
 
+    // Broadcast SSE events for created orders
+    if (created.length > 0) {
+      try {
+        broadcastBulkUpdate(created);
+      } catch (sseError) {
+        // Log SSE error but don't fail the main operation
+        console.error("[createOrders] Failed to broadcast SSE events:", sseError);
+      }
+    }
+
     return {
       success: allSuccess,
       created,
@@ -199,20 +210,26 @@ export async function createOrders(
 // ============================================================================
 
 /**
- * Fetch all orders for public display
+ * Fetch IN_PROGRESS orders for the orders page
  *
- * This function is used by the public /orders page.
+ * This function is used by the /orders page (In Progress tab).
  * No authentication required - read-only access.
+ * 
+ * Note: Only returns IN_PROGRESS orders.
+ * Completed orders will have a separate function.
  *
- * @returns Array of orders sorted by requiredDate ascending
+ * @returns Array of IN_PROGRESS orders sorted by requiredDate ascending
  *
  * @example
  * const orders = await getOrders();
- * // Returns orders sorted by requiredDate (earliest first)
+ * // Returns IN_PROGRESS orders sorted by requiredDate (earliest first)
  */
 export async function getOrders(): Promise<Order[]> {
   try {
     const orders = await prisma.order.findMany({
+      where: {
+        status: "IN_PROGRESS",
+      },
       orderBy: {
         requiredDate: "asc",
       },

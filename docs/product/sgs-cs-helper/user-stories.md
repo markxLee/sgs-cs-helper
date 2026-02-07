@@ -478,6 +478,28 @@ Phase 1 MVP:                                    │
 
 ---
 
+**US-1.2.6: Show Registered By, add filter/sort, and display Priority ETA**
+
+- **Description**: As a Staff member, I want the orders list to show who registered each order, be able to filter and sort by `Registered By` and `Required Date`, and see an estimated time-to-complete per `Priority` so that I can triage and assign work more effectively.
+
+- **Acceptance Criteria**:
+  - AC1: Orders table includes a `Registered By` column showing uploader name or identifier
+  - AC2: UI provides filters for `Registered By` and `Required Date` (date range)
+  - AC3: UI allows sorting by `Registered By` and `Required Date` (asc/desc)
+  - AC4: UI provides a search box to search orders by `Job Number` (supports exact and partial matches)
+  - AC5: (shifted) `Priority` column displays both priority level and an estimated time-to-complete (ETA) for that priority. ETA values are read from a `priority_to_eta` config/mapping; if missing, sensible hardcoded defaults are used (e.g., Priority 1 -> 2h).
+  - AC4: `Priority` column displays both priority level and an estimated time-to-complete (ETA) for that priority. ETA values are read from a `priority_to_eta` config/mapping; if missing, sensible hardcoded defaults are used (e.g., Priority 1 -> 2h).
+  - AC5: ETA values are configurable via a system config or mapping and documented in the settings help
+  - AC6: Filtering and sorting work together with existing status/priority filters (combinable)
+  - AC7: Empty state and loading states handled correctly when filters return no results
+  - AC8: Feature respects permissions: only users with view permissions see `Registered By` (role-based visibility)
+
+- **Blocked By**: US-1.1.3, US-1.2.1
+
+- **Notes**: ETA per priority should be stored or derived from a `priority_to_eta` config (e.g., Priority 1 -> 2h, Priority 2 -> 8h)
+
+---
+
 ### Epic 1.3: Order Completion
 
 ---
@@ -904,6 +926,26 @@ These stories can be worked on in parallel after their dependencies are met:
 - **Bị chặn bởi**: US-1.2.1
 
 ---
+
+**US-1.2.6: Hiển thị Registered By, thêm lọc/sắp xếp, và hiển thị ETA theo Priority**
+
+- **Mô tả**: Là nhân viên, tôi muốn danh sách đơn hiển thị người đăng ký (Registered By), có thể lọc và sắp xếp theo `Registered By` và `Required Date`, và xem ước lượng thời gian hoàn thành theo `Priority` để phân loại và phân công công việc hiệu quả hơn.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Bảng đơn có cột `Registered By` hiển thị tên hoặc định danh người upload
+  - AC2: Giao diện cung cấp bộ lọc cho `Registered By` và `Required Date` (phạm vi ngày)
+  - AC3: Giao diện cho phép sắp xếp theo `Registered By` và `Required Date` (tăng/d giảm)
+  - AC4: Giao diện cung cấp ô tìm kiếm để tìm đơn theo `Job Number` (hỗ trợ tìm khớp chính xác và khớp một phần)
+  - AC5: Cột `Priority` hiển thị cả mức độ ưu tiên và ước lượng thời gian hoàn thành (ETA) cho mức ưu tiên đó. Giá trị ETA được lấy từ cấu hình/mapping `priority_to_eta`; nếu không có, sử dụng mặc định hardcoded hợp lý (ví dụ: Priority 1 -> 2h).
+  - AC5: Giá trị ETA có thể cấu hình qua cấu hình hệ thống hoặc mapping và được ghi trong phần trợ giúp cài đặt
+  - AC6: Lọc và sắp xếp kết hợp được với các bộ lọc trạng thái/priority hiện có
+  - AC7: Xử lý trạng thái rỗng và loading khi bộ lọc không trả về kết quả
+  - AC8: Tính năng tuân thủ phân quyền: chỉ người có quyền xem mới thấy `Registered By`
+
+- **Bị chặn bởi**: US-1.1.3, US-1.2.1
+
+- **Ghi chú**: ETA theo priority nên được lưu hoặc suy ra từ cấu hình `priority_to_eta` (ví dụ: Priority 1 -> 2h, Priority 2 -> 8h)
+
 
 **US-1.2.3: Mã màu theo Priority**
 

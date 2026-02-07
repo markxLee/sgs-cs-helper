@@ -15,6 +15,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getOrders } from "@/lib/actions/order";
+import { auth } from "@/lib/auth";
 import { RealtimeOrders } from "@/components/orders/realtime-orders";
 import type { OrderData } from "@/hooks/use-realtime-progress";
 
@@ -42,6 +43,16 @@ interface OrdersPageProps {
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const params = await searchParams;
   const activeTab = params.tab === "completed" ? "completed" : "in-progress";
+
+  // Get current session for permission check
+  const session = await auth();
+
+  // Compute canMarkDone: SUPER_ADMIN/ADMIN always, STAFF if canUpdateStatus
+  const canMarkDone = session?.user
+    ? session.user.role === "SUPER_ADMIN" ||
+      session.user.role === "ADMIN" ||
+      (session.user.role === "STAFF" && session.user.canUpdateStatus === true)
+    : false;
 
   // Fetch all orders from database (initial data)
   const orders = await getOrders();
@@ -99,7 +110,11 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       </div>
 
       {/* Realtime orders with client-side progress calculation and SSE */}
-      <RealtimeOrders initialOrders={initialOrders} activeTab={activeTab} />
+      <RealtimeOrders
+        initialOrders={initialOrders}
+        activeTab={activeTab}
+        canMarkDone={canMarkDone}
+      />
     </div>
   );
 }

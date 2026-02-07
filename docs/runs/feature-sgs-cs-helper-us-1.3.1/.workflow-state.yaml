@@ -1,0 +1,168 @@
+meta:
+  docs_root: sgs-cs-helper
+  base_branch: main
+  dev_mode: standard
+  created_at: "2026-02-07T00:00:00Z"
+  update_count: 1
+
+status:
+  current_phase: 3
+  phase_name: impl
+  phase_status: complete
+  current_task: null
+  current_update: 1
+  last_action: "All tasks complete (T-009 fixed with polling fallback)"
+  next_action: "/phase-4-tests or /phase-5-done (skip Phase 4)"
+  pending_approval: null
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: "2026-02-07T00:00:00Z"
+    completed_at: "2026-02-07T00:00:00Z"
+  phase_1_spec:
+    status: awaiting-review
+    previous_status: approved
+    started_at: "2026-02-07T00:00:00Z"
+    completed_at: "2026-02-07T00:00:00Z"
+    requirements_count:
+      functional: 4
+      non_functional: 3
+    artifacts:
+      - path: 01_spec/spec-update-1.md
+        status: complete
+      - path: 01_spec/spec-review.md
+        status: complete
+  phase_2_tasks:
+    status: awaiting-review
+    previous_status: approved
+    started_at: "2026-02-07T00:00:00Z"
+    completed_at: "2026-02-07T00:00:00Z"
+    tasks_summary:
+      total: 4
+      by_root:
+        sgs-cs-helper: 4
+    test_plan:
+      included: true
+      test_cases_count: 13
+      coverage_target: 70
+    artifacts:
+      - path: 02_tasks/tasks-update-1.md
+        status: complete
+      - path: 02_tasks/task-plan-review.md
+        status: complete
+  phase_3_impl:
+    status: batch-complete
+    previous_status: in-progress
+    tasks:
+      T-007:
+        id: T-007
+        title: "Add permission check to Mark Done button (frontend)"
+        root: sgs-cs-helper
+        status: completed
+        reviewed_at: "2026-02-07T12:40:00Z"
+        review_verdict: approved
+        depends_on: []
+        test_cases: ["TC-007-1", "TC-007-2", "TC-007-3", "TC-007-4", "TC-007-5"]
+        implemented_at: "2026-02-07T12:00:00Z"
+      T-008:
+        id: T-008
+        title: "Add permission validation to mark-done endpoint"
+        root: sgs-cs-helper
+        status: completed
+        reviewed_at: "2026-02-07T12:40:00Z"
+        review_verdict: approved
+        depends_on: []
+        test_cases: ["TC-008-1", "TC-008-2", "TC-008-3", "TC-008-4"]
+        implemented_at: "2026-02-07T12:00:00Z"
+      T-009:
+        id: T-009
+        title: "Add SSE broadcast to upload endpoint"
+        root: sgs-cs-helper
+        status: completed
+        reviewed_at: "2026-02-07T12:40:00Z"
+        review_verdict: approved
+        review_notes: "Fixed with SSE + Periodic Polling (3 min) fallback for multi-instance environments. Polling refetches IN_PROGRESS orders from /api/orders on reconnect and every 3 minutes."
+        depends_on: []
+        test_cases: ["TC-009-1", "TC-009-2", "TC-009-3", "TC-009-4"]
+        implemented_at: "2026-02-07T12:00:00Z"
+        fixed_at: "2026-02-07T13:00:00Z"
+      T-010:
+        id: T-010
+        title: "Add tests for permissions and SSE"
+        root: sgs-cs-helper
+        status: completed
+        reviewed_at: "2026-02-07T12:40:00Z"
+        review_verdict: approved
+        depends_on: ["T-007", "T-008", "T-009"]
+        test_cases: []
+        implemented_at: "2026-02-07T12:00:00Z"
+      T-001:
+        status: completed
+        title: "Add Mark Done button to OrdersTable"
+        root: sgs-cs-helper
+        started_at: "2026-02-07T00:00:00Z"
+        implemented_at: "2026-02-07T00:00:00Z"
+        reviewed_by: "user-manual"
+        completed_at: "2026-02-07T00:00:00Z"
+      T-002:
+        status: completed
+        title: "Implement confirmation modal"
+        root: sgs-cs-helper
+        started_at: "2026-02-07T00:00:00Z"
+        implemented_at: "2026-02-07T00:00:00Z"
+        reviewed_by: "user-manual"
+        completed_at: "2026-02-07T00:00:00Z"
+      T-003:
+        status: completed
+        title: "Server action: mark order as Done"
+        root: sgs-cs-helper
+        started_at: "2026-02-07T00:00:00Z"
+        implemented_at: "2026-02-07T00:00:00Z"
+        reviewed_at: "2026-02-07T00:00:00Z"
+        reviewed_by: "user-manual"
+        completed_at: "2026-02-07T00:00:00Z"
+        review_verdict: "approved"
+        issues_count:
+          critical: 0
+          major: 0
+      T-004:
+        status: completed
+        title: "Broadcast SSE on completion"
+        root: sgs-cs-helper
+        started_at: "2026-02-07T00:00:00Z"
+        implemented_at: "2026-02-07T00:00:00Z"
+        reviewed_at: "2026-02-07T00:00:00Z"
+        reviewed_by: "ai-review"
+        review_verdict: approved
+        completed_at: "2026-02-07T00:00:00Z"
+      T-005:
+        status: completed
+        title: "Move order to Completed filter"
+        root: sgs-cs-helper
+        started_at: "2026-02-07T00:00:00Z"
+        implemented_at: "2026-02-07T00:00:00Z"
+        reviewed_at: "2026-02-07T00:00:00Z"
+        reviewed_by: "user-manual"
+        review_verdict: approved
+        completed_at: "2026-02-07T00:00:00Z"
+      T-006:
+        status: skipped
+        title: "Add audit/log for manual test"
+        root: sgs-cs-helper
+        skipped_at: "2026-02-07T00:00:00Z"
+        skip_reason: "Not required now (skipped per user request)"
+
+updates:
+  - number: 1
+    timestamp: "2026-02-07T00:00:00Z"
+    type: REQUIREMENT_CHANGE
+    source: "User - mid-workflow requirement change"
+    description: "Add permission checks for Mark Done button + SSE broadcast for upload orders"
+    restart_from: 1
+    affected_phases: [1, 2, 3, 4, 5]
+    affected_requirements:
+      modified: ["FR-001", "FR-002"]
+      added: ["NFR-005"]
+    status: approved
+    approved_at: "2026-02-07T00:00:00Z"

@@ -157,13 +157,20 @@ RULES:
   - Status: `PLANNED`
   - Blocked By: ~~US-1.2.1~~ ✅
 
+- [ ] **US-1.2.6** — Show Registered By, Filter/Sort, Priority ETA
+  - Status: `PLANNED`
+  - Blocked By: US-1.1.3, US-1.2.1
+  - Notes: Add `Registered By` column, filters for `Registered By` and `Required Date`, sorting, and show ETA per priority from config
+
 ---
 
 ### Epic 1.3: Order Completion
 
-- [ ] **US-1.3.1** — Mark Order as Done
-  - Status: `PLANNED`
+- [x] **US-1.3.1** — Mark Order as Done
+  - Status: `DONE`
   - Blocked By: ~~US-1.2.1~~ ✅
+  - ✅ Completed: 2026-02-07
+  - Branch: `feature-sgs-cs-helper-us-1.3.1`
 
 - [ ] **US-1.3.2** — Visual Distinction for Completed Orders
   - Status: `PLANNED`
@@ -229,7 +236,7 @@ RULES:
   - 🔄 Đang triển khai
 
 - [ ] **US-0.2.2** — Đăng nhập Admin bằng Google OAuth
-  - Trạng thái: `PLANNED`
+  - Trạng thái: `IN_PROGRESS`
   - Bị chặn bởi: US-0.2.1, US-0.3.1
 
 - [ ] **US-0.2.3** — Đăng nhập Nhân viên bằng Mã chung
