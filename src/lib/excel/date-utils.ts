@@ -91,32 +91,18 @@ export function isValidExcelSerial(value: unknown): value is number {
  * // Invalid serial
  * excelSerialToDate(-1) // Returns: null
  */
-export function excelSerialToDate(
-  serial: number,
-  useVietnamTz: boolean = true
-): Date | null {
+export function excelSerialToDate(serial: number): Date | null {
   if (!isValidExcelSerial(serial)) {
     return null;
   }
 
-  // Handle Excel's leap year bug (serial 60 = Feb 29, 1900 which doesn't exist)
-  // For serials > 60, subtract 1 to correct the bug
-  const adjustedSerial = serial > 60 ? serial - 1 : serial;
-
   // Convert to milliseconds and add to epoch
-  const utcMs = EXCEL_EPOCH + adjustedSerial * MS_PER_DAY;
+  // Excel dates represent Vietnam local time (UTC+7)
+  // We subtract 7 hours to store as UTC
+  const localMs = EXCEL_EPOCH + serial * MS_PER_DAY;
+  const utcMs = localMs - VIETNAM_TZ_OFFSET * 60 * 60 * 1000;
 
-  // Create date in UTC
-  const utcDate = new Date(utcMs);
-
-  if (useVietnamTz) {
-    // Adjust for Vietnam timezone (UTC+7)
-    // We add the offset to get the correct local time
-    const vietnamMs = utcMs + VIETNAM_TZ_OFFSET * 60 * 60 * 1000;
-    return new Date(vietnamMs);
-  }
-
-  return utcDate;
+  return new Date(utcMs);
 }
 
 /**
@@ -158,6 +144,7 @@ export function formatExcelDate(
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
+    timeZone: "Asia/Ho_Chi_Minh",
   });
 }
 
@@ -175,9 +162,11 @@ export function formatExcelDate(
  *
  * @param value - Cell value from xlsx
  * @returns Date object or null if not parseable
+ *
+ * All dates are interpreted as Vietnam local time (UTC+7) and converted to UTC for storage.
  */
 export function parseExcelDateCell(value: unknown): Date | null {
-  // Already a Date
+  // Already a Date (xlsx parsed it as UTC)
   if (value instanceof Date) {
     return value;
   }
@@ -196,7 +185,7 @@ export function parseExcelDateCell(value: unknown): Date | null {
       return excelSerialToDate(num);
     }
 
-    // Try to parse as date string
+    // Try to parse as date string (assumed UTC)
     const parsed = Date.parse(trimmed);
     if (!isNaN(parsed)) {
       return new Date(parsed);

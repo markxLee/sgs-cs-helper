@@ -69,11 +69,24 @@ export default async function AdminLayout({
                     Audit Logs
                   </Link>
                 )}
+                <span className="text-gray-300">|</span>
                 <Link
-                  href="/dashboard"
+                  href="/"
                   className="text-sm text-gray-600 hover:text-gray-900"
                 >
                   Dashboard
+                </Link>
+                <Link
+                  href="/orders"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Orders
+                </Link>
+                <Link
+                  href="/upload"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Upload
                 </Link>
               </nav>
             </div>

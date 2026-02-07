@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { LogoutButton } from "./_components/logout-button";
 
 /**
  * Dashboard Layout
@@ -20,20 +22,74 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  const role = session.user.role;
+  const canUpload = session.user.canUpload;
+
+  // Check upload permission
+  const hasUploadAccess =
+    role === "SUPER_ADMIN" ||
+    role === "ADMIN" ||
+    (role === "STAFF" && canUpload === true);
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-900">
-            SGS CS Helper
-          </h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              {session.user.name || session.user.email}
-            </span>
-            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-              {session.user.role}
-            </span>
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            {/* Logo/Title */}
+            <Link href="/" className="text-xl font-semibold text-gray-900 hover:text-gray-700">
+              SGS CS Helper
+            </Link>
+
+            {/* Navigation */}
+            <nav className="flex items-center gap-4">
+              {/* Dashboard link */}
+              <Link
+                href="/"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Dashboard
+              </Link>
+
+              {/* Orders link */}
+              <Link
+                href="/orders"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Orders
+              </Link>
+
+              {/* Upload link - permission based */}
+              {hasUploadAccess && (
+                <Link
+                  href="/upload"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Upload
+                </Link>
+              )}
+
+              {/* Admin link - admin only */}
+              {(role === "SUPER_ADMIN" || role === "ADMIN") && (
+                <Link
+                  href="/admin"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Admin
+                </Link>
+              )}
+
+              {/* User info */}
+              <span className="text-sm text-gray-600">
+                {session.user.name || session.user.email}
+              </span>
+              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                {role}
+              </span>
+
+              {/* Logout */}
+              <LogoutButton />
+            </nav>
           </div>
         </div>
       </header>

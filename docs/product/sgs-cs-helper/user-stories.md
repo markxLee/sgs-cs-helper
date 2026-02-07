@@ -342,24 +342,42 @@ Phase 1 MVP:                                    │
 
 ---
 
-**US-1.1.3: Store Order with Duplicate Detection**
+**US-1.1.3: Store Order with Upsert by Job Number**
 
-- **Description**: As a system, I need to store parsed order data in the database with duplicate detection so that orders can be tracked without creating duplicates.
+- **Description**: As a system, I need to store parsed order data in the database with upsert logic so that orders are created or updated based on Job Number.
 
 - **Acceptance Criteria**:
-  - AC1: Job Number uniqueness is checked before insert (case-insensitive)
-  - AC2: Duplicate orders are skipped (not created)
-  - AC3: User is notified which files were duplicates
-  - AC4: Non-duplicate orders in same batch are still processed
-  - AC5: Order record is created with all extracted fields
-  - AC6: Status is set to IN_PROGRESS by default
-  - AC7: uploadedAt timestamp is recorded
-  - AC8: uploadedById references the current user
+  - AC1: Job Number is used as unique identifier (case-insensitive)
+  - AC2: If Job Number exists: UPDATE order with new data (if data changed)
+  - AC3: If Job Number not exists: CREATE new order
+  - AC4: User is notified: X orders created, Y orders updated, Z unchanged
+  - AC5: Only changed fields are updated (compare before update)
+  - AC6: Status is NOT overwritten if order already exists (preserve current status)
+  - AC7: uploadedAt timestamp is updated on both create and update
+  - AC8: uploadedById references the user who uploaded
   - AC9: Database transaction ensures data integrity
+  - AC10: SSE broadcasts bulk update to connected clients after successful upsert
 
 - **Blocked By**: US-1.1.2
 
-- **Notes**: Job Number is the unique identifier. Link order to user who uploaded it.
+- **Notes**: 
+  - Use Prisma upsert with jobNumber as unique key
+  - Preserve existing status to avoid overwriting COMPLETED orders back to IN_PROGRESS
+  - Show clear summary: "Created: 5, Updated: 3, Unchanged: 2"
+
+- **Technical Notes**:
+  - **Upsert Pattern**:
+    ```typescript
+    await prisma.order.upsert({
+      where: { jobNumber: order.jobNumber },
+      create: { ...orderData, status: "IN_PROGRESS" },
+      update: { 
+        ...orderData,
+        // Do NOT update status - preserve existing
+      }
+    });
+    ```
+  - **SSE Broadcast**: After batch upsert, call `broadcastBulkUpdate(orders)` from `@/lib/sse/broadcaster`
 
 ---
 
@@ -480,6 +498,21 @@ Phase 1 MVP:                                    │
 
 - **Notes**: Use Server Action for mutation.
 
+- **Technical Notes (from US-1.2.1 implementation)**:
+  - **Realtime Updates**: Page `/orders` uses SSE (Server-Sent Events) for realtime status sync
+  - **SSE Endpoint**: `/api/orders/sse` - clients subscribe to receive order updates
+  - **Broadcaster**: When updating order status, call `broadcastOrderUpdate(order)` from `@/lib/sse/broadcaster`
+  - **Client Progress**: Progress bar updates every 60s client-side without server calls
+  - **Implementation Pattern**:
+    ```typescript
+    // In server action after updating order status:
+    import { broadcastOrderUpdate } from "@/lib/sse/broadcaster";
+    
+    // After prisma update
+    const updatedOrder = await prisma.order.update({...});
+    broadcastOrderUpdate(updatedOrder); // Push to all connected clients
+    ```
+
 ---
 
 **US-1.3.2: Visual Distinction for Completed Orders**
@@ -500,18 +533,38 @@ Phase 1 MVP:                                    │
 
 **US-1.3.3: Undo Order Completion**
 
-- **Description**: As a Staff member, I can undo marking an order as Done (within 5 minutes) so that I can correct mistakes.
+- **Description**: As a Staff member, I can undo marking an order as Done so that I can correct mistakes.
 
 - **Acceptance Criteria**:
-  - AC1: "Undo" option appears after marking done (toast or button)
-  - AC2: Undo is available for 5 minutes after completion
-  - AC3: Clicking undo reverts status to IN_PROGRESS
+  - AC1: Staff with `canUpdateStatus` permission can revert COMPLETED → IN_PROGRESS
+  - AC2: "Revert to In Progress" button available in Completed tab
+  - AC3: Clicking revert changes status to IN_PROGRESS
   - AC4: completedAt is cleared
-  - AC5: After 5 minutes, undo option is no longer available
+  - AC5: Order moves back to In Progress tab
+  - AC6: SSE broadcasts update to all connected clients
 
 - **Blocked By**: US-1.3.1
 
-- **Notes**: Time window prevents accidental permanent changes.
+- **Notes**: 
+  - No time window limit - staff can revert anytime if they have permission
+  - Update available from Completed tab on /orders page
+
+- **Technical Notes (from US-1.2.1 implementation)**:
+  - **Completed Tab**: Sort by Received Date (newest first)
+  - **Permission Check**: Verify `session.user.canUpdateStatus === true` before allowing revert
+  - **SSE Broadcast**: Call `broadcastOrderUpdate(order)` after status change
+  - **Implementation Pattern**:
+    ```typescript
+    // Server action to revert status
+    if (!session?.user?.canUpdateStatus) {
+      throw new Error("Permission denied");
+    }
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "IN_PROGRESS", completedAt: null }
+    });
+    broadcastOrderUpdate(order);
+    ```
 
 ---
 
@@ -533,7 +586,7 @@ Phase 1 MVP:                                    │
 | US-0.3.2 | Seed Initial Data | US-0.3.1 | 0 |
 | US-1.1.1 | Upload Excel Files UI | US-0.2.5, US-0.3.1 | 1 |
 | US-1.1.2 | Parse Excel and Extract Order Data | US-1.1.1 | 1 |
-| US-1.1.3 | Store Order with Duplicate Detection | US-1.1.2 | 1 |
+| US-1.1.3 | Store Order with Upsert by Job Number | US-1.1.2 | 1 |
 | US-1.2.1 | Display Orders List | US-1.1.3 | 1 |
 | US-1.2.2 | Display Progress Bar | US-1.2.1 | 1 |
 | US-1.2.3 | Priority Color Coding | US-1.2.1 | 1 |

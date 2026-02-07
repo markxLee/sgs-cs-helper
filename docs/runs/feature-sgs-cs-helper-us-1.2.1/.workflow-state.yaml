@@ -1,0 +1,288 @@
+---
+meta:
+  workflow_version: "1.0"
+  branch_slug: "feature-sgs-cs-helper-us-1.2.1"
+  current_branch: "feature/sgs-cs-helper-us-1.2.1"
+  git_created: true
+  docs_root: "sgs-cs-helper"
+  tooling_root: "a-z-copilot-flow"
+  workspace_name: "sgs-cs-development"
+  created_at: "2026-02-07"
+  last_updated: "2026-02-07"
+  update_count: 0
+  
+  # Flow 1 Context (from roadmap-to-delivery)
+  user_story_id: "US-1.2.1"
+  user_story_title: "Display Orders List + Progress Bar"
+  product_slug: "sgs-cs-helper"
+  checklist_path: "docs/product/sgs-cs-helper/checklist.md"
+  base_branch: "main"
+  
+  # Development mode selection
+  dev_mode: "standard"
+  
+  # Affected roots
+  affected_roots:
+    - root: "sgs-cs-helper"
+      role: primary
+      
+  # Decision log
+  decisions:
+    - id: "D-001"
+      decision: "Merge US-1.2.2 (Progress Bar) into US-1.2.1"
+      rationale: "Progress bar is integral part of the orders list view"
+    - id: "D-002"
+      decision: "Public read-only access (no login required to view)"
+      rationale: "All users should see order progress, only auth users can update"
+    - id: "D-003"
+      decision: "Progress bar color scheme: ⬜ 0-40%, 🟢 41-65%, 🟡 66-80%, 🔴 >80%/overdue"
+      rationale: "User-defined color thresholds for urgency indication"
+    - id: "D-004"
+      decision: "Default progress duration: 3 hours from Received Date"
+      rationale: "Standard turnaround time when no admin config exists"
+    - id: "D-005"
+      decision: "Design extensible progress system for multiple order types"
+      rationale: "Future: Different order types may have different progress durations, admin-configurable"
+    - id: "D-006"
+      decision: "Exclude lunch break (12:00-13:00) from elapsed time"
+      rationale: "Staff not working during lunch, don't count that hour if order started before 12:00"
+    - id: "D-007"
+      decision: "Duration based on Priority: P0=15min, P1=1h, P2=2.5h, P3+=3h"
+      rationale: "Higher priority orders have shorter turnaround times"
+    - id: "D-008"
+      decision: "Server Components for public page"
+      rationale: "SEO-friendly, simple architecture, no real-time needed"
+    - id: "D-009"
+      decision: "Route: /orders (public), separate from /dashboard (auth)"
+      rationale: "Allow public access to order list without affecting auth-protected areas"
+
+# Flow 1 completion
+flow_1:
+  current_step: 12
+  step_name: roadmap-to-delivery
+  status: complete
+  product_slug: sgs-cs-helper
+  selected_user_story: US-1.2.1
+  git_branch: feature/sgs-cs-helper-us-1.2.1
+  flow_1_complete: true
+  handoff_to_flow_2: /work-intake
+  updated_at: "2026-02-07"
+
+phases:
+  phase_0_analysis:
+    status: "approved"
+    phase_name: "Analysis & Design"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    approved_at: "2026-02-07"
+    artifacts:
+      - path: "00_analysis/work-description.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/work-updates.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/solution-design.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/decision-log.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/diagrams/flow-overview.md"
+        status: "complete"
+        created_at: "2026-02-07"
+      - path: "00_analysis/diagrams/sequence-main.md"
+        status: "complete"
+        created_at: "2026-02-07"
+    
+  phase_1_spec:
+    status: "approved"
+    phase_name: "Specification"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    approved_at: "2026-02-07"
+    artifacts:
+      - path: "01_spec/spec.md"
+        status: "complete"
+        created_at: "2026-02-07"
+    requirements_count:
+      functional: 7
+      non_functional: 3
+    
+  phase_2_tasks:
+    status: "approved"
+    phase_name: "Task Planning"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    approved_at: "2026-02-07"
+    artifacts:
+      - path: "02_tasks/tasks.md"
+        status: "complete"
+        created_at: "2026-02-07"
+    tasks_summary:
+      total: 8
+      by_root:
+        sgs-cs-helper: 8
+    test_plan:
+      included: true
+      test_cases_count: 21
+      coverage_target: "Unit 90%, Component 80%, Integration 70%"
+    
+  phase_3_impl:
+    status: "approved"
+    phase_name: "Implementation"
+    batch_mode: true
+    batch_completed_at: "2026-02-07"
+    reviewed_at: "2026-02-07"
+    review_verdict: "approved"
+    artifacts:
+      - path: "03_impl/impl-log.md"
+        status: "complete"
+        created_at: "2026-02-07"
+    tasks:
+      - id: T-001
+        title: "Add shadcn/ui components"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: []
+        estimate: S
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-002
+        title: "Create progress calculation utilities"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: []
+        estimate: M
+        test_cases: [TC-001, TC-002, TC-003, TC-004, TC-005, TC-006, TC-007, TC-008, TC-009, TC-010, TC-011]
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-003
+        title: "Create getOrders server action"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: []
+        estimate: S
+        test_cases: [TC-012, TC-013]
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-004
+        title: "Create OrderProgressBar component"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: [T-001, T-002]
+        estimate: S
+        test_cases: [TC-014, TC-015]
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-005
+        title: "Create OrdersTable component"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: [T-001, T-004]
+        estimate: M
+        test_cases: [TC-016, TC-017]
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-006
+        title: "Create public /orders page"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: [T-003, T-005]
+        estimate: M
+        test_cases: [TC-018, TC-019]
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-007
+        title: "Create loading.tsx for orders page"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: [T-001]
+        estimate: S
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+      - id: T-008
+        title: "Add error handling and empty state"
+        root: sgs-cs-helper
+        status: completed
+        depends_on: [T-006]
+        estimate: S
+        test_cases: [TC-020, TC-021]
+        implemented_at: "2026-02-07"
+        reviewed_at: "2026-02-07"
+        review_verdict: approved
+    
+  phase_4_tests:
+    status: "skipped"
+    phase_name: "Testing"
+    skipped_at: "2026-02-07"
+    reason: "User requested skip"
+    
+  phase_5_done:
+    status: "complete"
+    phase_name: "Done Check"
+    started_at: "2026-02-07"
+    completed_at: "2026-02-07"
+    dod_results:
+      total_criteria: 18
+      passed: 18
+      failed: 0
+    checklist_updated: true
+
+status:
+  current_phase: 5
+  phase_name: "Done Check"
+  phase_status: "complete"
+  last_action: "Done check passed. All DoD criteria met."
+  next_action: "Commit, push, and create PR"
+  blockers: []
+
+context:
+  scope_summary:
+    en: |
+      Display orders list with progress bars showing time urgency.
+      Public read-only access (no login required to view).
+      Update actions require authenticated users with permissions.
+    vi: |
+      Hiển thị danh sách orders với progress bars hiển thị mức độ khẩn cấp.
+      Truy cập công khai chỉ đọc (không cần đăng nhập để xem).
+      Các hành động cập nhật yêu cầu user đã xác thực có quyền.
+      
+  acceptance_criteria:
+    # Orders List
+    - "AC1: Orders displayed in table/list view (public, no login required)"
+    - "AC2: Each row shows: Job Number, Registered Date, Required Date, Priority, Status"
+    - "AC3: Sorted by Required Date (soonest first) by default"
+    - "AC4: Empty state shows 'No orders' message"
+    - "AC5: List loads < 2 seconds for 100 orders"
+    - "AC6: Loading skeleton/spinner while fetching"
+    - "AC7: Error state with retry option"
+    # Progress Bar (merged from US-1.2.2)
+    - "AC8: Progress bar shows % of time elapsed (Registered → Required)"
+    - "AC9: Progress bar color-coded: ⬜ 0-40%, 🟢 41-65%, 🟡 66-80%, 🔴 >80%/overdue"
+    - "AC10: Percentage number displayed alongside bar"
+    - "AC11: Overdue orders show 100%+ with red indicator"
+    
+  non_goals:
+    - "Priority color coding (US-1.2.3)"
+    - "Filtering by status (US-1.2.4)"
+    - "Sorting options (US-1.2.5)"
+    - "Order completion actions (US-1.3.1 - requires auth)"
+    - "Real-time WebSocket updates (future enhancement)"
+    
+  dependencies_satisfied:
+    - "US-1.1.1: Upload Excel Files UI ✅"
+    - "US-1.1.2: Parse Excel and Extract Order Data ✅"
+    - "US-1.1.3: Store Order with Duplicate Detection ✅"
+
+history:
+  - timestamp: "2026-02-07"
+    action: "flow_1_complete"
+    details: "US-1.2.1 selected (merged with US-1.2.2), branch created, handoff to Flow 2"

@@ -45,7 +45,7 @@ interface OrderPreviewItemProps {
 // ============================================================================
 
 /**
- * Format date for display with full date and time
+ * Format date for display with full date and time in Vietnam timezone
  */
 function formatDate(date: Date): string {
   return date.toLocaleString("vi-VN", {
@@ -54,6 +54,7 @@ function formatDate(date: Date): string {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Ho_Chi_Minh",
   });
 }
 
