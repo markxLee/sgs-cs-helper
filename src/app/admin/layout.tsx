@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { LogoutButton } from "@/components/admin/logout-button";
 
 /**
  * Admin Layout
@@ -60,6 +61,14 @@ export default async function AdminLayout({
                     Admins
                   </Link>
                 )}
+                {session.user.role === "SUPER_ADMIN" && (
+                  <Link
+                    href="/admin/audit-logs"
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Audit Logs
+                  </Link>
+                )}
                 <Link
                   href="/dashboard"
                   className="text-sm text-gray-600 hover:text-gray-900"
@@ -75,6 +84,7 @@ export default async function AdminLayout({
               <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
                 {session.user.role}
               </span>
+              <LogoutButton />
             </div>
           </div>
         </div>

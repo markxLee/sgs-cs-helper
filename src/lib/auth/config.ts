@@ -2,6 +2,35 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "./password";
+import { logLoginAttempt } from "@/lib/utils/audit-log";
+import type { Prisma } from "@/generated/prisma/client";
+
+/**
+ * Extract IP address from request headers
+ * Handles various proxy configurations
+ */
+function getClientIP(request: Request): string | undefined {
+  // Check common headers for IP address
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    // Take the first IP if there are multiple (comma-separated)
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  const realIP = request.headers.get('x-real-ip');
+  if (realIP) {
+    return realIP;
+  }
+
+  const clientIP = request.headers.get('x-client-ip');
+  if (clientIP) {
+    return clientIP;
+  }
+
+  // Fallback to connection remote address (if available)
+  // Note: This might not work in all environments
+  return undefined;
+}
 
 /**
  * NextAuth.js configuration for SGS CS Helper
@@ -18,11 +47,12 @@ export const authConfig: NextAuthConfig = {
         password: { label: "Password", type: "password" },
         staffCode: { label: "Staff Code", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         // Standard email/password login
         if (credentials?.email && credentials?.password) {
           const email = credentials.email as string;
           const password = credentials.password as string;
+          const clientIP = request ? getClientIP(request) : undefined;
           
           const user = await prisma.user.findFirst({
             where: {
@@ -33,14 +63,74 @@ export const authConfig: NextAuthConfig = {
             },
           });
           
-          if (!user || !user.passwordHash || user.authMethod !== "CREDENTIALS" || user.status !== "ACTIVE") {
+          if (!user || !user.passwordHash || user.authMethod !== "CREDENTIALS") {
             return null;
+          }
+          
+          // Log login attempt
+          await logLoginAttempt({
+            adminId: user.id,
+            result: "FAILURE", // Assume failure, update to SUCCESS on success
+            ip: clientIP,
+          });
+          
+          // Check role and status for Admin login
+          if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
+            // Allow ACTIVE or PENDING status, block REVOKED
+            if (user.status === "REVOKED") {
+              return null; // Will show generic error
+            }
+            if (user.status !== "ACTIVE" && user.status !== "PENDING") {
+              return null; // Unknown status
+            }
+          } else if (user.role === "STAFF") {
+            // Staff must be ACTIVE
+            if (user.status !== "ACTIVE") {
+              return null;
+            }
+          } else {
+            return null; // Unknown role
           }
           
           const isValidPassword = await verifyPassword(password, user.passwordHash);
           
           if (!isValidPassword) {
+            // Increment failed login count
+            const newFailedCount = user.failedLoginCount + 1;
+            const updateData: Prisma.UserUpdateInput = { failedLoginCount: newFailedCount };
+            
+            // Lock account after 10 failed attempts
+            if (newFailedCount >= 10) {
+              updateData.status = "REVOKED";
+            }
+            
+            await prisma.user.update({
+              where: { id: user.id },
+              data: updateData,
+            });
+            
             return null;
+          }
+          
+          // Successful login - reset failed login count
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { failedLoginCount: 0 },
+          });
+          
+          // Update audit log to SUCCESS
+          await logLoginAttempt({
+            adminId: user.id,
+            result: "SUCCESS",
+            ip: clientIP,
+          });
+          
+          // Update PENDING Admin status to ACTIVE on first login
+          if ((user.role === "ADMIN" || user.role === "SUPER_ADMIN") && user.status === "PENDING") {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { status: "ACTIVE" },
+            });
           }
           
           return {
@@ -48,7 +138,7 @@ export const authConfig: NextAuthConfig = {
             email: user.email,
             name: user.name,
             role: user.role,
-            status: user.status,
+            status: user.status === "PENDING" ? "ACTIVE" : user.status, // Return ACTIVE even if just updated
             canUpload: user.canUpload,
             canUpdateStatus: user.canUpdateStatus,
             staffCode: user.staffCode,
@@ -57,6 +147,8 @@ export const authConfig: NextAuthConfig = {
         // Staff code login
         if (credentials?.staffCode) {
           const staffCode = credentials.staffCode as string;
+          const clientIP = request ? getClientIP(request) : undefined;
+          
           const user = await prisma.user.findFirst({
             where: {
               staffCode: staffCode,
@@ -64,9 +156,21 @@ export const authConfig: NextAuthConfig = {
               status: "ACTIVE",
             },
           });
+          
           if (!user) {
+            // Log failed staff login attempt
+            // Since we don't have user ID for failed attempts, we'll need to handle this differently
+            // For now, we'll skip logging failed staff attempts as they don't have identifiable users
             return null;
           }
+          
+          // Log successful staff login
+          await logLoginAttempt({
+            adminId: user.id,
+            result: "SUCCESS",
+            ip: clientIP,
+          });
+          
           return {
             id: user.id,
             email: user.email,
