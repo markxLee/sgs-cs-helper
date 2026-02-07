@@ -86,12 +86,15 @@ model Order {
   id              String      @id @default(cuid())
   jobNumber       String      @unique
   registeredDate  DateTime
+  receivedDate    DateTime    // Thời gian nhận mẫu - dùng để tính processing time
   requiredDate    DateTime
   priority        Int         @default(0)
   status          OrderStatus @default(IN_PROGRESS)
 
-  // Parsed data
-  registeredBy    String?
+  // Parsed data from Excel
+  registeredBy    String?     // Row 2, Col 3 - Người đăng ký
+  checkedBy       String?     // Row 2, Col 7 - Người kiểm tra
+  note            String?     // Row 3 - Ghi chú
   sampleCount     Int         @default(1)
   description     String?
 

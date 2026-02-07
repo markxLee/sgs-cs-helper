@@ -116,13 +116,16 @@ RULES:
   - Blocked By: ~~US-0.2.5~~ ✅, ~~US-0.3.1~~ ✅
   - ✅ Completed: 2026-02-07
 
-- [ ] **US-1.1.2** — Parse Excel and Extract Order Data
-  - Status: `PLANNED`
-  - Blocked By: US-1.1.1
+- [x] **US-1.1.2** — Parse Excel and Extract Order Data
+  - Status: `DONE`
+  - Blocked By: ~~US-1.1.1~~ ✅
+  - ✅ Completed: 2026-02-07
 
-- [ ] **US-1.1.3** — Store Order with Duplicate Detection
-  - Status: `PLANNED`
-  - Blocked By: US-1.1.2
+- [x] **US-1.1.3** — Store Order with Duplicate Detection
+  - Status: `DONE`
+  - Blocked By: ~~US-1.1.2~~ ✅
+  - ✅ Completed: 2026-02-07
+  - Note: Implemented as part of US-1.1.2 server action
 
 ---
 
@@ -130,7 +133,7 @@ RULES:
 
 - [ ] **US-1.2.1** — Display Orders List
   - Status: `PLANNED`
-  - Blocked By: US-1.1.3
+  - Blocked By: ~~US-1.1.3~~ ✅
 
 - [ ] **US-1.2.2** — Display Progress Bar
   - Status: `PLANNED`
@@ -255,13 +258,16 @@ RULES:
   - Bị chặn bởi: ~~US-0.2.3~~ ✅, ~~US-0.3.1~~ ✅
   - ✅ Hoàn thành: 2026-02-07
 
-- [ ] **US-1.1.2** — Phân tích Excel và Trích xuất Dữ liệu
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.1.1
+- [x] **US-1.1.2** — Phân tích Excel và Trích xuất Dữ liệu
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-1.1.1~~ ✅
+  - ✅ Hoàn thành: 2026-02-07
 
-- [ ] **US-1.1.3** — Lưu Đơn hàng với Phát hiện Trùng lặp
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.1.2
+- [x] **US-1.1.3** — Lưu Đơn hàng với Phát hiện Trùng lặp
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-1.1.2~~ ✅
+  - ✅ Hoàn thành: 2026-02-07
+  - Ghi chú: Được triển khai như một phần của US-1.1.2 server action
 
 ---
 
@@ -269,7 +275,7 @@ RULES:
 
 - [ ] **US-1.2.1** — Hiển thị Danh sách Đơn hàng
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.1.3
+  - Bị chặn bởi: ~~US-1.1.3~~ ✅
 
 - [ ] **US-1.2.2** — Hiển thị Progress Bar
   - Trạng thái: `PLANNED`

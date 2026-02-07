@@ -105,6 +105,7 @@ export default function AuditLogsPage() {
   // Initial load
   useEffect(() => {
     loadAuditLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAdminId, startDate, endDate, selectedResult]);
 
   const handlePageChange = (newPage: number) => {
