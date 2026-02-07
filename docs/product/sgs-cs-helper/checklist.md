@@ -62,9 +62,12 @@ RULES:
   - Status: `PLANNED`
   - Blocked By: ~~US-0.2.2~~ ✅
 
-- [ ] **US-0.2.4** — Admin Credentials Login
-  - Status: `PLANNED`
+- [x] **US-0.2.4** — Admin Credentials Login
+  - Status: `DONE`
   - Blocked By: ~~US-0.2.2~~ ✅
+  - ✅ Completed: 2026-02-07
+  - Branch: `feature/sgs-cs-helper-us-0.2.4`
+  - Notes: Email/password login with audit logging, account lockout, IP tracking
 
 - [x] **US-0.2.5** — Staff Code Login (Per-User)
   - Status: `DONE`
@@ -74,7 +77,7 @@ RULES:
 
 - [ ] **US-0.2.6** — Role-Based Route Protection
   - Status: `PLANNED`
-  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.3, US-0.2.4, ~~US-0.2.5~~ ✅
+  - Blocked By: ~~US-0.2.1~~ ✅, US-0.2.3, ~~US-0.2.4~~ ✅, ~~US-0.2.5~~ ✅
 
 - [x] **US-0.2.7** — Staff User Management
   - Status: `DONE`

@@ -40,6 +40,23 @@ enum OrderStatus {
   OVERDUE
 }
 
+enum LoginResult {
+  SUCCESS
+  FAILURE
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timestamp DateTime    @default(now())
+  result    LoginResult
+  ip        String?
+  createdAt DateTime    @default(now())
+  
+  @@index([userId, timestamp])
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String?  @unique
@@ -57,8 +74,12 @@ model User {
   // For password-based auth (SUPER_ADMIN, ADMIN)
   passwordHash String?
 
+  // NEW: For Admin login security
+  failedLoginCount  Int      @default(0)
+
   // Relations
   orders    Order[]  @relation("UploadedBy")
+  auditLogs AuditLog[]
 }
 
 model Order {

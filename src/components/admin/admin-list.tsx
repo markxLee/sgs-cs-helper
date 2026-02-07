@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { getAdmins, revokeAdmin } from "@/lib/actions/admin";
+import { ChangePasswordDialog } from "./change-password-dialog";
 
 type UserStatus = "PENDING" | "ACTIVE" | "REVOKED";
 type AuthMethod = "GOOGLE" | "CREDENTIALS";
@@ -18,6 +19,13 @@ interface ConfirmDialog {
   isOpen: boolean;
   adminId: string;
   adminEmail: string;
+}
+
+interface PasswordDialog {
+  isOpen: boolean;
+  adminId: string;
+  adminEmail: string;
+  status: UserStatus;
 }
 
 const statusConfig: Record<UserStatus, { label: string; className: string }> = {
@@ -48,6 +56,12 @@ export function AdminList() {
     isOpen: false,
     adminId: "",
     adminEmail: "",
+  });
+  const [passwordDialog, setPasswordDialog] = useState<PasswordDialog>({
+    isOpen: false,
+    adminId: "",
+    adminEmail: "",
+    status: "ACTIVE",
   });
   const [isPending, startTransition] = useTransition();
 
@@ -93,6 +107,29 @@ export function AdminList() {
 
   const handleCancelRevoke = () => {
     setConfirmDialog({ isOpen: false, adminId: "", adminEmail: "" });
+  };
+
+  const handlePasswordClick = (adminId: string, adminEmail: string, status: UserStatus) => {
+    setPasswordDialog({
+      isOpen: true,
+      adminId,
+      adminEmail,
+      status,
+    });
+  };
+
+  const handlePasswordDialogClose = () => {
+    setPasswordDialog({
+      isOpen: false,
+      adminId: "",
+      adminEmail: "",
+      status: "ACTIVE",
+    });
+  };
+
+  const handlePasswordSuccess = () => {
+    // Refresh the admin list to show updated status
+    fetchAdmins();
   };
 
   const formatDate = (date: Date) => {
@@ -205,19 +242,30 @@ export function AdminList() {
                         {formatDate(admin.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        {admin.status !== "REVOKED" ? (
+                        <div className="flex items-center justify-end space-x-3">
                           <button
                             onClick={() =>
-                              handleRevokeClick(admin.id, admin.email)
+                              handlePasswordClick(admin.id, admin.email, admin.status)
                             }
                             disabled={isPending}
-                            className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-blue-600 hover:text-blue-900 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Revoke
+                            Change Password
                           </button>
-                        ) : (
-                          <span className="text-gray-400">Revoked</span>
-                        )}
+                          {admin.status !== "REVOKED" ? (
+                            <button
+                              onClick={() =>
+                                handleRevokeClick(admin.id, admin.email)
+                              }
+                              disabled={isPending}
+                              className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Revoke
+                            </button>
+                          ) : (
+                            <span className="text-gray-400">Revoked</span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -265,6 +313,16 @@ export function AdminList() {
           </div>
         </div>
       )}
+
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog
+        isOpen={passwordDialog.isOpen}
+        adminId={passwordDialog.adminId}
+        adminEmail={passwordDialog.adminEmail}
+        currentStatus={passwordDialog.status}
+        onClose={handlePasswordDialogClose}
+        onSuccess={handlePasswordSuccess}
+      />
     </>
   );
 }
