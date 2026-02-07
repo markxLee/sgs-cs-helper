@@ -4,14 +4,24 @@
  * Updates progress every minute without server calls.
  * Progress is calculated client-side based on receivedDate and priority.
  *
+ * Includes periodic polling fallback (3 minutes) to catch missed SSE events
+ * in multi-instance deployments.
+ *
  * @module hooks/use-realtime-progress
  */
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { calculateOrderProgress, type ProgressInfo } from "@/lib/utils/progress";
 import type { OrderStatus } from "@/generated/prisma/client";
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Polling interval for fallback data refresh (3 minutes) */
+const POLL_INTERVAL = 3 * 60 * 1000;
 
 // ============================================================================
 // Types
@@ -54,6 +64,9 @@ export function useRealtimeProgress(
 
   // Tick counter to trigger recalculation
   const [tick, setTick] = useState(0);
+  
+  // Track last fetch time to avoid double-fetching
+  const lastFetchRef = useRef<number>(Date.now());
 
   // Calculate progress - derived from orders and tick
   const { ordersWithProgress, lastUpdated } = useMemo(() => {
@@ -79,6 +92,42 @@ export function useRealtimeProgress(
     return () => clearInterval(interval);
   }, [updateInterval]);
 
+  // Refetch orders from server (polling fallback)
+  const refetchOrders = useCallback(async () => {
+    try {
+      console.log("[Realtime] Fetching latest orders from server");
+      const response = await fetch("/api/orders");
+      if (response.ok) {
+        const freshOrders = await response.json();
+        // Parse date strings to Date objects
+        const parsedOrders = freshOrders.map((o: Record<string, unknown>) => ({
+          ...o,
+          registeredDate: new Date(o.registeredDate as string),
+          receivedDate: new Date(o.receivedDate as string),
+          requiredDate: new Date(o.requiredDate as string),
+        }));
+        setOrders(parsedOrders);
+        lastFetchRef.current = Date.now();
+        console.log("[Realtime] Orders refreshed:", parsedOrders.length);
+      }
+    } catch (error) {
+      console.error("[Realtime] Failed to fetch orders:", error);
+    }
+  }, []);
+
+  // Periodic polling as fallback for missed SSE events (3 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const timeSinceLastFetch = Date.now() - lastFetchRef.current;
+      // Only poll if no recent fetch (avoid double-fetch after reconnect)
+      if (timeSinceLastFetch > POLL_INTERVAL - 10000) {
+        refetchOrders();
+      }
+    }, POLL_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [refetchOrders]);
+
   // Update orders when SSE pushes new data
   const updateOrders = useCallback((newOrders: OrderData[]) => {
     setOrders(newOrders);
@@ -98,6 +147,16 @@ export function useRealtimeProgress(
     setOrders((prev) => [...prev, newOrder]);
   }, []);
 
+  // Add multiple new orders (for bulk upload)
+  const addOrders = useCallback((newOrders: OrderData[]) => {
+    setOrders((prev) => {
+      // Filter out duplicates by id
+      const existingIds = new Set(prev.map((o) => o.id));
+      const uniqueNewOrders = newOrders.filter((o) => !existingIds.has(o.id));
+      return [...prev, ...uniqueNewOrders];
+    });
+  }, []);
+
   // Remove order
   const removeOrder = useCallback((orderId: string) => {
     setOrders((prev) => prev.filter((order) => order.id !== orderId));
@@ -109,6 +168,8 @@ export function useRealtimeProgress(
     updateOrders,
     updateOrder,
     addOrder,
+    addOrders,
     removeOrder,
+    refetchOrders,
   };
 }

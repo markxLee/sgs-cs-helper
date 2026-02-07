@@ -24,8 +24,16 @@ export interface SSEOrderEvent {
 // Global State for SSE Connections
 // ============================================================================
 
-// Store connected clients
-const clients = new Set<ReadableStreamDefaultController<Uint8Array>>();
+// Extend globalThis type for SSE clients
+declare global {
+  // eslint-disable-next-line no-var
+  var __sseClients: Set<ReadableStreamDefaultController<Uint8Array>> | undefined;
+}
+
+// Use globalThis to ensure singleton across module reloads (especially in dev mode)
+// This prevents the issue where Server Actions get a different module instance
+const clients = globalThis.__sseClients ?? new Set<ReadableStreamDefaultController<Uint8Array>>();
+globalThis.__sseClients = clients;
 
 // ============================================================================
 // Helper Functions
@@ -38,6 +46,8 @@ export function broadcastOrderEvent(event: SSEOrderEvent): void {
   const message = `data: ${JSON.stringify(event)}\n\n`;
   const encoder = new TextEncoder();
   const encoded = encoder.encode(message);
+
+  console.log(`[SSE] Broadcasting ${event.type} event to ${clients.size} clients`);
 
   clients.forEach((controller) => {
     try {

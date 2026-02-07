@@ -30,6 +30,8 @@ interface UseOrderSSEOptions {
   onError?: (error: Event) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
+  /** Called after reconnect to refetch latest data (polling fallback) */
+  onReconnectRefresh?: () => void;
 }
 
 // ============================================================================
@@ -57,11 +59,13 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
     onError,
     onConnect,
     onDisconnect,
+    onReconnectRefresh,
   } = options;
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttempts = useRef(0);
+  const hasConnectedOnce = useRef(false);
 
   // Store callbacks in refs to avoid recreating connect function
   const callbacksRef = useRef({
@@ -72,6 +76,7 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
     onError,
     onConnect,
     onDisconnect,
+    onReconnectRefresh,
   });
 
   // Update callbacks ref when they change
@@ -84,8 +89,9 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
       onError,
       onConnect,
       onDisconnect,
+      onReconnectRefresh,
     };
-  }, [onUpdate, onAdd, onRemove, onBulkUpdate, onError, onConnect, onDisconnect]);
+  }, [onUpdate, onAdd, onRemove, onBulkUpdate, onError, onConnect, onDisconnect, onReconnectRefresh]);
 
   // Parse date fields from JSON
   const parseOrderDates = useCallback((order: unknown): OrderData => {
@@ -137,13 +143,20 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
     eventSource.onopen = () => {
       reconnectAttempts.current = 0;
       callbacksRef.current.onConnect?.();
+      
+      // Trigger refetch after reconnect (not on first connect)
+      if (hasConnectedOnce.current) {
+        console.log("[SSE] Reconnected - triggering data refresh");
+        callbacksRef.current.onReconnectRefresh?.();
+      }
+      hasConnectedOnce.current = true;
     };
 
     eventSource.onmessage = (event) => {
       try {
         const parsed: SSEOrderEvent = JSON.parse(event.data);
         const callbacks = callbacksRef.current;
-
+        console.log("Received SSE event:", parsed);
         switch (parsed.type) {
           case "update":
             if (parsed.data && typeof parsed.data === "object" && !Array.isArray(parsed.data)) {
@@ -195,6 +208,10 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
         newEventSource.onopen = () => {
           reconnectAttempts.current = 0;
           callbacksRef.current.onConnect?.();
+          
+          // Trigger refetch after reconnect
+          console.log("[SSE] Reconnected - triggering data refresh");
+          callbacksRef.current.onReconnectRefresh?.();
         };
 
         newEventSource.onmessage = eventSource.onmessage;

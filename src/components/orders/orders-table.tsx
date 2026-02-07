@@ -20,9 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { OrderProgressBar } from "@/components/orders/order-progress-bar";
+import { MarkDoneModal } from "@/components/orders/MarkDoneModal";
 import type { ProgressInfo } from "@/lib/utils/progress";
 import type { OrderStatus } from "@/generated/prisma/client";
+import { useState, useCallback } from "react";
 
 // ============================================================================
 // Types
@@ -41,6 +44,9 @@ export interface OrderWithProgress {
 
 interface OrdersTableProps {
   orders: OrderWithProgress[];
+  activeTab?: "in-progress" | "completed";
+  /** Whether current user can mark orders as done */
+  canMarkDone?: boolean;
 }
 
 // ============================================================================
@@ -98,34 +104,34 @@ function getPriorityClass(priority: number): string {
 /**
  * Get status display label
  */
-function getStatusLabel(status: OrderStatus): string {
-  switch (status) {
-    case "IN_PROGRESS":
-      return "In Progress";
-    case "COMPLETED":
-      return "Completed";
-    case "OVERDUE":
-      return "Overdue";
-    default:
-      return status;
-  }
-}
+// function getStatusLabel(status: OrderStatus): string {
+//   switch (status) {
+//     case "IN_PROGRESS":
+//       return "In Progress";
+//     case "COMPLETED":
+//       return "Completed";
+//     case "OVERDUE":
+//       return "Overdue";
+//     default:
+//       return status;
+//   }
+// }
 
 /**
  * Get status badge color class
  */
-function getStatusClass(status: OrderStatus): string {
-  switch (status) {
-    case "IN_PROGRESS":
-      return "bg-blue-100 text-blue-800";
-    case "COMPLETED":
-      return "bg-green-100 text-green-800";
-    case "OVERDUE":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-}
+// function getStatusClass(status: OrderStatus): string {
+//   switch (status) {
+//     case "IN_PROGRESS":
+//       return "bg-blue-100 text-blue-800";
+//     case "COMPLETED":
+//       return "bg-green-100 text-green-800";
+//     case "OVERDUE":
+//       return "bg-red-100 text-red-800";
+//     default:
+//       return "bg-gray-100 text-gray-800";
+//   }
+// }
 
 /**
  * Format remaining time in a human-readable way
@@ -169,27 +175,66 @@ function formatRemainingTime(remainingHours: number, isOverdue: boolean): string
 /**
  * Table displaying orders with progress bars
  *
- * @example
- * <OrdersTable orders={ordersWithProgress} />
+ * @exampleactiveTab="in-progress" />
  */
-export function OrdersTable({ orders }: OrdersTableProps) {
+export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = false }: OrdersTableProps) {
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    order: OrderWithProgress | null;
+  }>({ isOpen: false, order: null });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Handle mark done API call
+  const handleMarkDone = useCallback(async () => {
+    if (!modalState.order) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/orders/${modalState.order.id}/mark-done`, {
+        method: "POST",
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || "Có lỗi xảy ra");
+      }
+      
+      // Success - close modal, SSE will handle UI update
+      setModalState({ isOpen: false, order: null });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [modalState.order]);
+
+  // Filter orders based on active tab
+  const filteredOrders = orders.filter((order) => {
+    if (activeTab === "completed") {
+      return order.status === "COMPLETED";
+    }
+    return order.status !== "COMPLETED";
+  });
+  console.log("Filtered Orders:", filteredOrders);
   return (
     <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[120px]">Job Number</TableHead>
-            <TableHead className="w-[160px]">Registered Date</TableHead>
-            <TableHead className="w-[160px]">Received Date</TableHead>
-            <TableHead className="w-[160px]">Required Date</TableHead>
-            <TableHead className="w-[120px]">Priority</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[180px]">Progress</TableHead>
-            <TableHead className="w-[120px]">Remaining</TableHead>
+            <TableHead className="w-[120px]">Số Đơn Hàng</TableHead>
+            <TableHead className="w-[160px]">Ngày Đăng Ký</TableHead>
+            <TableHead className="w-[160px]">Ngày Nhận</TableHead>
+            <TableHead className="w-[160px]">Ngày Trả Kết Quả</TableHead>
+           <TableHead className="w-[120px]">Độ Ưu Tiên</TableHead>
+            {/* <TableHead className="w-[100px]">Trạng Thái</TableHead> */}
+            <TableHead className="w-[180px]">Tiến Độ</TableHead>
+            <TableHead className="w-[120px]">Thời Gian Còn Lại</TableHead>
+            <TableHead className="w-[120px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <TableRow key={order.id}>
               <TableCell className="font-medium">{order.jobNumber}</TableCell>
               <TableCell>{formatDate(order.registeredDate)}</TableCell>
@@ -202,13 +247,13 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   {getPriorityLabel(order.priority)}
                 </span>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getStatusClass(order.status)}`}
                 >
                   {getStatusLabel(order.status)}
                 </span>
-              </TableCell>
+              </TableCell> */}
               <TableCell>
                 <OrderProgressBar
                   percentage={order.progress.percentage}
@@ -223,10 +268,37 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   {formatRemainingTime(order.progress.remainingHours, order.progress.isOverdue)}
                 </span>
               </TableCell>
+              <TableCell>
+                {order.status === "IN_PROGRESS" && canMarkDone && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setModalState({ isOpen: true, order });
+                    }}
+                    aria-label={`Mark order ${order.jobNumber} as done`}
+                  >
+                    Hoàn Thành
+                  </Button>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      {modalState.order && (
+        <MarkDoneModal
+          isOpen={modalState.isOpen}
+          jobNumber={modalState.order.jobNumber}
+          isLoading={isLoading}
+          onConfirm={handleMarkDone}
+          onCancel={() => {
+            if (!isLoading) {
+              setModalState({ isOpen: false, order: null });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

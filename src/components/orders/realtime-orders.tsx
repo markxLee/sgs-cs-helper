@@ -23,13 +23,15 @@ import { OrdersTable } from "@/components/orders/orders-table";
 interface RealtimeOrdersProps {
   initialOrders: OrderData[];
   activeTab: "in-progress" | "completed";
+  /** Whether current user can mark orders as done */
+  canMarkDone?: boolean;
 }
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function RealtimeOrders({ initialOrders, activeTab }: RealtimeOrdersProps) {
+export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }: RealtimeOrdersProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   // Realtime progress calculation
@@ -38,8 +40,9 @@ export function RealtimeOrders({ initialOrders, activeTab }: RealtimeOrdersProps
     lastUpdated,
     updateOrder,
     addOrder,
+    addOrders,
     removeOrder,
-    updateOrders,
+    refetchOrders,
   } = useRealtimeProgress(initialOrders, 60000); // Update every minute
 
   // Subscribe to SSE for status changes
@@ -54,13 +57,18 @@ export function RealtimeOrders({ initialOrders, activeTab }: RealtimeOrdersProps
       removeOrder(orderId);
     },
     onBulkUpdate: (orders) => {
-      updateOrders(orders);
+      // Bulk update from upload: add new orders to list
+      addOrders(orders);
     },
     onConnect: () => {
       setIsConnected(true);
     },
     onDisconnect: () => {
       setIsConnected(false);
+    },
+    // Polling fallback: refetch data after reconnect
+    onReconnectRefresh: () => {
+      refetchOrders();
     },
   });
 
@@ -112,7 +120,7 @@ export function RealtimeOrders({ initialOrders, activeTab }: RealtimeOrdersProps
       {filteredOrders.length === 0 ? (
         <EmptyState tab={activeTab} />
       ) : (
-        <OrdersTable orders={filteredOrders} />
+        <OrdersTable orders={filteredOrders} canMarkDone={canMarkDone} />
       )}
     </div>
   );
