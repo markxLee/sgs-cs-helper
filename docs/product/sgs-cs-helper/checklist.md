@@ -121,35 +121,41 @@ RULES:
   - Blocked By: ~~US-1.1.1~~ ✅
   - ✅ Completed: 2026-02-07
 
-- [x] **US-1.1.3** — Store Order with Duplicate Detection
-  - Status: `DONE`
+- [ ] **US-1.1.3** — Store Order with Upsert by Job Number
+  - Status: `TODO` (needs update from duplicate detection to upsert)
   - Blocked By: ~~US-1.1.2~~ ✅
-  - ✅ Completed: 2026-02-07
-  - Note: Implemented as part of US-1.1.2 server action
+  - Note: Changed from duplicate skip to upsert (create or update)
+  - TODO: Update upload action to use upsert instead of skip duplicates
+  - TODO: Preserve existing status (don't overwrite COMPLETED)
+  - TODO: Show summary: X created, Y updated, Z unchanged
+  - TODO: Broadcast SSE after bulk upsert
 
 ---
 
 ### Epic 1.2: Order Dashboard
 
-- [ ] **US-1.2.1** — Display Orders List
-  - Status: `PLANNED`
+- [x] **US-1.2.1** — Display Orders List + Progress Bar ✅
+  - Status: `DONE` (2026-02-07)
   - Blocked By: ~~US-1.1.3~~ ✅
+  - Note: Merged with US-1.2.2 (Progress Bar) | Public read-only access
+  - Features: Tabs (In Progress/Completed), Remaining time, Realtime SSE
 
-- [ ] **US-1.2.2** — Display Progress Bar
-  - Status: `PLANNED`
-  - Blocked By: US-1.2.1
+- [x] **US-1.2.2** — Display Progress Bar
+  - Status: `DONE`
+  - Blocked By: ~~US-1.2.1~~ ✅
+  - ✅ Merged into US-1.2.1
 
 - [ ] **US-1.2.3** — Priority Color Coding
   - Status: `PLANNED`
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 - [ ] **US-1.2.4** — Filter Orders by Status
   - Status: `PLANNED`
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 - [ ] **US-1.2.5** — Sort Orders
   - Status: `PLANNED`
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 ---
 
@@ -157,7 +163,7 @@ RULES:
 
 - [ ] **US-1.3.1** — Mark Order as Done
   - Status: `PLANNED`
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 - [ ] **US-1.3.2** — Visual Distinction for Completed Orders
   - Status: `PLANNED`
@@ -263,35 +269,41 @@ RULES:
   - Bị chặn bởi: ~~US-1.1.1~~ ✅
   - ✅ Hoàn thành: 2026-02-07
 
-- [x] **US-1.1.3** — Lưu Đơn hàng với Phát hiện Trùng lặp
-  - Trạng thái: `DONE`
+- [ ] **US-1.1.3** — Lưu Đơn hàng với Upsert theo Job Number
+  - Trạng thái: `TODO` (cần update từ skip duplicate sang upsert)
   - Bị chặn bởi: ~~US-1.1.2~~ ✅
-  - ✅ Hoàn thành: 2026-02-07
-  - Ghi chú: Được triển khai như một phần của US-1.1.2 server action
+  - Ghi chú: Đổi từ skip duplicate sang upsert (tạo hoặc cập nhật)
+  - TODO: Update upload action dùng upsert thay vì skip duplicates
+  - TODO: Giữ nguyên status hiện tại (không overwrite COMPLETED)
+  - TODO: Hiển thị summary: X tạo mới, Y cập nhật, Z không đổi
+  - TODO: Broadcast SSE sau khi bulk upsert
 
 ---
 
 ### Epic 1.2: Dashboard Đơn hàng
 
-- [ ] **US-1.2.1** — Hiển thị Danh sách Đơn hàng
-  - Trạng thái: `PLANNED`
+- [x] **US-1.2.1** — Hiển thị Danh sách Đơn hàng + Progress Bar ✅
+  - Trạng thái: `DONE` (2026-02-07)
   - Bị chặn bởi: ~~US-1.1.3~~ ✅
+  - Ghi chú: Đã gộp với US-1.2.2 (Progress Bar) | Truy cập công khai chỉ đọc
+  - Tính năng: Tabs (Đang xử lý/Hoàn thành), Thời gian còn lại, Realtime SSE
 
-- [ ] **US-1.2.2** — Hiển thị Progress Bar
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.2.1
+- [x] **US-1.2.2** — Hiển thị Progress Bar
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
+  - ✅ Đã gộp vào US-1.2.1
 
 - [ ] **US-1.2.3** — Mã màu theo Priority
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 - [ ] **US-1.2.4** — Lọc Đơn theo Trạng thái
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 - [ ] **US-1.2.5** — Sắp xếp Đơn hàng
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ---
 
@@ -299,7 +311,7 @@ RULES:
 
 - [ ] **US-1.3.1** — Đánh dấu Đơn Hoàn thành
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 - [ ] **US-1.3.2** — Phân biệt Trực quan Đơn Hoàn thành
   - Trạng thái: `PLANNED`

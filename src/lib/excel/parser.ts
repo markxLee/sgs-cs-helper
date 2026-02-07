@@ -216,6 +216,10 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
       metadataRow,
       COLUMN_MAP.receivedDate
     );
+    console.log("Received Date Value:", receivedDateValue, "Type:", typeof receivedDateValue, "isDate:", receivedDateValue instanceof Date);
+    if (typeof receivedDateValue === "number") {
+      console.log("Serial number:", receivedDateValue);
+    }
     const requiredDateValue = getCellValue(
       metadataRow,
       COLUMN_MAP.requiredDate
@@ -278,7 +282,7 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
       note,
       sourceFileName: fileName,
     };
-
+    console.log("Parsed order:", order);
     return {
       success: true,
       data: order,

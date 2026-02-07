@@ -194,5 +194,36 @@ export async function createOrders(
   }
 }
 
+// ============================================================================
+// Public Read Actions
+// ============================================================================
+
+/**
+ * Fetch all orders for public display
+ *
+ * This function is used by the public /orders page.
+ * No authentication required - read-only access.
+ *
+ * @returns Array of orders sorted by requiredDate ascending
+ *
+ * @example
+ * const orders = await getOrders();
+ * // Returns orders sorted by requiredDate (earliest first)
+ */
+export async function getOrders(): Promise<Order[]> {
+  try {
+    const orders = await prisma.order.findMany({
+      orderBy: {
+        requiredDate: "asc",
+      },
+    });
+
+    return orders;
+  } catch (error) {
+    console.error("[getOrders] Error fetching orders:", error);
+    throw new Error("Failed to fetch orders");
+  }
+}
+
 // Note: Zod schemas are NOT exported from "use server" files
 // They must stay internal to this module
