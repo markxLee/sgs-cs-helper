@@ -62,7 +62,6 @@ export const authConfig: NextAuthConfig = {
               },
             },
           });
-          
           if (!user || !user.passwordHash || user.authMethod !== "CREDENTIALS") {
             return null;
           }

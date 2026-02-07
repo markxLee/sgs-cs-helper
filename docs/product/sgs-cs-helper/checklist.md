@@ -111,9 +111,10 @@ RULES:
 
 ### Epic 1.1: Order Upload & Parsing
 
-- [ ] **US-1.1.1** — Upload Excel Files UI
-  - Status: `PLANNED`
+- [x] **US-1.1.1** — Upload Excel Files UI
+  - Status: `DONE`
   - Blocked By: ~~US-0.2.5~~ ✅, ~~US-0.3.1~~ ✅
+  - ✅ Completed: 2026-02-07
 
 - [ ] **US-1.1.2** — Parse Excel and Extract Order Data
   - Status: `PLANNED`
@@ -249,9 +250,10 @@ RULES:
 
 ### Epic 1.1: Upload & Phân tích Đơn hàng
 
-- [ ] **US-1.1.1** — Giao diện Upload File Excel
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-0.2.3, US-0.3.1
+- [x] **US-1.1.1** — Giao diện Upload File Excel
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-0.2.3~~ ✅, ~~US-0.3.1~~ ✅
+  - ✅ Hoàn thành: 2026-02-07
 
 - [ ] **US-1.1.2** — Phân tích Excel và Trích xuất Dữ liệu
   - Trạng thái: `PLANNED`
