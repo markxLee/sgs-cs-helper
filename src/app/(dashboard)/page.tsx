@@ -17,6 +17,11 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await auth();
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
+  const isAdmin = session?.user?.role === "ADMIN";
+  const isStaff = session?.user?.role === "STAFF";
+  const canUpload = session?.user?.canUpload === true;
+  // Upload access is determined inline in the JSX below:
+  // ADMIN/SUPER_ADMIN always, STAFF with canUpload=true
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
@@ -30,12 +35,32 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions - Admin & Super Admin */}
-      {(session?.user?.role === "ADMIN" || isSuperAdmin) && (
+      {(isAdmin || isSuperAdmin) && (
         <div className="border-t pt-6 mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             Admin Actions
           </h3>
           <div className="flex flex-wrap gap-4">
+            <Link
+              href="/upload"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <svg
+                className="mr-2 h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+                />
+              </svg>
+              Upload Excel
+            </Link>
             <Link
               href="/admin/staff"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -78,6 +103,38 @@ export default async function DashboardPage() {
                 Manage Admin Users
               </Link>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Actions - Staff with upload permission */}
+      <a>Upload</a>
+      {isStaff && canUpload && (
+        <div className="border-t pt-6 mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Quick Actions
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/upload"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <svg
+                className="mr-2 h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+                />
+              </svg>
+              Upload Excel
+            </Link>
           </div>
         </div>
       )}
