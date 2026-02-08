@@ -1,0 +1,150 @@
+meta:
+  branch_slug: feature-sgs-cs-helper-us-1.2.6
+  docs_root: sgs-cs-helper
+  tooling_root: a-z-copilot-flow
+  feature_name: Show Registered By, Filter/Sort, Priority ETA
+  created_at: 2026-02-07T00:00:00Z
+  last_updated: 2026-02-07T00:00:00Z
+  updated_by: user
+  dev_mode: standard
+  base_branch: main
+  user_story_id: US-1.2.6
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+  affected_roots:
+    - root: sgs-cs-helper
+      role: primary
+      changes: ["docs/product/sgs-cs-helper/checklist.md"]
+
+status:
+  current_phase: 5
+  phase_name: done
+  phase_status: complete
+  sub_phase: "done_check_complete"
+  sub_phase_name: "All DoD criteria verified"
+  last_action: "Done check completed - all criteria met"
+  next_action: "Ready for PR creation and merge"
+  blockers: []
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: 2026-02-07T00:00:00Z
+    completed_at: 2026-02-08T00:00:00Z
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: initialized
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+    key_decisions:
+      - "Extend existing shadcn/ui Table (not replace with TanStack)"
+      - "Reuse getPriorityDuration() for ETA display"
+      - "CLIENT-SIDE filtering and sorting (revised from server-side)"
+      - "Include uploadedBy relation with minimal server changes"
+      - "Feature scope: IN-PROGRESS ORDERS ONLY"
+    blockers: []
+  phase_1_spec:
+    status: approved
+    started_at: 2026-02-08T00:00:00Z
+    completed_at: 2026-02-08T00:00:00Z
+    approved_at: 2026-02-08T00:00:00Z
+    requirements_count:
+      functional: 5
+      non_functional: 3
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+      - path: 01_spec/spec-review.md
+        status: complete
+  phase_2_tasks:
+    status: approved
+    started_at: 2026-02-08T00:00:00Z
+    completed_at: 2026-02-08T00:00:00Z
+    approved_at: 2026-02-08T00:00:00Z
+    tasks_summary:
+      total: 7
+      by_root:
+        sgs-cs-helper: 7
+    test_plan:
+      included: true
+      test_cases_count: 20
+      coverage_target: 90
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+  phase_3_impl:
+    status: complete
+    started_at: 2026-02-08T00:00:00Z
+    completed_at: 2026-02-08T00:00:00Z
+    tasks:
+      - id: T-002
+        title: Add Registered By Column
+        root: sgs-cs-helper
+        status: complete
+        depends_on: []
+        test_cases: [TC-002, TC-003]
+      - id: T-003
+        title: Create Client-side Filter Controls
+        root: sgs-cs-helper
+        status: complete
+        depends_on: []
+        test_cases: [TC-004, TC-005, TC-006]
+      - id: T-004
+        title: Implement Client-side Sorting
+        root: sgs-cs-helper
+        status: complete
+        depends_on: []
+        test_cases: [TC-007, TC-008]
+      - id: T-005
+        title: Add Job Number Search
+        root: sgs-cs-helper
+        status: complete
+        depends_on: []
+        test_cases: [TC-009, TC-010]
+      - id: T-006
+        title: Add Priority ETA Display
+        root: sgs-cs-helper
+        status: complete
+        depends_on: []
+        test_cases: [TC-011]
+      - id: T-007
+        title: Integrate All Features
+        root: sgs-cs-helper
+        status: complete
+        depends_on: [T-002, T-003, T-004, T-005, T-006]
+        test_cases: [TC-012, TC-013]
+      - id: T-008
+        title: Handle Edge Cases & Polish
+        root: sgs-cs-helper
+        status: complete
+        depends_on: [T-007]
+        test_cases: [TC-014]
+
+  phase_5_done:
+    status: complete
+    started_at: 2026-02-08T00:00:00Z
+    completed_at: 2026-02-08T00:00:00Z
+    dod_results:
+      total_criteria: 15
+      passed: 13
+      failed: 0
+      blockers: []
+    checklist_updated: true
+    checklist_path: docs/product/sgs-cs-helper/checklist.md
+    artifacts:
+      - path: 05_done/done-check.md
+        status: complete
+
+history:
+  - timestamp: 2026-02-07T00:00:00Z
+    phase: 0
+    action: resume
+    description: "Workflow initialized for US-1.2.6"
+  - timestamp: 2026-02-08T00:00:00Z
+    phase: 0
+    action: work_review
+    description: "Work review completed - READY with analysis tasks"

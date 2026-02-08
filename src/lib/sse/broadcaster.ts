@@ -19,6 +19,7 @@ type OrderData = Pick<
   | "id"
   | "jobNumber"
   | "registeredDate"
+  | "registeredBy"
   | "receivedDate"
   | "requiredDate"
   | "priority"
@@ -39,6 +40,7 @@ export function broadcastOrderUpdate(order: OrderData): void {
       id: order.id,
       jobNumber: order.jobNumber,
       registeredDate: order.registeredDate.toISOString(),
+      registeredBy: order.registeredBy,
       receivedDate: order.receivedDate.toISOString(),
       requiredDate: order.requiredDate.toISOString(),
       priority: order.priority,
@@ -57,6 +59,7 @@ export function broadcastOrderAdd(order: OrderData): void {
       id: order.id,
       jobNumber: order.jobNumber,
       registeredDate: order.registeredDate.toISOString(),
+      registeredBy: order.registeredBy,
       receivedDate: order.receivedDate.toISOString(),
       requiredDate: order.requiredDate.toISOString(),
       priority: order.priority,
@@ -85,6 +88,7 @@ export function broadcastBulkUpdate(orders: OrderData[]): void {
       id: order.id,
       jobNumber: order.jobNumber,
       registeredDate: order.registeredDate.toISOString(),
+      registeredBy: order.registeredBy,
       receivedDate: order.receivedDate.toISOString(),
       requiredDate: order.requiredDate.toISOString(),
       priority: order.priority,

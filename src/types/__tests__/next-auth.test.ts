@@ -296,7 +296,7 @@ describe('NextAuth Type Extensions - TC-005', () => {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       };
 
-      expect(session.user).toBe(user);
+      expect(session.user).toStrictEqual(user);
       expect(session.user.canUpload).toBe(true);
     });
 

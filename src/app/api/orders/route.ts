@@ -30,6 +30,7 @@ export async function GET() {
         registeredDate: true,
         receivedDate: true,
         requiredDate: true,
+        registeredBy: true,
         priority: true,
         status: true,
       },

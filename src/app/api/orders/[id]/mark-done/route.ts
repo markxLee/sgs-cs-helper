@@ -66,6 +66,7 @@ export async function POST(
         id: true,
         jobNumber: true,
         registeredDate: true,
+        registeredBy: true,
         receivedDate: true,
         requiredDate: true,
         priority: true,

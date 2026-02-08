@@ -537,19 +537,26 @@ Phase 1 MVP:                                    │
 
 ---
 
-**US-1.3.2: Visual Distinction for Completed Orders**
+**US-1.3.2: Completed Orders Tab & Completed-Tab UI**
 
-- **Description**: As a Staff member, I can visually distinguish completed orders so that I know what's done.
+- **Description**: Completed orders are shown in a separate "Completed" tab. As a Staff member, I need a dedicated Completed tab UI where the progress bar is not shown, the primary action is an undo ("Hoàn Tác" / "Undo") to revert completion, and I can search and filter completed orders (search by Job Number, filter by Registered By and Required Date) so that I can find and, if permitted, revert completed items.
 
 - **Acceptance Criteria**:
-  - AC1: Completed orders have different visual style (grayed out, strikethrough, or badge)
-  - AC2: Progress bar shows "Complete" instead of percentage
-  - AC3: Completion timestamp is displayed
-  - AC4: "Mark Done" button is replaced with "Completed" indicator
+  - AC1: There is a separate `Completed` tab on the `/orders` page that lists only orders with status `COMPLETED`.
+  - AC2: Rows in Completed tab show: Job Number, Registered Date, Required Date, Priority, Registered By, completedAt timestamp, and a Completed indicator/badge.
+  - AC3: Progress bar is not shown in the Completed tab (not required for completed items).
+  - AC4: The primary action for each Completed row is `Undo` (label: "Hoàn Tác" / "Undo"). Clicking `Undo` opens a confirmation modal before reverting status to `IN_PROGRESS`.
+  - AC5: Undo action is permission-gated: only users with `canUpdateStatus` (or ADMIN/SUPER_ADMIN) can see and perform `Undo`; UI hides/greys out the action for others.
+  - AC6: Completed tab provides a search box for `Job Number` supporting partial and exact matches.
+  - AC7: Completed tab provides filters for `Registered By` (select or autocomplete) and `Required Date` (date range), and these filters can be combined with search.
+  - AC8: Sorting is available on `completedAt`, `Registered Date`, and `Required Date` (asc/desc).
+  - AC9: After successful `Undo`, the order moves back to the In Progress view and SSE/broadcast (or refetch) updates connected clients.
+  - AC10: Empty state and loading states handled appropriately for Completed tab.
+  - AC11: All UI strings localized (English + Vietnamese) and unit tests exist for Completed tab behaviors (search/filter/undo permission gating).
 
-- **Blocked By**: US-1.3.1
+- **Blocked By**: US-1.3.1 (Mark Done) and US-1.2.1 (Orders list)
 
-- **Notes**: Clear visual distinction.
+- **Notes**: This differs from a simple visual change — Completed items live in their own tab with search/filter/undo semantics. Consider adding pagination and server-side filtering for performance if Completed grows large.
 
 ---
 
@@ -1014,17 +1021,24 @@ These stories can be worked on in parallel after their dependencies are met:
 
 ---
 
-**US-1.3.2: Phân biệt Trực quan Đơn Hoàn thành**
+**US-1.3.2: Tab Hoàn Thành & Giao diện Tab Hoàn Thành**
 
-- **Mô tả**: Là nhân viên, tôi có thể phân biệt trực quan đơn đã hoàn thành để biết gì đã xong.
+- **Mô tả**: Đơn đã hoàn thành hiển thị trong tab riêng "Hoàn Thành". Là nhân viên, tôi cần giao diện riêng cho tab Hoàn Thành — không hiển thị progress bar, hành động chính là `Hoàn Tác` để hoàn nguyên, và UI phải hỗ trợ tìm kiếm và lọc (tìm theo Job Number, lọc theo Registered By và Required Date) để dễ tìm và hoàn nguyên các đơn đã hoàn thành nếu được phép.
 
 - **Tiêu chí nghiệm thu**:
-  - AC1: Đơn hoàn thành có style khác (xám, gạch ngang, hoặc badge)
-  - AC2: Progress bar hiển thị "Hoàn thành" thay vì %
-  - AC3: Timestamp hoàn thành được hiển thị
-  - AC4: Nút "Đánh dấu Hoàn thành" được thay bằng chỉ báo "Đã hoàn thành"
+  - AC1: Có tab `Hoàn Thành` riêng trên trang `/orders` chỉ liệt kê các đơn có trạng thái `COMPLETED`.
+  - AC2: Mỗi hàng trong tab Hoàn Thành hiển thị: Job Number, Registered Date, Required Date, Priority, Registered By, completedAt và một badge chỉ báo đã hoàn thành.
+  - AC3: Không hiển thị progress bar trong tab Hoàn Thành.
+  - AC4: Hành động chính cho mỗi đơn là `Hoàn Tác`. Click `Hoàn Tác` mở modal xác nhận trước khi hoàn nguyên trạng thái về `IN_PROGRESS`.
+  - AC5: Hành động `Hoàn Tác` chỉ hiển thị và thực thi với user có quyền `canUpdateStatus` (hoặc ADMIN/SUPER_ADMIN); người khác không thấy hoặc thấy disabled.
+  - AC6: Tab Hoàn Thành có ô tìm kiếm `Job Number` hỗ trợ tìm khớp một phần và khớp chính xác.
+  - AC7: Tab Hoàn Thành có bộ lọc `Registered By` (select/autocomplete) và `Required Date` (phạm vi ngày); các bộ lọc có thể kết hợp với tìm kiếm.
+  - AC8: Cho phép sắp xếp theo `completedAt`, `Registered Date`, `Required Date` (tăng/giảm).
+  - AC9: Sau khi `Hoàn Tác` thành công, đơn chuyển lại sang tab Đang xử lý và SSE/refetch cập nhật các client đang kết nối.
+  - AC10: Xử lý trạng thái rỗng và loading đúng cho tab Hoàn Thành.
+  - AC11: Các chuỗi UI có bản địa hóa (EN + VI) và có unit tests cho hành vi tab Hoàn Thành (tìm kiếm/lọc/hoàn tác và phân quyền).
 
-- **Bị chặn bởi**: US-1.3.1
+- **Bị chặn bởi**: US-1.3.1 và US-1.2.1
 
 ---
 

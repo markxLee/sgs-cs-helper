@@ -5,6 +5,7 @@
  * 1. Receives initial orders from server
  * 2. Calculates progress client-side, updates every minute
  * 3. Subscribes to SSE for status changes from other users
+ * 4. Provides filtering, sorting, and search controls
  *
  * @module components/orders/realtime-orders
  */
@@ -14,7 +15,10 @@
 import { useState, useMemo } from "react";
 import { useRealtimeProgress, type OrderData } from "@/hooks/use-realtime-progress";
 import { useOrderSSE } from "@/hooks/use-order-sse";
+import { useOrderControls } from "@/hooks/use-order-controls";
 import { OrdersTable } from "@/components/orders/orders-table";
+import { OrderFiltersComponent } from "@/components/orders/order-filters";
+import { JobSearch } from "@/components/orders/job-search";
 
 // ============================================================================
 // Types
@@ -33,6 +37,19 @@ interface RealtimeOrdersProps {
 
 export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }: RealtimeOrdersProps) {
   const [isConnected, setIsConnected] = useState(false);
+
+  // Order controls: filtering, sorting, search
+  const {
+    filters,
+    sort,
+    search,
+    hasActiveControls,
+    setFilters,
+    handleSort,
+    setSearch,
+    resetControls,
+    processOrders,
+  } = useOrderControls();
 
   // Realtime progress calculation
   const {
@@ -72,17 +89,38 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
     },
   });
 
-  // Filter and sort based on active tab
+  // Filter and sort based on active tab, then apply user controls
   const filteredOrders = useMemo(() => {
+    let result: typeof ordersWithProgress;
+    
     if (activeTab === "completed") {
-      return ordersWithProgress
+      result = ordersWithProgress
         .filter((order) => order.status === "COMPLETED")
         .sort((a, b) => b.requiredDate.getTime() - a.requiredDate.getTime());
+    } else {
+      result = ordersWithProgress
+        .filter((order) => order.status !== "COMPLETED")
+        .sort((a, b) => b.progress.percentage - a.progress.percentage);
     }
-    return ordersWithProgress
-      .filter((order) => order.status !== "COMPLETED")
-      .sort((a, b) => b.progress.percentage - a.progress.percentage);
-  }, [ordersWithProgress, activeTab]);
+    
+    // Apply user controls (filter, sort, search) for in-progress tab
+    if (activeTab === "in-progress") {
+      result = processOrders(result);
+    }
+    
+    return result;
+  }, [ordersWithProgress, activeTab, processOrders]);
+
+  // Extract unique registrants for filter dropdown
+  const registrants = useMemo(() => {
+    const uniqueRegistrants = new Set<string>();
+    ordersWithProgress.forEach((order) => {
+      if (order.registeredBy) {
+        uniqueRegistrants.add(order.registeredBy);
+      }
+    });
+    return Array.from(uniqueRegistrants).sort();
+  }, [ordersWithProgress]);
 
   // Counts for display
   const inProgressCount = ordersWithProgress.filter(
@@ -116,11 +154,55 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
         </div>
       </div>
 
+      {/* Filter & Search Controls (only for in-progress tab) */}
+      {activeTab === "in-progress" && (
+        <div className="space-y-4 mb-6">
+          {/* Search and Filters Row */}
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Job Search */}
+            <div className="flex-1 max-w-sm">
+              <JobSearch
+                value={search}
+                onChange={setSearch}
+                placeholder="Search Job Number..."
+              />
+            </div>
+            
+            {/* Filters */}
+            <div className="flex-1">
+              <OrderFiltersComponent
+                filters={filters}
+                registrants={registrants}
+                onFiltersChange={setFilters}
+              />
+            </div>
+          </div>
+          
+          {/* Active filters indicator */}
+          {hasActiveControls && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Filtering/Sorting active</span>
+              <button
+                onClick={resetControls}
+                className="text-primary hover:underline"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Orders table */}
       {filteredOrders.length === 0 ? (
-        <EmptyState tab={activeTab} />
+        <EmptyState tab={activeTab} hasFilters={hasActiveControls} />
       ) : (
-        <OrdersTable orders={filteredOrders} canMarkDone={canMarkDone} />
+        <OrdersTable
+          orders={filteredOrders}
+          canMarkDone={canMarkDone}
+          sortConfig={activeTab === "in-progress" ? sort : undefined}
+          onSort={activeTab === "in-progress" ? handleSort : undefined}
+        />
       )}
     </div>
   );
@@ -140,8 +222,39 @@ function formatTime(date: Date): string {
   }).format(date);
 }
 
-function EmptyState({ tab }: { tab: string }) {
+function EmptyState({ tab, hasFilters = false }: { tab: string; hasFilters?: boolean }) {
   const isCompleted = tab === "completed";
+
+  // Show different message when filters are active
+  if (hasFilters) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="rounded-full bg-muted p-4 mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-muted-foreground"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-semibold mb-2">
+          No orders found
+        </h2>
+        <p className="text-muted-foreground max-w-sm">
+          No orders match the current filters. Try adjusting filter criteria.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">

@@ -157,8 +157,11 @@ RULES:
   - Status: `PLANNED`
   - Blocked By: ~~US-1.2.1~~ ✅
 
-- [ ] **US-1.2.6** — Show Registered By, Filter/Sort, Priority ETA
-  - Status: `PLANNED`
+- [x] **US-1.2.6** — Show Registered By, Filter/Sort, Priority ETA
+  - Status: `DONE`
+  - Started: 2026-02-07
+  - ✅ Completed: 2026-02-08
+  - Branch: `feature/sgs-cs-helper-us-1.2.6`
   - Blocked By: US-1.1.3, US-1.2.1
   - Notes: Add `Registered By` column, filters for `Registered By` and `Required Date`, sorting, and show ETA per priority from config
 

@@ -62,6 +62,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     id: order.id,
     jobNumber: order.jobNumber,
     registeredDate: order.registeredDate,
+    registeredBy: order.registeredBy,
     receivedDate: order.receivedDate,
     requiredDate: order.requiredDate,
     priority: order.priority,
