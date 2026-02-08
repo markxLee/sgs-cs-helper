@@ -99,6 +99,7 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
       id: string;
       jobNumber: string;
       registeredDate: string;
+      registeredBy: string | null;
       receivedDate: string;
       requiredDate: string;
       priority: number;
@@ -108,6 +109,7 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
       id: o.id,
       jobNumber: o.jobNumber,
       registeredDate: new Date(o.registeredDate),
+      registeredBy: o.registeredBy,
       receivedDate: new Date(o.receivedDate),
       requiredDate: new Date(o.requiredDate),
       priority: o.priority,

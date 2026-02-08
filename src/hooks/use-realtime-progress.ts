@@ -31,6 +31,7 @@ export interface OrderData {
   id: string;
   jobNumber: string;
   registeredDate: Date;
+  registeredBy: string | null;
   receivedDate: Date;
   requiredDate: Date;
   priority: number;

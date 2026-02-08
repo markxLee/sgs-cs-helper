@@ -23,6 +23,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { OrderProgressBar } from "@/components/orders/order-progress-bar";
 import { MarkDoneModal } from "@/components/orders/MarkDoneModal";
+import { SortableHeader, type SortConfig } from "@/components/orders/sortable-header";
+import { getPriorityDuration } from "@/lib/utils/progress";
 import type { ProgressInfo } from "@/lib/utils/progress";
 import type { OrderStatus } from "@/generated/prisma/client";
 import { useState, useCallback } from "react";
@@ -35,6 +37,7 @@ export interface OrderWithProgress {
   id: string;
   jobNumber: string;
   registeredDate: Date;
+  registeredBy: string | null;
   receivedDate: Date;
   requiredDate: Date;
   priority: number;
@@ -47,6 +50,10 @@ interface OrdersTableProps {
   activeTab?: "in-progress" | "completed";
   /** Whether current user can mark orders as done */
   canMarkDone?: boolean;
+  /** Sort configuration for sortable headers */
+  sortConfig?: SortConfig;
+  /** Callback when a sortable header is clicked */
+  onSort?: (key: string) => void;
 }
 
 // ============================================================================
@@ -72,17 +79,8 @@ function formatDate(date: Date): string {
 /**
  * Get priority display label
  */
-function getPriorityLabel(priority: number): string {
-  switch (priority) {
-    case 0:
-      return "P0 - Emergency";
-    case 1:
-      return "P1 - Urgent";
-    case 2:
-      return "P2 - Normal";
-    default:
-      return `P${priority} - Low`;
-  }
+function getPriorityLabel(priority: number, etaHours: number): string {
+  return `${priority} - (${etaHours}h)`;
 }
 
 /**
@@ -141,31 +139,31 @@ function formatRemainingTime(remainingHours: number, isOverdue: boolean): string
     const overdueHours = Math.abs(remainingHours);
     if (overdueHours < 1) {
       const minutes = Math.round(overdueHours * 60);
-      return `Quá ${minutes} phút`;
+      return `${minutes}m overdue`;
     }
     const hours = Math.floor(overdueHours);
     const minutes = Math.round((overdueHours - hours) * 60);
     if (minutes === 0) {
-      return `Quá ${hours}h`;
+      return `${hours}h overdue`;
     }
-    return `Quá ${hours}h ${minutes}m`;
+    return `${hours}h ${minutes}m overdue`;
   }
 
   if (remainingHours <= 0) {
-    return "Hết giờ";
+    return "Time's up";
   }
 
   if (remainingHours < 1) {
     const minutes = Math.round(remainingHours * 60);
-    return `Còn ${minutes} phút`;
+    return `${minutes}m left`;
   }
 
   const hours = Math.floor(remainingHours);
   const minutes = Math.round((remainingHours - hours) * 60);
   if (minutes === 0) {
-    return `Còn ${hours}h`;
+    return `${hours}h left`;
   }
-  return `Còn ${hours}h ${minutes}m`;
+  return `${hours}h ${minutes}m left`;
 }
 
 // ============================================================================
@@ -177,7 +175,7 @@ function formatRemainingTime(remainingHours: number, isOverdue: boolean): string
  *
  * @exampleactiveTab="in-progress" />
  */
-export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = false }: OrdersTableProps) {
+export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = false, sortConfig, onSort }: OrdersTableProps) {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     order: OrderWithProgress | null;
@@ -222,14 +220,59 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[120px]">Số Đơn Hàng</TableHead>
-            <TableHead className="w-[160px]">Ngày Đăng Ký</TableHead>
-            <TableHead className="w-[160px]">Ngày Nhận</TableHead>
-            <TableHead className="w-[160px]">Ngày Trả Kết Quả</TableHead>
-           <TableHead className="w-[120px]">Độ Ưu Tiên</TableHead>
-            {/* <TableHead className="w-[100px]">Trạng Thái</TableHead> */}
-            <TableHead className="w-[180px]">Tiến Độ</TableHead>
-            <TableHead className="w-[120px]">Thời Gian Còn Lại</TableHead>
+            <TableHead className="w-[120px]">Job Number</TableHead>
+            <TableHead className="w-[160px]">
+              {sortConfig && onSort ? (
+                <SortableHeader
+                  label="Registered Date"
+                  field="registeredDate"
+                  currentSort={sortConfig}
+                  onSort={onSort}
+                />
+              ) : (
+                "Registered Date"
+              )}
+            </TableHead>
+            <TableHead className="w-[140px]">Registered By</TableHead>
+            <TableHead className="w-[160px]">Received Date</TableHead>
+            <TableHead className="w-[160px]">
+              {sortConfig && onSort ? (
+                <SortableHeader
+                  label="Due Date"
+                  field="requiredDate"
+                  currentSort={sortConfig}
+                  onSort={onSort}
+                />
+              ) : (
+                "Due Date"
+              )}
+            </TableHead>
+           <TableHead className="w-[100px]">
+              {sortConfig && onSort ? (
+                <SortableHeader
+                  label="Priority"
+                  field="priority"
+                  currentSort={sortConfig}
+                  onSort={onSort}
+                />
+              ) : (
+                "Priority"
+              )}
+            </TableHead>
+            {/* <TableHead className="w-[100px]">Status</TableHead> */}
+            <TableHead className="w-[180px]">
+              {sortConfig && onSort ? (
+                <SortableHeader
+                  label="Progress"
+                  field="progress"
+                  currentSort={sortConfig}
+                  onSort={onSort}
+                />
+              ) : (
+                "Progress"
+              )}
+            </TableHead>
+            <TableHead className="w-[120px]">Time Left</TableHead>
             <TableHead className="w-[120px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -238,13 +281,18 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
             <TableRow key={order.id}>
               <TableCell className="font-medium">{order.jobNumber}</TableCell>
               <TableCell>{formatDate(order.registeredDate)}</TableCell>
+              <TableCell className="max-w-[140px]">
+                <span className="truncate block" title={order.registeredBy || 'Unknown'}>
+                  {order.registeredBy || 'Unknown'}
+                </span>
+              </TableCell>
               <TableCell>{formatDate(order.receivedDate)}</TableCell>
               <TableCell>{formatDate(order.requiredDate)}</TableCell>
               <TableCell>
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getPriorityClass(order.priority)}`}
                 >
-                  {getPriorityLabel(order.priority)}
+                  {getPriorityLabel(order.priority, getPriorityDuration(order.priority))}
                 </span>
               </TableCell>
               {/* <TableCell>
@@ -277,7 +325,7 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
                     }}
                     aria-label={`Mark order ${order.jobNumber} as done`}
                   >
-                    Hoàn Thành
+                    Complete
                   </Button>
                 )}
               </TableCell>

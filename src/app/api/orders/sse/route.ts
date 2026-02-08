@@ -26,7 +26,6 @@ export interface SSEOrderEvent {
 
 // Extend globalThis type for SSE clients
 declare global {
-  // eslint-disable-next-line no-var
   var __sseClients: Set<ReadableStreamDefaultController<Uint8Array>> | undefined;
 }
 
