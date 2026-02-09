@@ -175,13 +175,16 @@ RULES:
   - ✅ Completed: 2026-02-07
   - Branch: `feature-sgs-cs-helper-us-1.3.1`
 
-- [ ] **US-1.3.2** — Visual Distinction for Completed Orders
-  - Status: `PLANNED`
-  - Blocked By: US-1.3.1
+- [x] **US-1.3.2** — Visual Distinction for Completed Orders
+  - Status: `DONE`
+  - Blocked By: ~~US-1.3.1~~ ✅
+  - ✅ Completed: 2026-02-09
+  - Branch: `feature/sgs-cs-helper-us-1.3.2`
 
-- [ ] **US-1.3.3** — Undo Order Completion
-  - Status: `PLANNED`
-  - Blocked By: US-1.3.1
+- [x] **US-1.3.3** — Undo Order Completion
+  - Status: `DONE`
+  - Blocked By: ~~US-1.3.1~~ ✅
+  - ✅ Completed: 2026-02-09 (covered by US-1.3.2)
 
 ---
 
@@ -323,13 +326,16 @@ RULES:
   - Trạng thái: `PLANNED`
   - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
-- [ ] **US-1.3.2** — Phân biệt Trực quan Đơn Hoàn thành
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.3.1
+- [x] **US-1.3.2** — Phân biệt Trực quan Đơn Hoàn thành
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-1.3.1~~ ✅
+  - ✅ Hoàn thành: 2026-02-09
+  - Branch: `feature/sgs-cs-helper-us-1.3.2`
 
-- [ ] **US-1.3.3** — Hoàn tác Hoàn thành Đơn
-  - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.3.1
+- [x] **US-1.3.3** — Hoàn tác Hoàn thành Đơn
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-1.3.1~~ ✅
+  - ✅ Hoàn thành: 2026-02-09 (bao gồm trong US-1.3.2)
 
 ---
 
