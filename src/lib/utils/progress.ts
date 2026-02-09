@@ -90,17 +90,23 @@ export function getPriorityDuration(priority: number): number {
 /**
  * Calculate lunch break deduction in hours
  *
- * Deducts 1 hour if:
- * - Order was received before 12:00
- * - Current time is after 13:00
+ * Handles three scenarios:
+ * 1. Received before 12:00, now after 13:00 → deduct 1 hour
+ * 2. Received before 12:00, now during lunch (12:00–13:00) → deduct (now - 12:00)
+ * 3. Received during lunch (12:00–13:00), now after 13:00 → deduct (13:00 - received)
+ * 4. Both received and now during lunch → deduct entire elapsed (all lunch time)
+ * 5. Received after 13:00 → no deduction
  *
  * @param receivedDate - When the order was received
  * @param now - Current time (defaults to now)
- * @returns 0 or 1 hour deduction
+ * @returns Hours to deduct (0 to 1)
  *
  * @example
  * // Order at 10:00, now is 14:00 → deduct 1 hour
  * getLunchBreakDeduction(new Date('2026-02-07T10:00:00'), new Date('2026-02-07T14:00:00')) // 1
+ *
+ * // Order at 12:03, now is 14:00 → deduct 0.95 hours (57 min of lunch)
+ * getLunchBreakDeduction(new Date('2026-02-07T12:03:00'), new Date('2026-02-07T14:00:00')) // 0.95
  *
  * // Order at 13:30, now is 15:00 → no deduction (started after lunch)
  * getLunchBreakDeduction(new Date('2026-02-07T13:30:00'), new Date('2026-02-07T15:00:00')) // 0
@@ -118,20 +124,45 @@ export function getLunchBreakDeduction(
   const receivedDecimal = receivedHour + receivedMinutes / 60;
   const nowDecimal = nowHour + nowMinutes / 60;
 
-  // Check if order started before lunch and current time is after lunch
-  const startedBeforeLunch = receivedDecimal < LUNCH_START_HOUR;
+  // Classify positions relative to lunch break
+  const receivedBeforeLunch = receivedDecimal < LUNCH_START_HOUR;
+  const receivedDuringLunch =
+    receivedDecimal >= LUNCH_START_HOUR && receivedDecimal < LUNCH_END_HOUR;
   const nowAfterLunch = nowDecimal >= LUNCH_END_HOUR;
+  const nowDuringLunch =
+    nowDecimal >= LUNCH_START_HOUR && nowDecimal < LUNCH_END_HOUR;
 
-  // Only check same day for lunch break
+  // Only apply lunch deduction if lunch period is relevant
   const sameDay =
     receivedDate.toDateString() === now.toDateString() ||
     // If multi-day, always assume lunch break happened
     receivedDate.getTime() < now.getTime();
 
-  if (startedBeforeLunch && nowAfterLunch && sameDay) {
+  if (!sameDay) {
+    return 0;
+  }
+
+  // Case 1: Received before lunch, now after lunch → full 1 hour deduction
+  if (receivedBeforeLunch && nowAfterLunch) {
     return 1;
   }
 
+  // Case 2: Received before lunch, now during lunch → partial deduction
+  if (receivedBeforeLunch && nowDuringLunch) {
+    return Math.round((nowDecimal - LUNCH_START_HOUR) * 100) / 100;
+  }
+
+  // Case 3: Received during lunch, now after lunch → deduct remaining lunch
+  if (receivedDuringLunch && nowAfterLunch) {
+    return Math.round((LUNCH_END_HOUR - receivedDecimal) * 100) / 100;
+  }
+
+  // Case 4: Both during lunch → deduct entire elapsed (all non-working time)
+  if (receivedDuringLunch && nowDuringLunch) {
+    return Math.round((nowDecimal - receivedDecimal) * 100) / 100;
+  }
+
+  // Case 5: Received after lunch or now before lunch → no deduction
   return 0;
 }
 
