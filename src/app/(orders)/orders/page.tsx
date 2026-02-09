@@ -1,12 +1,9 @@
 /**
  * Public Orders Page
  *
- * Displays all orders with progress bars.
- * No authentication required - public read-only access.
- *
- * Features:
- * - Client-side realtime progress calculation (updates every minute)
- * - SSE subscription for status changes from other users
+ * Displays orders split across two tabs:
+ * - In Progress: Realtime SSE-powered progress tracking
+ * - Completed: Server-side paginated list with undo capability
  *
  * @route /orders
  * @route /orders?tab=completed - Show completed orders
@@ -17,6 +14,7 @@ import Link from "next/link";
 import { getOrders } from "@/lib/actions/order";
 import { auth } from "@/lib/auth";
 import { RealtimeOrders } from "@/components/orders/realtime-orders";
+import { CompletedOrders } from "@/components/orders/completed-orders";
 import type { OrderData } from "@/hooks/use-realtime-progress";
 
 // ============================================================================
@@ -53,29 +51,28 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       session.user.role === "ADMIN" ||
       (session.user.role === "STAFF" && session.user.canUpdateStatus === true)
     : false;
-  console.log("canMarkDone:", canMarkDone, 'session', session);
-  // Fetch all orders from database (initial data)
-  const orders = await getOrders();
 
-  // Convert to plain data for client component
-  const initialOrders: OrderData[] = orders.map((order) => ({
-    id: order.id,
-    jobNumber: order.jobNumber,
-    registeredDate: order.registeredDate,
-    registeredBy: order.registeredBy,
-    receivedDate: order.receivedDate,
-    requiredDate: order.requiredDate,
-    priority: order.priority,
-    status: order.status,
-  }));
+  // canUndo uses the same permission as canMarkDone
+  const canUndo = canMarkDone;
 
-  // Count for tabs (server-side initial counts)
-  const inProgressCount = orders.filter(
-    (order) => order.status !== "COMPLETED"
-  ).length;
-  const completedCount = orders.filter(
-    (order) => order.status === "COMPLETED"
-  ).length;
+  // Fetch in-progress orders only when on that tab (completed tab fetches client-side)
+  let initialOrders: OrderData[] = [];
+  let inProgressCount = 0;
+
+  if (activeTab === "in-progress") {
+    const orders = await getOrders();
+    initialOrders = orders.map((order) => ({
+      id: order.id,
+      jobNumber: order.jobNumber,
+      registeredDate: order.registeredDate,
+      registeredBy: order.registeredBy,
+      receivedDate: order.receivedDate,
+      requiredDate: order.requiredDate,
+      priority: order.priority,
+      status: order.status,
+    }));
+    inProgressCount = initialOrders.length;
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -96,7 +93,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          In Progress ({inProgressCount})
+          In Progress{activeTab === "in-progress" ? ` (${inProgressCount})` : ""}
         </Link>
         <Link
           href="/orders?tab=completed"
@@ -106,16 +103,20 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          Completed ({completedCount})
+          Completed
         </Link>
       </div>
 
-      {/* Realtime orders with client-side progress calculation and SSE */}
-      <RealtimeOrders
-        initialOrders={initialOrders}
-        activeTab={activeTab}
-        canMarkDone={canMarkDone}
-      />
+      {/* Tab content */}
+      {activeTab === "completed" ? (
+        <CompletedOrders canUndo={canUndo} activeTab={activeTab} />
+      ) : (
+        <RealtimeOrders
+          initialOrders={initialOrders}
+          activeTab={activeTab}
+          canMarkDone={canMarkDone}
+        />
+      )}
     </div>
   );
 }
