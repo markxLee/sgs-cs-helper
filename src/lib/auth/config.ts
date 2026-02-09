@@ -131,7 +131,7 @@ export const authConfig: NextAuthConfig = {
               data: { status: "ACTIVE" },
             });
           }
-          
+          console.log('\n\nUser logged in:', user);
           return {
             id: user.id,
             email: user.email,
@@ -162,7 +162,7 @@ export const authConfig: NextAuthConfig = {
             // For now, we'll skip logging failed staff attempts as they don't have identifiable users
             return null;
           }
-          
+          console.log('\n\nStaff user logged in:', user);
           // Log successful staff login
           await logLoginAttempt({
             adminId: user.id,

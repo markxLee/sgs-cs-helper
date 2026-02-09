@@ -157,10 +157,11 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
       {/* Filter & Search Controls (only for in-progress tab) */}
       {activeTab === "in-progress" && (
         <div className="space-y-4 mb-6">
-          {/* Search and Filters Row */}
-          <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search and Filters Row - All on one line */}
+          <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/50 rounded-lg">
             {/* Job Search */}
-            <div className="flex-1 max-w-sm">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">Job Number</span>
               <JobSearch
                 value={search}
                 onChange={setSearch}
@@ -168,14 +169,12 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
               />
             </div>
             
-            {/* Filters */}
-            <div className="flex-1">
-              <OrderFiltersComponent
-                filters={filters}
-                registrants={registrants}
-                onFiltersChange={setFilters}
-              />
-            </div>
+            {/* Filters - inline */}
+            <OrderFiltersComponent
+              filters={filters}
+              registrants={registrants}
+              onFiltersChange={setFilters}
+            />
           </div>
           
           {/* Active filters indicator */}

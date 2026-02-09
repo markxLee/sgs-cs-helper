@@ -25,6 +25,7 @@ import { OrderProgressBar } from "@/components/orders/order-progress-bar";
 import { MarkDoneModal } from "@/components/orders/MarkDoneModal";
 import { SortableHeader, type SortConfig } from "@/components/orders/sortable-header";
 import { getPriorityDuration } from "@/lib/utils/progress";
+import { cn } from "@/lib/utils";
 import type { ProgressInfo } from "@/lib/utils/progress";
 import type { OrderStatus } from "@/generated/prisma/client";
 import { useState, useCallback } from "react";
@@ -214,14 +215,13 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
     }
     return order.status !== "COMPLETED";
   });
-  console.log("Filtered Orders:", filteredOrders);
   return (
     <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[120px]">Job Number</TableHead>
-            <TableHead className="w-[160px]">
+            <TableHead className={cn("w-[160px]", sortConfig && onSort && "hover:bg-muted/50 transition-colors")}>
               {sortConfig && onSort ? (
                 <SortableHeader
                   label="Registered Date"
@@ -235,7 +235,7 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
             </TableHead>
             <TableHead className="w-[140px]">Registered By</TableHead>
             <TableHead className="w-[160px]">Received Date</TableHead>
-            <TableHead className="w-[160px]">
+            <TableHead className={cn("w-[160px]", sortConfig && onSort && "hover:bg-muted/50 transition-colors")}>
               {sortConfig && onSort ? (
                 <SortableHeader
                   label="Due Date"
@@ -247,7 +247,7 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
                 "Due Date"
               )}
             </TableHead>
-           <TableHead className="w-[100px]">
+           <TableHead className={cn("w-[100px]", sortConfig && onSort && "hover:bg-muted/50 transition-colors")}>
               {sortConfig && onSort ? (
                 <SortableHeader
                   label="Priority"
@@ -260,7 +260,7 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
               )}
             </TableHead>
             {/* <TableHead className="w-[100px]">Status</TableHead> */}
-            <TableHead className="w-[180px]">
+            <TableHead className={cn("w-[180px]", sortConfig && onSort && "hover:bg-muted/50 transition-colors")}>
               {sortConfig && onSort ? (
                 <SortableHeader
                   label="Progress"

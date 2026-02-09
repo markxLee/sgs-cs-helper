@@ -118,7 +118,6 @@ export function UploadForm() {
 
     try {
       const results = await parseExcelFiles(files);
-      console.log("Parsed results:", results);
       // Convert to PreviewItemData with unique IDs
       const items: PreviewItemData[] = results.map((result, index) => ({
         id: `${result.fileName}-${index}-${Date.now()}`,

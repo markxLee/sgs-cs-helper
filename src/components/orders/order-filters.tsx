@@ -88,7 +88,7 @@ export function OrderFiltersComponent({
   };
 
   return (
-    <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/50 rounded-lg mb-4">
+    <>
       {/* Registered By Filter */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="registeredBy" className="text-sm font-medium">
@@ -152,6 +152,6 @@ export function OrderFiltersComponent({
           Clear Filters
         </Button>
       )}
-    </div>
+    </>
   );
 }

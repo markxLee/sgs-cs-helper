@@ -5,7 +5,6 @@ export async function GET() {
   try {
     // Test that auditLog is accessible
     const auditLogCount = await prisma.auditLog.count();
-    console.log('AuditLog count:', auditLogCount);
 
     // Test that failedLoginCount is accessible
     const users = await prisma.user.findMany({

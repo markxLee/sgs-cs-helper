@@ -53,7 +53,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       session.user.role === "ADMIN" ||
       (session.user.role === "STAFF" && session.user.canUpdateStatus === true)
     : false;
-
+  console.log("canMarkDone:", canMarkDone, 'session', session);
   // Fetch all orders from database (initial data)
   const orders = await getOrders();
 
