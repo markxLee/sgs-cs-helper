@@ -20,8 +20,8 @@ import type { OrderStatus } from "@/generated/prisma/client";
 // Constants
 // ============================================================================
 
-/** Polling interval for fallback data refresh (3 minutes) */
-const POLL_INTERVAL = 3 * 60 * 1000;
+/** Polling interval for fallback data refresh (1 minute) */
+const POLL_INTERVAL = 30 * 1000;
 
 // ============================================================================
 // Types
