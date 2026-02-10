@@ -21,8 +21,8 @@ export function ScanButton({ onClick, className }: ScanButtonProps) {
   return (
     <button
       onClick={onClick}
-      title="Quét mã QR hoặc barcode để đánh dấu đơn hàng hoàn thành nhanh chóng"
-      aria-label="Mở scanner để quét mã QR/Barcode đánh dấu hoàn thành đơn hàng"
+      title="Mở camera để quét mã QR hoặc barcode đánh dấu hoàn thành"
+      aria-label="Mở camera để quét mã QR/Barcode đánh dấu hoàn thành đơn hàng"
       className={cn(
         "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium",
         "text-white bg-indigo-600 hover:bg-indigo-700",
@@ -32,7 +32,7 @@ export function ScanButton({ onClick, className }: ScanButtonProps) {
       )}
     >
       <ScanIcon />
-      <span>Scan to Complete</span>
+      <span>Camera Scan</span>
     </button>
   );
 }

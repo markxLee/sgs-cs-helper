@@ -10,7 +10,7 @@
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
 | **Purpose** | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 26 |
+| **Total Stories** | 27 |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE` |
 
 ---
@@ -201,6 +201,11 @@ RULES:
   - Blocked By: ~~US-1.3.1~~ ✅, ~~US-1.3.2~~ ✅
   - Notes: Add `completedById` to schema, show "Completed By" + "Actual Duration" columns in Completed tab, overdue indicator
 
+- [ ] **US-1.3.6** — Barcode Scanner Device Support (USB/Bluetooth Keyboard Input)
+  - Status: `PLANNED`
+  - Blocked By: ~~US-1.3.4~~ ✅
+  - Notes: USB/Bluetooth scanner as HID keyboard input, reuse lookup API + mark-done flow, passive listener on orders page
+
 ---
 
 ## Phase 2: Reporting & Analytics
@@ -228,9 +233,9 @@ RULES:
 | 0 | 0.3 Database Schema | 2 | ✅ US-0.3.1 ready |
 | 1 | 1.1 Upload & Parsing | 3 | ⏳ Blocked |
 | 1 | 1.2 Dashboard | 6 | ⏳ Blocked |
-| 1 | 1.3 Completion | 5 | ⏳ Blocked |
+| 1 | 1.3 Completion | 6 | ⏳ Blocked |
 | 2 | 2.1 Performance Dashboard | 2 | ⏳ Blocked |
-| **Total** | | **22** | **2 ready** |
+| **Total** | | **23** | **2 ready** |
 
 ---
 
@@ -384,6 +389,11 @@ RULES:
   - Bị chặn bởi: ~~US-1.3.1~~ ✅, ~~US-1.3.2~~ ✅
   - Ghi chú: Thêm `completedById` vào schema, hiển thị cột "Người Hoàn thành" + "Thời gian Thực tế" trong tab Hoàn Thành, chỉ báo quá hạn
 
+- [ ] **US-1.3.6** — Hỗ trợ Máy quét Barcode (USB/Bluetooth — Nhập qua Bàn phím)
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: ~~US-1.3.4~~ ✅
+  - Ghi chú: Máy quét USB/Bluetooth nhập qua bàn phím, tái sử dụng API lookup + flow mark-done, listener ngầm trên trang orders
+
 ---
 
 ## Phase 2: Báo cáo & Phân tích
@@ -411,9 +421,9 @@ RULES:
 | 0 | 0.3 Database | 2 | ✅ US-0.3.1 sẵn sàng |
 | 1 | 1.1 Upload | 3 | ⏳ Đang chặn |
 | 1 | 1.2 Dashboard | 6 | ⏳ Đang chặn |
-| 1 | 1.3 Hoàn thành | 5 | ⏳ Đang chặn |
+| 1 | 1.3 Hoàn thành | 6 | ⏳ Đang chặn |
 | 2 | 2.1 Dashboard Hiệu suất | 2 | ⏳ Đang chặn |
-| **Tổng** | | **22** | **2 sẵn sàng** |
+| **Tổng** | | **23** | **2 sẵn sàng** |
 
 ---
 

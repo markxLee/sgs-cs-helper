@@ -10,7 +10,7 @@
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
 | **Scope Covered** | Phase 0 (Foundation) + Phase 1 (MVP) + Phase 2 (Reporting & Analytics) |
-| **Total User Stories** | 24 |
+| **Total User Stories** | 25 |
 
 ---
 
@@ -679,6 +679,35 @@ Phase 1 MVP:                                    │
 
 ---
 
+**US-1.3.6: Barcode Scanner Device Support (USB/Bluetooth Keyboard Input)**
+
+- **Description**: As a Staff member, I can use a USB or Bluetooth barcode scanner device connected to a desktop/laptop computer to scan job documents and mark orders as complete, so that I can work faster at a workstation without needing a mobile phone camera.
+
+- **Acceptance Criteria**:
+  - AC1: On the orders page, a global keyboard listener detects barcode scanner input (rapid keystrokes < 50ms apart, ending with Enter)
+  - AC2: Scanner input is distinguished from normal typing by keystroke speed threshold
+  - AC3: When a valid barcode string is captured, it triggers the same lookup flow as camera scan (reuse `GET /api/orders/lookup`)
+  - AC4: If order found + `IN_PROGRESS`: show ConfirmDialog with order details and "Mark Complete" button (reuse existing confirmation flow)
+  - AC5: If order found + `COMPLETED`: show info message "Order already completed"
+  - AC6: If order not found: show error message "Order not found"
+  - AC7: After successful mark complete, listener remains active for continuous scanning (batch workflow)
+  - AC8: Keyboard listener only active when scanner overlay is NOT open (no conflict with camera scan)
+  - AC9: Permission-gated: only active for users with `canUpdateStatus`
+  - AC10: Works on desktop browsers (Chrome, Edge, Firefox) — no HTTPS requirement for USB input
+  - AC11: No visible UI change required — scanner input works passively on the orders page
+
+- **Blocked By**: US-1.3.4
+
+- **Notes**:
+  - USB/Bluetooth barcode scanners act as HID keyboard devices — they "type" the barcode string and press Enter
+  - Reuses `GET /api/orders/lookup` API route and `POST /api/orders/[id]/mark-done` from US-1.3.4
+  - Key implementation: `useEffect` with `keydown` listener, buffer keystrokes, detect rapid input pattern
+  - Threshold: ~50ms between keystrokes suggests scanner (human typing is typically >100ms)
+  - Must not interfere with other input fields (e.g., search/filter inputs) — disable when an input element is focused
+  - Consider debounce/cooldown after successful scan to prevent double-processing
+
+---
+
 ---
 
 ## Phase 2: Reporting & Analytics
@@ -772,6 +801,7 @@ Phase 1 MVP:                                    │
 | US-1.3.3 | Undo Order Completion | US-1.3.1 | 1 |
 | US-1.3.4 | Scan QR/Barcode to Mark Order Complete | US-1.3.1 | 1 |
 | US-1.3.5 | Completion Tracking — Log Completed By & Actual Duration | US-1.3.1, US-1.3.2 | 1 |
+| US-1.3.6 | Barcode Scanner Device Support (USB/Bluetooth) | US-1.3.4 | 1 |
 | US-2.1.1 | Performance Dashboard with Chart Visualization | US-1.3.5 | 2 |
 | US-2.1.2 | Export Performance Report & Orders to Excel | US-2.1.1 | 2 |
 
@@ -1288,6 +1318,35 @@ These stories can be worked on in parallel after their dependencies are met:
   - Thời gian Thực tế dùng `receivedDate` (thời điểm nhận mẫu) làm mốc bắt đầu, nhất quán với progress bar
   - Quá hạn dùng `requiredDate` làm mốc deadline
   - Hỗ trợ báo cáo hiệu suất nhân viên tương lai (lọc/nhóm theo `completedBy`)
+
+---
+
+**US-1.3.6: Hỗ trợ Máy quét Barcode (USB/Bluetooth — Nhập qua Bàn phím)**
+
+- **Mô tả**: Là nhân viên, tôi có thể dùng máy quét barcode USB hoặc Bluetooth kết nối máy tính để quét hồ sơ và đánh dấu đơn hoàn thành, giúp làm việc nhanh hơn tại bàn làm việc mà không cần dùng camera điện thoại.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Trên trang orders, listener bàn phím toàn trang phát hiện input từ máy quét (phím nhấn liên tục < 50ms, kết thúc Enter)
+  - AC2: Phân biệt input máy quét với gõ phím thường bằng ngưỡng tốc độ
+  - AC3: Khi bắt được chuỗi barcode hợp lệ, kích hoạt flow lookup giống camera scan (tái sử dụng `GET /api/orders/lookup`)
+  - AC4: Nếu tìm thấy đơn + `IN_PROGRESS`: hiện ConfirmDialog với thông tin đơn và nút "Đánh dấu Hoàn thành"
+  - AC5: Nếu tìm thấy đơn + `COMPLETED`: hiện thông báo "Đơn đã hoàn thành"
+  - AC6: Nếu không tìm thấy: hiện thông báo lỗi "Không tìm thấy đơn hàng"
+  - AC7: Sau khi mark complete thành công, listener vẫn hoạt động để quét tiếp (batch workflow)
+  - AC8: Keyboard listener chỉ active khi scanner overlay KHÔNG mở (tránh xung đột với camera scan)
+  - AC9: Phân quyền: chỉ hoạt động với user có `canUpdateStatus`
+  - AC10: Hoạt động trên trình duyệt desktop (Chrome, Edge, Firefox) — không cần HTTPS cho input USB
+  - AC11: Không cần thay đổi UI — máy quét hoạt động ngầm trên trang orders
+
+- **Bị chặn bởi**: US-1.3.4
+
+- **Ghi chú**:
+  - Máy quét barcode USB/Bluetooth hoạt động như thiết bị HID bàn phím — "gõ" chuỗi barcode rồi nhấn Enter
+  - Tái sử dụng API route `GET /api/orders/lookup` và `POST /api/orders/[id]/mark-done` từ US-1.3.4
+  - Triển khai chính: `useEffect` với `keydown` listener, buffer phím nhấn, phát hiện pattern nhập nhanh
+  - Ngưỡng: ~50ms giữa các phím gợi ý máy quét (gõ tay thường > 100ms)
+  - Không được can thiệp vào các ô input khác (VD: search/filter) — tắt khi input element đang focus
+  - Cân nhắc debounce/cooldown sau scan thành công để tránh xử lý trùng
 
 ---
 

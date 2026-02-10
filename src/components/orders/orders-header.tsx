@@ -34,7 +34,7 @@ export function OrdersHeader({ canScan }: OrdersHeaderProps) {
           <div className="flex flex-col items-end gap-1">
             <ScanButton onClick={() => setIsScannerOpen(true)} />
             <p className="text-xs text-muted-foreground">
-              Scan QR/barcode to mark orders done
+              Use camera to scan QR/barcode
             </p>
           </div>
         )}
