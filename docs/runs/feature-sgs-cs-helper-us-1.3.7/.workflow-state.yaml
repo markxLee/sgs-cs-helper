@@ -1,0 +1,39 @@
+meta:
+  user_story_id: US-1.3.7
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+  base_branch: main
+  dev_mode: standard
+lite_mode:
+  status: complete
+  description: "Hide empty () in Completed By + add Early completion sub-line"
+  files_changed:
+    - src/components/orders/completed-orders-table.tsx
+  verified:
+    typescript: pass
+    lint: pass
+  completed_at: 2026-02-10
+phases:
+  phase_0_analysis:
+    status: complete
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: initialized
+status:
+  current_phase: done
+  phase_name: lite-mode-complete
+  phase_status: complete
+  last_action: "Lite mode implementation approved — checklist updated to DONE"
+  next_action: "Commit and create PR"
+flow_1:
+  current_step: 12
+  step_name: roadmap-to-delivery
+  status: complete
+  product_slug: sgs-cs-helper
+  selected_user_story: US-1.3.7
+  git_branch: feature/sgs-cs-helper-us-1.3.7
+  flow_1_complete: true
+  handoff_to_flow_2: /work-intake
+  updated_at: 2026-02-10T00:00:00Z

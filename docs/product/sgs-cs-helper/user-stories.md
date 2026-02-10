@@ -708,6 +708,26 @@ Phase 1 MVP:                                    │
 
 ---
 
+**US-1.3.7: Completed Tab UI Polish — Email Display & Early Completion Indicator**
+
+- **Description**: As a Staff member / Admin, I want the Completed tab to (1) hide empty parentheses `()` in the "Completed By" column when a user has no email, and (2) show how much earlier an order was completed relative to its priority duration in the "Actual Duration" column (mirroring the overdue sub-line), so the display is clean and informative.
+
+- **Acceptance Criteria**:
+  - AC1: "Completed By" column — if `completedBy.email` is null or empty string, display only the user's name without trailing `()`
+  - AC2: "Actual Duration" column — if order was completed **before** the priority-based duration threshold, show a sub-line: `"Early: {time}"` in green (e.g., "Early: 30m"), mirroring the overdue sub-line format
+  - AC3: Early duration calculation: `priorityDurationMs - actualMs` (only when `actualMs < priorityDurationMs`)
+  - AC4: Color scheme unchanged: green for on-time/early, purple for overdue
+  - AC5: No API changes — UI-only fix in `completed-orders-table.tsx`
+
+- **Blocked By**: US-1.3.5
+
+- **Notes**:
+  - Staff users created via staff code login may not have email addresses
+  - Early indicator helps managers quickly see high-performing completions
+  - Uses same `formatDuration()` utility and `getPriorityDuration()` logic as overdue calculation
+
+---
+
 ---
 
 ## Phase 2: Reporting & Analytics
@@ -1347,6 +1367,26 @@ These stories can be worked on in parallel after their dependencies are met:
   - Ngưỡng: ~50ms giữa các phím gợi ý máy quét (gõ tay thường > 100ms)
   - Không được can thiệp vào các ô input khác (VD: search/filter) — tắt khi input element đang focus
   - Cân nhắc debounce/cooldown sau scan thành công để tránh xử lý trùng
+
+---
+
+**US-1.3.7: Cải thiện UI tab Hoàn thành — Hiển thị Email & Chỉ báo Hoàn thành Sớm**
+
+- **Mô tả**: Là nhân viên / Admin, tôi muốn tab Hoàn thành (1) ẩn dấu ngoặc rỗng `()` ở cột "Completed By" khi user không có email, và (2) hiển thị hoàn thành sớm bao lâu so với thời gian priority ở cột "Actual Duration" (tương tự dòng phụ overdue), để giao diện sạch và thông tin đầy đủ.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Cột "Completed By" — nếu `completedBy.email` null hoặc chuỗi rỗng, chỉ hiển thị tên user, bỏ `()`
+  - AC2: Cột "Actual Duration" — nếu đơn hoàn thành **sớm hơn** thời gian priority, hiển thị dòng phụ: `"Early: {time}"` màu xanh (VD: "Early: 30m"), giống format dòng overdue
+  - AC3: Tính thời gian sớm: `priorityDurationMs - actualMs` (chỉ khi `actualMs < priorityDurationMs`)
+  - AC4: Màu sắc không đổi: xanh cho đúng hạn/sớm, tím cho quá hạn
+  - AC5: Không thay đổi API — chỉ sửa UI trong `completed-orders-table.tsx`
+
+- **Bị chặn bởi**: US-1.3.5
+
+- **Ghi chú**:
+  - Staff user tạo qua staff code login có thể không có email
+  - Chỉ báo sớm giúp quản lý nhanh chóng thấy đơn hoàn thành hiệu quả
+  - Dùng cùng hàm `formatDuration()` và logic `getPriorityDuration()` như tính overdue
 
 ---
 
