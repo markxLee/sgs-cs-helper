@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCompletedOrders } from "@/hooks/use-completed-orders";
 import { CompletedOrdersTable } from "@/components/orders/completed-orders-table";
 import { JobSearch } from "@/components/orders/job-search";
@@ -17,6 +17,7 @@ import {
   OrderFiltersComponent,
   type OrderFilters,
 } from "@/components/orders/order-filters";
+import { fetchRegistrants } from "@/lib/actions/order";
 
 // ============================================================================
 // Types
@@ -48,33 +49,34 @@ export function CompletedOrders({ canUndo, activeTab }: CompletedOrdersProps) {
     sortDir,
     setPage,
     setSearch,
-    setRegisteredBy,
-    setDateRange,
+    setFilters,
     setSortConfig,
     refetch,
   } = useCompletedOrders(activeTab);
 
   // ---------------------------------------------------------------------------
-  // Derived data
+  // Registrants from dedicated lookup table (authoritative source)
   // ---------------------------------------------------------------------------
 
-  /**
-   * Extract unique registrant names from current orders for filter dropdown.
-   *
-   * Known limitation: only registrants present on the current page (max 50)
-   * are shown. Registrants whose completed orders are all on other pages
-   * won't appear. A dedicated /api/orders/completed/registrants endpoint
-   * would solve this but is out of scope for now.
-   */
-  const registrants = useMemo(() => {
-    const names = new Set<string>();
-    for (const order of orders) {
-      if (order.registeredBy) {
-        names.add(order.registeredBy);
-      }
-    }
-    return Array.from(names).sort();
-  }, [orders]);
+  const [registrants, setRegistrants] = useState<string[]>([]);
+  const [isLoadingRegistrants, setIsLoadingRegistrants] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoadingRegistrants(true);
+    fetchRegistrants()
+      .then((data) => {
+        if (!cancelled) setRegistrants(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch registrants:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingRegistrants(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Handlers
@@ -83,16 +85,19 @@ export function CompletedOrders({ canUndo, activeTab }: CompletedOrdersProps) {
   /**
    * Handle filter changes from OrderFiltersComponent.
    *
-   * We delegate to the hook's individual setters. When both change at once
-   * (e.g. "Clear Filters"), the first fetch is immediately aborted by the
-   * second via AbortController, so no stale data is applied.
+   * Uses the combined `setFilters` method to update all filter dimensions
+   * in a single fetch, avoiding race conditions from sequential setter calls
+   * where the second fetch would spread stale `paramsRef.current` values.
    */
   const handleFiltersChange = useCallback(
     (filters: OrderFilters) => {
-      setRegisteredBy(filters.registeredBy);
-      setDateRange(filters.requiredDateFrom, filters.requiredDateTo);
+      setFilters({
+        registeredBy: filters.registeredBy,
+        dateFrom: filters.requiredDateFrom,
+        dateTo: filters.requiredDateTo,
+      });
     },
-    [setRegisteredBy, setDateRange]
+    [setFilters]
   );
 
   /** Handle sort toggle — cycles asc ↔ desc, or sets new field to asc */
@@ -134,6 +139,7 @@ export function CompletedOrders({ canUndo, activeTab }: CompletedOrdersProps) {
           filters={currentFilters}
           onFiltersChange={handleFiltersChange}
           registrants={registrants}
+          isLoading={isLoadingRegistrants}
         />
       </div>
 

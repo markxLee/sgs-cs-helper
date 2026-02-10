@@ -115,6 +115,14 @@ model Order {
   @@index([requiredDate])
 }
 
+model Registrant {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  
+  @@index([name])
+}
+
 model Config {
   id        String   @id @default(cuid())
   key       String   @unique

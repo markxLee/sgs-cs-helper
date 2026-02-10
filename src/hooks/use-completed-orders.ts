@@ -57,7 +57,7 @@ export interface CompletedOrdersState {
   totalPages: number;
   isLoading: boolean;
   search: string;
-  registeredBy: string;
+  registeredBy: string[];
   dateFrom: string;
   dateTo: string;
   sortField: string;
@@ -67,8 +67,13 @@ export interface CompletedOrdersState {
 export interface UseCompletedOrdersReturn extends CompletedOrdersState {
   setPage: (page: number) => void;
   setSearch: (search: string) => void;
-  setRegisteredBy: (value: string) => void;
+  setRegisteredBy: (value: string[]) => void;
   setDateRange: (from: string, to: string) => void;
+  setFilters: (filters: {
+    registeredBy: string[];
+    dateFrom: string;
+    dateTo: string;
+  }) => void;
   setSortConfig: (field: string, dir: "asc" | "desc") => void;
   refetch: () => void;
 }
@@ -101,7 +106,7 @@ export function useCompletedOrders(
 
   // Filter / search / sort state
   const [search, setSearchState] = useState("");
-  const [registeredBy, setRegisteredByState] = useState("");
+  const [registeredBy, setRegisteredByState] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [sortField, setSortField] = useState("completedAt");
@@ -141,74 +146,73 @@ export function useCompletedOrders(
   // ---------------------------------------------------------------------------
   // Core fetch function
   // ---------------------------------------------------------------------------
-  const fetchOrders = useCallback(
-    async (params?: {
-      page?: number;
-      search?: string;
-      registeredBy?: string;
-      dateFrom?: string;
-      dateTo?: string;
-      sortField?: string;
-      sortDir?: string;
-    }) => {
-      // Cancel any in-flight request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+  const fetchOrders = useCallback(async (params?: {
+    page?: number;
+    search?: string;
+    registeredBy?: string[];
+    dateFrom?: string;
+    dateTo?: string;
+    sortField?: string;
+    sortDir?: string;
+  }) => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    // Use provided params or fall back to ref (for polling)
+    const p = params ?? paramsRef.current;
+
+    // Build query string
+    const queryParams = new URLSearchParams();
+    queryParams.set("page", String(p.page ?? 1));
+    queryParams.set("limit", String(DEFAULT_LIMIT));
+
+    if (p.search) queryParams.set("search", p.search);
+    if (p.registeredBy && p.registeredBy.length > 0) {
+      queryParams.set("registeredBy", p.registeredBy.join(","));
+    }
+    if (p.dateFrom) queryParams.set("dateFrom", p.dateFrom);
+    if (p.dateTo) queryParams.set("dateTo", p.dateTo);
+    if (p.sortField) queryParams.set("sortField", p.sortField);
+    if (p.sortDir) queryParams.set("sortDir", p.sortDir);
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/orders/completed?${queryParams.toString()}`,
+        { signal: controller.signal }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
+      const data: CompletedOrdersResponse = await response.json();
 
-      // Use provided params or fall back to ref (for polling)
-      const p = params ?? paramsRef.current;
-
-      // Build query string
-      const queryParams = new URLSearchParams();
-      queryParams.set("page", String(p.page ?? 1));
-      queryParams.set("limit", String(DEFAULT_LIMIT));
-
-      if (p.search) queryParams.set("search", p.search);
-      if (p.registeredBy) queryParams.set("registeredBy", p.registeredBy);
-      if (p.dateFrom) queryParams.set("dateFrom", p.dateFrom);
-      if (p.dateTo) queryParams.set("dateTo", p.dateTo);
-      if (p.sortField) queryParams.set("sortField", p.sortField);
-      if (p.sortDir) queryParams.set("sortDir", p.sortDir);
-
-      setIsLoading(true);
-
-      try {
-        const response = await fetch(
-          `/api/orders/completed?${queryParams.toString()}`,
-          { signal: controller.signal }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data: CompletedOrdersResponse = await response.json();
-
-        // Only apply if this request wasn't aborted
-        if (!controller.signal.aborted) {
-          setOrders(data.orders);
-          setTotal(data.total);
-          setPageState(data.page);
-          setTotalPages(data.totalPages);
-        }
-      } catch (error: unknown) {
-        // Ignore abort errors — they're expected when cancelling stale requests
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        console.error("Failed to fetch completed orders:", error);
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+      // Only apply if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setOrders(data.orders);
+        setTotal(data.total);
+        setPageState(data.page);
+        setTotalPages(data.totalPages);
       }
-    },
-    []
-  );
+    } catch (error: unknown) {
+      // Ignore abort errors — they're expected when cancelling stale requests
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      console.error("Failed to fetch completed orders:", error);
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Setters that trigger fetch
@@ -243,7 +247,7 @@ export function useCompletedOrders(
 
   /** Change registeredBy filter — immediate fetch, reset to page 1 */
   const setRegisteredBy = useCallback(
-    (value: string) => {
+    (value: string[]) => {
       setRegisteredByState(value);
       setPageState(1);
       void fetchOrders({ ...paramsRef.current, registeredBy: value, page: 1 });
@@ -261,6 +265,32 @@ export function useCompletedOrders(
         ...paramsRef.current,
         dateFrom: from,
         dateTo: to,
+        page: 1,
+      });
+    },
+    [fetchOrders]
+  );
+
+  /**
+   * Set all filters at once — single fetch, no race condition.
+   *
+   * Use this when multiple filter dimensions change together (e.g. the
+   * OrderFilters component fires one `onFiltersChange` with registeredBy +
+   * date range). Calling individual setters sequentially causes the second
+   * fetch to spread stale `paramsRef.current` values because the React
+   * state + useEffect sync hasn't run yet.
+   */
+  const setFilters = useCallback(
+    (filters: { registeredBy: string[]; dateFrom: string; dateTo: string }) => {
+      setRegisteredByState(filters.registeredBy);
+      setDateFrom(filters.dateFrom);
+      setDateTo(filters.dateTo);
+      setPageState(1);
+      void fetchOrders({
+        ...paramsRef.current,
+        registeredBy: filters.registeredBy,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
         page: 1,
       });
     },
@@ -357,6 +387,7 @@ export function useCompletedOrders(
     setSearch,
     setRegisteredBy,
     setDateRange,
+    setFilters,
     setSortConfig,
     refetch,
   };

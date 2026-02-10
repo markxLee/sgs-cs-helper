@@ -93,7 +93,10 @@ export async function GET(request: NextRequest) {
     const page = parsePositiveInt(searchParams.get("page"), DEFAULT_PAGE);
     const limit = parsePositiveInt(searchParams.get("limit"), DEFAULT_LIMIT);
     const search = searchParams.get("search")?.trim() || undefined;
-    const registeredBy = searchParams.get("registeredBy")?.trim() || undefined;
+    const registeredByRaw = searchParams.get("registeredBy")?.trim() || undefined;
+    const registeredBy = registeredByRaw
+      ? registeredByRaw.split(",").map((s) => s.trim()).filter(Boolean)
+      : undefined;
     const dateFrom = searchParams.get("dateFrom") || undefined;
     const dateTo = searchParams.get("dateTo") || undefined;
     const completedById =
@@ -120,9 +123,9 @@ export async function GET(request: NextRequest) {
       where.jobNumber = { contains: search, mode: "insensitive" };
     }
 
-    // Filter: exact match on registeredBy
-    if (registeredBy) {
-      where.registeredBy = registeredBy;
+    // Filter: match any of selected registrants (OR logic)
+    if (registeredBy && registeredBy.length > 0) {
+      where.registeredBy = { in: registeredBy };
     }
 
     // Filter: exact match on completedById

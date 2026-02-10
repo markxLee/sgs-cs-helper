@@ -12,13 +12,14 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRealtimeProgress, type OrderData } from "@/hooks/use-realtime-progress";
 import { useOrderSSE } from "@/hooks/use-order-sse";
 import { useOrderControls } from "@/hooks/use-order-controls";
 import { OrdersTable } from "@/components/orders/orders-table";
 import { OrderFiltersComponent } from "@/components/orders/order-filters";
 import { JobSearch } from "@/components/orders/job-search";
+import { fetchRegistrants } from "@/lib/actions/order";
 
 // ============================================================================
 // Types
@@ -111,16 +112,26 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
     return result;
   }, [ordersWithProgress, activeTab, processOrders]);
 
-  // Extract unique registrants for filter dropdown
-  const registrants = useMemo(() => {
-    const uniqueRegistrants = new Set<string>();
-    ordersWithProgress.forEach((order) => {
-      if (order.registeredBy) {
-        uniqueRegistrants.add(order.registeredBy);
-      }
-    });
-    return Array.from(uniqueRegistrants).sort();
-  }, [ordersWithProgress]);
+  // Fetch registrants from Registrant table (authoritative source)
+  const [registrants, setRegistrants] = useState<string[]>([]);
+  const [isLoadingRegistrants, setIsLoadingRegistrants] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoadingRegistrants(true);
+    fetchRegistrants()
+      .then((data) => {
+        if (!cancelled) setRegistrants(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch registrants:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingRegistrants(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // Counts for display
   const inProgressCount = ordersWithProgress.filter(
@@ -148,7 +159,7 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
             }`}
           />
           {isConnected ? "Live" : "Reconnecting..."}
-          <span className="text-gray-400">
+          <span className="text-gray-400" suppressHydrationWarning>
             Updated: {formatTime(lastUpdated)}
           </span>
         </div>
@@ -173,6 +184,7 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
             <OrderFiltersComponent
               filters={filters}
               registrants={registrants}
+              isLoading={isLoadingRegistrants}
               onFiltersChange={setFilters}
             />
           </div>

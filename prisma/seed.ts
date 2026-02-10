@@ -96,6 +96,39 @@ async function main() {
     where: { role: "STAFF" }
   });
   console.log(`   ✓ Updated ${updated.count} STAFF users with permissions`);
+
+  // 6. Seed Registrants from existing Orders
+  console.log("\n👥 Seeding Registrants from existing orders...");
+  
+  // Fetch distinct registeredBy values from Order table
+  const distinctRegistrants = await prisma.order.findMany({
+    distinct: ['registeredBy'],
+    where: {
+      registeredBy: {
+        not: null,
+      },
+    },
+    select: {
+      registeredBy: true,
+    },
+  });
+
+  // Filter out empty/whitespace-only values and upsert each
+  let registrantCount = 0;
+  for (const { registeredBy } of distinctRegistrants) {
+    if (registeredBy && registeredBy.trim().length > 0) {
+      await prisma.registrant.upsert({
+        where: { name: registeredBy },
+        update: {},
+        create: { name: registeredBy },
+      });
+      registrantCount++;
+    }
+  }
+  
+  console.log(`   ✓ Seeded ${registrantCount} registrants from existing orders`);
+
+  console.log("\n✅ All seed operations completed successfully!");
 }
 
 main()
