@@ -163,9 +163,12 @@ RULES:
   - Blocked By: US-1.1.3, US-1.2.1
   - Notes: Add `Registered By` column, filters for `Registered By` and `Required Date`, sorting, and show ETA per priority from config
 
-- [ ] **US-1.2.7** — Multi-Select Registered By Filter with Dedicated Lookup Table
-  - Status: `PLANNED`
+- [x] **US-1.2.7** — Multi-Select Registered By Filter with Dedicated Lookup Table
+  - Status: `DONE`
   - Blocked By: ~~US-1.2.6~~ ✅
+  - Started: 2026-02-10
+  - ✅ Completed: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.2.7`
   - Notes: New `Registrant` lookup table, multi-select filter on both tabs, seed script from existing orders
 
 ---

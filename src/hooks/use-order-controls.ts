@@ -41,7 +41,7 @@ interface OrderWithDateFields {
 // ============================================================================
 
 const initialFilters: OrderFilters = {
-  registeredBy: "",
+  registeredBy: [],
   requiredDateFrom: "",
   requiredDateTo: "",
 };
@@ -89,7 +89,7 @@ export function useOrderControls() {
   // Check if any controls are active
   const hasActiveControls = useMemo(() => {
     return (
-      filters.registeredBy !== "" ||
+      filters.registeredBy.length > 0 ||
       filters.requiredDateFrom !== "" ||
       filters.requiredDateTo !== "" ||
       sort.field !== null ||
@@ -103,9 +103,9 @@ export function useOrderControls() {
       let result = [...orders];
 
       // Apply filters
-      if (filters.registeredBy) {
+      if (filters.registeredBy.length > 0) {
         result = result.filter(
-          (order) => order.registeredBy === filters.registeredBy
+          (order) => order.registeredBy && filters.registeredBy.includes(order.registeredBy)
         );
       }
 

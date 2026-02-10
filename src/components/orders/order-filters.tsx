@@ -1,33 +1,42 @@
 /**
- * Order Filters Component
+ * Order Filters Component — Multi-Select Registered By
  *
  * Client-side filter controls for orders table.
- * Filters by Registered By and Required Date range.
+ * Uses Popover + Command pattern for multi-select registrant filter,
+ * plus date range inputs.
  *
  * @module components/orders/order-filters
  */
 
 "use client";
 
-import { useMemo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useMemo, useState } from "react";
+import { Check, ChevronsUpDown, X, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface OrderFilters {
-  registeredBy: string;
+  registeredBy: string[];
   requiredDateFrom: string;
   requiredDateTo: string;
 }
@@ -35,8 +44,10 @@ export interface OrderFilters {
 interface OrderFiltersProps {
   filters: OrderFilters;
   onFiltersChange: (filters: OrderFilters) => void;
-  /** List of unique registrant names for dropdown */
+  /** List of all registrant names from Registrant table */
   registrants: string[];
+  /** Whether registrants are being loaded */
+  isLoading?: boolean;
 }
 
 // ============================================================================
@@ -47,69 +58,126 @@ export function OrderFiltersComponent({
   filters,
   onFiltersChange,
   registrants,
+  isLoading = false,
 }: OrderFiltersProps) {
+  const [open, setOpen] = useState(false);
+
   // Check if any filter is active
   const hasActiveFilters = useMemo(() => {
     return (
-      filters.registeredBy !== "" ||
+      filters.registeredBy.length > 0 ||
       filters.requiredDateFrom !== "" ||
       filters.requiredDateTo !== ""
     );
   }, [filters]);
 
-  // Handle filter changes
-  const handleRegisteredByChange = (value: string) => {
+  // ---- Handlers ----
+
+  /** Toggle a registrant in the selection */
+  const handleToggleRegistrant = (name: string) => {
+    const isSelected = filters.registeredBy.includes(name);
+    const next = isSelected
+      ? filters.registeredBy.filter((n) => n !== name)
+      : [...filters.registeredBy, name];
+
+    onFiltersChange({ ...filters, registeredBy: next });
+  };
+
+  /** Remove a single registrant badge */
+  const handleRemoveRegistrant = (name: string) => {
     onFiltersChange({
       ...filters,
-      registeredBy: value === "all" ? "" : value,
+      registeredBy: filters.registeredBy.filter((n) => n !== name),
     });
   };
 
   const handleDateFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFiltersChange({
-      ...filters,
-      requiredDateFrom: e.target.value,
-    });
+    onFiltersChange({ ...filters, requiredDateFrom: e.target.value });
   };
 
   const handleDateToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFiltersChange({
-      ...filters,
-      requiredDateTo: e.target.value,
-    });
+    onFiltersChange({ ...filters, requiredDateTo: e.target.value });
   };
 
   const handleClearFilters = () => {
     onFiltersChange({
-      registeredBy: "",
+      registeredBy: [],
       requiredDateFrom: "",
       requiredDateTo: "",
     });
   };
 
+  // ---- Trigger label ----
+
+  const triggerLabel = useMemo(() => {
+    const count = filters.registeredBy.length;
+    if (count === 0) return "Registered By";
+    if (count === 1) return filters.registeredBy[0];
+    return `${count} selected`;
+  }, [filters.registeredBy]);
+
+  // ---- Render ----
+
   return (
     <>
-      {/* Registered By Filter */}
+      {/* Registered By Multi-Select Filter */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="registeredBy" className="text-sm font-medium">
-          Registered By
-        </Label>
-        <Select
-          value={filters.registeredBy || "all"}
-          onValueChange={handleRegisteredByChange}
-        >
-          <SelectTrigger id="registeredBy" className="w-[180px]">
-            <SelectValue placeholder="All" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            {registrants.map((name) => (
-              <SelectItem key={name} value={name}>
-                {name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label className="text-sm font-medium">Registered By</Label>
+
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              aria-label="Select registrants to filter by"
+              className="w-[200px] justify-between font-normal"
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading…
+                </span>
+              ) : (
+                <span className="truncate">{triggerLabel}</span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+
+          <PopoverContent className="w-[220px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search registrant…" />
+              <CommandList>
+                <CommandEmpty>No registrant found.</CommandEmpty>
+                <CommandGroup>
+                  {registrants.map((name) => {
+                    const isSelected = filters.registeredBy.includes(name);
+                    return (
+                      <CommandItem
+                        key={name}
+                        value={name}
+                        onSelect={() => handleToggleRegistrant(name)}
+                      >
+                        <div
+                          className={cn(
+                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                            isSelected
+                              ? "bg-primary text-primary-foreground"
+                              : "opacity-50 [&_svg]:invisible"
+                          )}
+                        >
+                          <Check className="h-3 w-3" />
+                        </div>
+                        <span>{name}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Required Date From */}
@@ -151,6 +219,29 @@ export function OrderFiltersComponent({
           <X className="h-4 w-4 mr-1" />
           Clear Filters
         </Button>
+      )}
+
+      {/* Selected registrant badges — full-width row below filter controls */}
+      {filters.registeredBy.length > 0 && (
+        <div className="basis-full flex flex-wrap gap-1">
+          {filters.registeredBy.map((name) => (
+            <Badge
+              key={name}
+              variant="secondary"
+              className="text-xs px-1.5 py-0"
+            >
+              {name}
+              <button
+                type="button"
+                aria-label={`Remove ${name}`}
+                className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                onClick={() => handleRemoveRegistrant(name)}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
       )}
     </>
   );

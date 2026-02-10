@@ -78,6 +78,45 @@ async function requireUploadPermission(): Promise<Session> {
 }
 
 // ============================================================================
+// Registrant Actions
+// ============================================================================
+
+/**
+ * Fetch all registrant names from the Registrant table
+ *
+ * Returns a list of all unique registrant names, sorted alphabetically.
+ * Used by filter components to populate dropdown options.
+ *
+ * @returns Array of registrant names sorted A-Z (case-insensitive)
+ * @throws Error if user is not authenticated
+ *
+ * @example
+ * const registrants = await fetchRegistrants();
+ * // ["Alice Johnson", "Bob Smith", "Carol Williams"]
+ */
+export async function fetchRegistrants(): Promise<string[]> {
+  try {
+    // Auth check - require authenticated user
+    const session = await auth();
+    if (!session?.user) {
+      throw new Error("Unauthorized. Please log in.");
+    }
+
+    // Fetch all registrants sorted by name
+    const registrants = await prisma.registrant.findMany({
+      select: { name: true },
+      orderBy: { name: "asc" },
+    });
+
+    // Map to array of names
+    return registrants.map((r) => r.name);
+  } catch (error) {
+    console.error("fetchRegistrants error:", error);
+    throw error;
+  }
+}
+
+// ============================================================================
 // Helpers
 // ============================================================================
 
@@ -159,6 +198,29 @@ export async function createOrders(
     const { created, updated, unchanged, failed } =
       await prisma.$transaction(
         async (tx) => {
+          // ============================================================
+          // FR-003: Upsert unique registrants from orders into Registrant table
+          // ============================================================
+          const registrantNames = new Set<string>();
+          
+          for (const order of validatedOrders) {
+            if (order.registeredBy && order.registeredBy.trim().length > 0) {
+              registrantNames.add(order.registeredBy);
+            }
+          }
+          
+          // Upsert each unique registrant (idempotent)
+          for (const name of registrantNames) {
+            await tx.registrant.upsert({
+              where: { name },
+              update: {}, // No updates needed, just ensure exists
+              create: { name },
+            });
+          }
+          
+          // ============================================================
+          // Process orders (create/update/unchanged)
+          // ============================================================
           const created: Order[] = [];
           const updated: Order[] = [];
           const unchanged: UnchangedOrder[] = [];
