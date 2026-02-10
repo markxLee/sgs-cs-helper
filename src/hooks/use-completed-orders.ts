@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // ============================================================================
 // Constants
@@ -35,6 +35,12 @@ export interface CompletedOrder {
   priority: number;
   status: string;
   completedAt: string | null;
+  completedById: string | null;
+  completedBy: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
 }
 
 interface CompletedOrdersResponse {
@@ -135,71 +141,74 @@ export function useCompletedOrders(
   // ---------------------------------------------------------------------------
   // Core fetch function
   // ---------------------------------------------------------------------------
-  const fetchOrders = useCallback(async (params?: {
-    page?: number;
-    search?: string;
-    registeredBy?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    sortField?: string;
-    sortDir?: string;
-  }) => {
-    // Cancel any in-flight request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    // Use provided params or fall back to ref (for polling)
-    const p = params ?? paramsRef.current;
-
-    // Build query string
-    const queryParams = new URLSearchParams();
-    queryParams.set("page", String(p.page ?? 1));
-    queryParams.set("limit", String(DEFAULT_LIMIT));
-
-    if (p.search) queryParams.set("search", p.search);
-    if (p.registeredBy) queryParams.set("registeredBy", p.registeredBy);
-    if (p.dateFrom) queryParams.set("dateFrom", p.dateFrom);
-    if (p.dateTo) queryParams.set("dateTo", p.dateTo);
-    if (p.sortField) queryParams.set("sortField", p.sortField);
-    if (p.sortDir) queryParams.set("sortDir", p.sortDir);
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `/api/orders/completed?${queryParams.toString()}`,
-        { signal: controller.signal }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+  const fetchOrders = useCallback(
+    async (params?: {
+      page?: number;
+      search?: string;
+      registeredBy?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      sortField?: string;
+      sortDir?: string;
+    }) => {
+      // Cancel any in-flight request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      const data: CompletedOrdersResponse = await response.json();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
-      // Only apply if this request wasn't aborted
-      if (!controller.signal.aborted) {
-        setOrders(data.orders);
-        setTotal(data.total);
-        setPageState(data.page);
-        setTotalPages(data.totalPages);
+      // Use provided params or fall back to ref (for polling)
+      const p = params ?? paramsRef.current;
+
+      // Build query string
+      const queryParams = new URLSearchParams();
+      queryParams.set("page", String(p.page ?? 1));
+      queryParams.set("limit", String(DEFAULT_LIMIT));
+
+      if (p.search) queryParams.set("search", p.search);
+      if (p.registeredBy) queryParams.set("registeredBy", p.registeredBy);
+      if (p.dateFrom) queryParams.set("dateFrom", p.dateFrom);
+      if (p.dateTo) queryParams.set("dateTo", p.dateTo);
+      if (p.sortField) queryParams.set("sortField", p.sortField);
+      if (p.sortDir) queryParams.set("sortDir", p.sortDir);
+
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/orders/completed?${queryParams.toString()}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data: CompletedOrdersResponse = await response.json();
+
+        // Only apply if this request wasn't aborted
+        if (!controller.signal.aborted) {
+          setOrders(data.orders);
+          setTotal(data.total);
+          setPageState(data.page);
+          setTotalPages(data.totalPages);
+        }
+      } catch (error: unknown) {
+        // Ignore abort errors — they're expected when cancelling stale requests
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to fetch completed orders:", error);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
-    } catch (error: unknown) {
-      // Ignore abort errors — they're expected when cancelling stale requests
-      if (error instanceof DOMException && error.name === "AbortError") {
-        return;
-      }
-      console.error("Failed to fetch completed orders:", error);
-    } finally {
-      if (!controller.signal.aborted) {
-        setIsLoading(false);
-      }
-    }
-  }, []);
+    },
+    []
+  );
 
   // ---------------------------------------------------------------------------
   // Setters that trigger fetch

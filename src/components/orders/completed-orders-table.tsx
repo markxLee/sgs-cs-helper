@@ -12,7 +12,13 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import {
+  SortableHeader,
+  type SortConfig,
+} from "@/components/orders/sortable-header";
+import { UndoCompleteModal } from "@/components/orders/UndoCompleteModal";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -21,19 +27,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Undo2,
-  PackageOpen,
-} from "lucide-react";
-import { SortableHeader, type SortConfig } from "@/components/orders/sortable-header";
-import { UndoCompleteModal } from "@/components/orders/UndoCompleteModal";
-import { getPriorityDuration } from "@/lib/utils/progress";
-import { cn } from "@/lib/utils";
 import type { CompletedOrder } from "@/hooks/use-completed-orders";
+import { cn } from "@/lib/utils";
+import { calcActualDuration, formatDuration } from "@/lib/utils/duration";
+import { getPriorityDuration } from "@/lib/utils/progress";
+import { ChevronLeft, ChevronRight, PackageOpen, Undo2 } from "lucide-react";
+import { useCallback, useState } from "react";
 
 // ============================================================================
 // Types
@@ -102,13 +101,33 @@ function getPriorityClass(priority: number): string {
 function SkeletonRow() {
   return (
     <TableRow>
-      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-28" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-28" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-16" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-28" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-16" />
+      </TableCell>
     </TableRow>
   );
 }
@@ -180,7 +199,12 @@ export function CompletedOrdersTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[120px]">Job Number</TableHead>
-              <TableHead className={cn("w-[160px]", "hover:bg-muted/50 transition-colors")}>
+              <TableHead
+                className={cn(
+                  "w-[160px]",
+                  "hover:bg-muted/50 transition-colors"
+                )}
+              >
                 <SortableHeader
                   label="Registered Date"
                   field="registeredDate"
@@ -189,7 +213,12 @@ export function CompletedOrdersTable({
                 />
               </TableHead>
               <TableHead className="w-[140px]">Registered By</TableHead>
-              <TableHead className={cn("w-[160px]", "hover:bg-muted/50 transition-colors")}>
+              <TableHead
+                className={cn(
+                  "w-[160px]",
+                  "hover:bg-muted/50 transition-colors"
+                )}
+              >
                 <SortableHeader
                   label="Required Date"
                   field="requiredDate"
@@ -198,7 +227,12 @@ export function CompletedOrdersTable({
                 />
               </TableHead>
               <TableHead className="w-[100px]">Priority</TableHead>
-              <TableHead className={cn("w-[170px]", "hover:bg-muted/50 transition-colors")}>
+              <TableHead
+                className={cn(
+                  "w-[170px]",
+                  "hover:bg-muted/50 transition-colors"
+                )}
+              >
                 <SortableHeader
                   label="Completed At"
                   field="completedAt"
@@ -206,9 +240,21 @@ export function CompletedOrdersTable({
                   onSort={onSort}
                 />
               </TableHead>
-              {canUndo && (
-                <TableHead className="w-[100px]">Action</TableHead>
-              )}
+              <TableHead
+                className={cn(
+                  "w-[160px]",
+                  "hover:bg-muted/50 transition-colors"
+                )}
+              >
+                <SortableHeader
+                  label="Completed By"
+                  field="completedBy"
+                  currentSort={sortConfig}
+                  onSort={onSort}
+                />
+              </TableHead>
+              <TableHead className="w-[150px]">Actual Duration</TableHead>
+              {canUndo && <TableHead className="w-[100px]">Action</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -227,7 +273,7 @@ export function CompletedOrdersTable({
             {!isLoading && orders.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={canUndo ? 7 : 6}
+                  colSpan={canUndo ? 9 : 8}
                   className="h-32 text-center"
                 >
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -240,7 +286,10 @@ export function CompletedOrdersTable({
 
             {/* Data rows */}
             {orders.map((order) => (
-              <TableRow key={order.id} className={isLoading ? "opacity-50" : ""}>
+              <TableRow
+                key={order.id}
+                className={isLoading ? "opacity-50" : ""}
+              >
                 <TableCell className="font-medium">{order.jobNumber}</TableCell>
                 <TableCell>{formatDate(order.registeredDate)}</TableCell>
                 <TableCell className="max-w-[140px]">
@@ -264,6 +313,64 @@ export function CompletedOrdersTable({
                     <span className="text-green-700 font-medium">
                       {formatDate(order.completedAt)}
                     </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="max-w-[160px]">
+                  {order.completedBy ? (
+                    <span
+                      className="truncate block"
+                      title={`${order.completedBy.name} (${order.completedBy.email})`}
+                    >
+                      {order.completedBy.name} ({order.completedBy.email})
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {order.completedAt ? (
+                    (() => {
+                      const receivedDate = new Date(order.receivedDate);
+                      const completedAt = new Date(order.completedAt!);
+                      const actualMs = calcActualDuration(
+                        receivedDate,
+                        completedAt
+                      );
+
+                      // Compare actual duration against priority-based duration
+                      // (same logic as progress bar: P0=0.25h, P1=1h, P2=2.5h, P3+=3h)
+                      const MS_PER_HOUR = 1000 * 60 * 60;
+                      const priorityDurationHours = getPriorityDuration(
+                        order.priority
+                      );
+                      const priorityDurationMs =
+                        priorityDurationHours * MS_PER_HOUR;
+                      const isCompletedOverdue = actualMs > priorityDurationMs;
+                      const overdueDurationMs = isCompletedOverdue
+                        ? actualMs - priorityDurationMs
+                        : null;
+
+                      return (
+                        <div
+                          className={
+                            isCompletedOverdue
+                              ? "text-purple-600"
+                              : "text-green-600"
+                          }
+                        >
+                          <span className="font-medium">
+                            {formatDuration(actualMs)}
+                          </span>
+                          {overdueDurationMs != null && (
+                            <span className="block text-xs text-purple-500">
+                              Overdue: {formatDuration(overdueDurationMs)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()
                   ) : (
                     <span className="text-muted-foreground">—</span>
                   )}
