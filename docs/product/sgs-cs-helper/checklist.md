@@ -10,7 +10,7 @@
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
 | **Purpose** | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 21 |
+| **Total Stories** | 26 |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE` |
 
 ---
@@ -162,6 +162,11 @@ RULES:
   - Blocked By: US-1.1.3, US-1.2.1
   - Notes: Add `Registered By` column, filters for `Registered By` and `Required Date`, sorting, and show ETA per priority from config
 
+- [ ] **US-1.2.7** — Multi-Select Registered By Filter with Dedicated Lookup Table
+  - Status: `PLANNED`
+  - Blocked By: ~~US-1.2.6~~ ✅
+  - Notes: New `Registrant` lookup table, multi-select filter on both tabs, seed script from existing orders
+
 ---
 
 ### Epic 1.3: Order Completion
@@ -183,6 +188,32 @@ RULES:
   - Blocked By: ~~US-1.3.1~~ ✅
   - ✅ Completed: 2026-02-09 (covered by US-1.3.2)
 
+- [ ] **US-1.3.4** — Scan QR/Barcode to Mark Order Complete
+  - Status: `PLANNED`
+  - Blocked By: ~~US-1.3.1~~ ✅
+  - Notes: Use `@yudiel/react-qr-scanner`, camera-based scan on mobile, HTTPS required
+
+- [ ] **US-1.3.5** — Completion Tracking — Log Completed By & Show Actual Duration
+  - Status: `PLANNED`
+  - Blocked By: ~~US-1.3.1~~ ✅, ~~US-1.3.2~~ ✅
+  - Notes: Add `completedById` to schema, show "Completed By" + "Actual Duration" columns in Completed tab, overdue indicator
+
+---
+
+## Phase 2: Reporting & Analytics
+
+### Epic 2.1: Performance Dashboard
+
+- [ ] **US-2.1.1** — Performance Dashboard with Chart Visualization
+  - Status: `PLANNED`
+  - Blocked By: US-1.3.5
+  - Notes: Add charts (recharts) + KPI cards to existing dashboard page, Admin/Super Admin only, scope/time filters
+
+- [ ] **US-2.1.2** — Export Performance Report & Orders to Excel
+  - Status: `PLANNED`
+  - Blocked By: US-2.1.1
+  - Notes: Export summary report (.xlsx) with team avg comparison + export filtered orders, server-side generation
+
 ---
 
 ## Quick Stats
@@ -193,9 +224,10 @@ RULES:
 | 0 | 0.2 Authentication | 4 | ⏳ Blocked by US-0.3.1 |
 | 0 | 0.3 Database Schema | 2 | ✅ US-0.3.1 ready |
 | 1 | 1.1 Upload & Parsing | 3 | ⏳ Blocked |
-| 1 | 1.2 Dashboard | 5 | ⏳ Blocked |
-| 1 | 1.3 Completion | 3 | ⏳ Blocked |
-| **Total** | | **17** | **2 ready** |
+| 1 | 1.2 Dashboard | 6 | ⏳ Blocked |
+| 1 | 1.3 Completion | 5 | ⏳ Blocked |
+| 2 | 2.1 Performance Dashboard | 2 | ⏳ Blocked |
+| **Total** | | **22** | **2 ready** |
 
 ---
 
@@ -312,6 +344,11 @@ RULES:
   - Trạng thái: `PLANNED`
   - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
+- [ ] **US-1.2.7** — Bộ lọc Registered By Multi-Select với Bảng Tra cứu Riêng
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: ~~US-1.2.6~~ ✅
+  - Ghi chú: Bảng tra cứu `Registrant` mới, bộ lọc multi-select trên cả 2 tab, script seed từ đơn hiện có
+
 ---
 
 ### Epic 1.3: Hoàn thành Đơn hàng
@@ -331,6 +368,32 @@ RULES:
   - Bị chặn bởi: ~~US-1.3.1~~ ✅
   - ✅ Hoàn thành: 2026-02-09 (bao gồm trong US-1.3.2)
 
+- [ ] **US-1.3.4** — Quét QR/Barcode để Đánh dấu Đơn Hoàn thành
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: ~~US-1.3.1~~ ✅
+  - Ghi chú: Dùng `@yudiel/react-qr-scanner`, quét bằng camera trên mobile, yêu cầu HTTPS
+
+- [ ] **US-1.3.5** — Theo dõi Hoàn thành — Ghi nhận Người Hoàn thành & Thời gian Thực tế
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: ~~US-1.3.1~~ ✅, ~~US-1.3.2~~ ✅
+  - Ghi chú: Thêm `completedById` vào schema, hiển thị cột "Người Hoàn thành" + "Thời gian Thực tế" trong tab Hoàn Thành, chỉ báo quá hạn
+
+---
+
+## Phase 2: Báo cáo & Phân tích
+
+### Epic 2.1: Dashboard Hiệu suất
+
+- [ ] **US-2.1.1** — Dashboard Hiệu suất với Biểu đồ Trực quan
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: US-1.3.5
+  - Ghi chú: Thêm biểu đồ (recharts) + thẻ KPI vào trang dashboard hiện tại, chỉ Admin/Super Admin, bộ lọc phạm vi/thời gian
+
+- [ ] **US-2.1.2** — Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: US-2.1.1
+  - Ghi chú: Xuất báo cáo tổng hợp (.xlsx) so sánh TB team + xuất đơn theo bộ lọc, tạo file phía server
+
 ---
 
 ## Thống kê
@@ -341,9 +404,10 @@ RULES:
 | 0 | 0.2 Xác thực | 4 | ⏳ Chờ US-0.3.1 |
 | 0 | 0.3 Database | 2 | ✅ US-0.3.1 sẵn sàng |
 | 1 | 1.1 Upload | 3 | ⏳ Đang chặn |
-| 1 | 1.2 Dashboard | 5 | ⏳ Đang chặn |
-| 1 | 1.3 Hoàn thành | 3 | ⏳ Đang chặn |
-| **Tổng** | | **17** | **2 sẵn sàng** |
+| 1 | 1.2 Dashboard | 6 | ⏳ Đang chặn |
+| 1 | 1.3 Hoàn thành | 5 | ⏳ Đang chặn |
+| 2 | 2.1 Dashboard Hiệu suất | 2 | ⏳ Đang chặn |
+| **Tổng** | | **22** | **2 sẵn sàng** |
 
 ---
 

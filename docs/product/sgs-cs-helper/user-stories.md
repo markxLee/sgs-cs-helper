@@ -9,8 +9,8 @@
 |-------|-------|
 | **Product Name** | SGS CS Order Tracker |
 | **Product Slug** | `sgs-cs-helper` |
-| **Scope Covered** | Phase 0 (Foundation) + Phase 1 (MVP) |
-| **Total User Stories** | 19 |
+| **Scope Covered** | Phase 0 (Foundation) + Phase 1 (MVP) + Phase 2 (Reporting & Analytics) |
+| **Total User Stories** | 24 |
 
 ---
 
@@ -500,6 +500,33 @@ Phase 1 MVP:                                    │
 
 ---
 
+**US-1.2.7: Multi-Select Registered By Filter with Dedicated Lookup Table**
+
+- **Description**: As a Staff member / Admin, I need the "Registered By" filter on both In Progress and Completed tabs to support multi-select, with a complete data source backed by a dedicated `Registrant` lookup table (populated during Excel upload and seeded from existing orders), so I can filter orders by multiple registrants at once and never miss registrants who only appear on other pages.
+
+- **Acceptance Criteria**:
+  - AC1: New Prisma model `Registrant` with `name String @unique` — serves as lookup table for all known registrant names
+  - AC2: During Excel upload (upsert flow), extract unique `registeredBy` values and insert into `Registrant` table if not already present
+  - AC3: Seed/migration script to populate `Registrant` from existing `Order.registeredBy` via `SELECT DISTINCT registeredBy FROM "Order" WHERE registeredBy IS NOT NULL`
+  - AC4: API endpoint or Server Action to fetch all registrants from the `Registrant` table (replaces client-side `Set` extraction)
+  - AC5: "Registered By" filter on **In Progress** tab changes from single-select to multi-select (select multiple names)
+  - AC6: "Registered By" filter on **Completed** tab changes from single-select to multi-select (same component)
+  - AC7: Filter logic: when multiple registrants selected, show orders matching ANY of the selected registrants (`OR` logic)
+  - AC8: Multi-select UI shows selected count badge (e.g., "2 selected") and allows clearing all or individual selections
+  - AC9: `OrderFilters` type updated: `registeredBy: string` → `registeredBy: string[]`
+  - AC10: Completed tab server-side query supports `registeredBy` as array (Prisma `in` clause)
+  - AC11: In Progress tab client-side filter supports `registeredBy` as array
+
+- **Blocked By**: US-1.2.6
+
+- **Notes**:
+  - Current limitation: In Progress tab extracts registrants from loaded orders via `Set`; Completed tab extracts from current page only (max 50)
+  - `Registrant` table ensures complete data regardless of pagination
+  - Multi-select component: use shadcn `Popover` + `Command` (combobox) pattern or similar
+  - Schema: `model Registrant { id String @id @default(cuid()); name String @unique; createdAt DateTime @default(now()) }`
+
+---
+
 ### Epic 1.3: Order Completion
 
 ---
@@ -597,6 +624,124 @@ Phase 1 MVP:                                    │
 
 ---
 
+**US-1.3.4: Scan QR/Barcode to Mark Order Complete**
+
+- **Description**: As a Staff member, I can scan a QR code or barcode on a physical job document to quickly find the order by Job Number and mark it as complete, so that I don't need to manually search the list.
+
+- **Acceptance Criteria**:
+  - AC1: A "Scan" button/icon exists on the orders page (visible to users with `canUpdateStatus`)
+  - AC2: Clicking "Scan" opens a camera-based QR/barcode scanner using `@yudiel/react-qr-scanner`
+  - AC3: Scanner uses rear camera (`facingMode: 'environment'`) by default on mobile
+  - AC4: When a QR/barcode is detected, the decoded text is used to search for a matching Job Number (case-insensitive)
+  - AC5: If Job Number exists AND status is `IN_PROGRESS`: show an alert/dialog with order details and a "Mark Complete" button
+  - AC6: If Job Number exists AND status is `COMPLETED`: show info message "Order already completed"
+  - AC7: If Job Number not found: show error message "Order not found"
+  - AC8: After successful mark complete, scanner stays open for continuous scanning (batch workflow)
+  - AC9: Scanner can be closed/dismissed at any time
+  - AC10: Works on mobile browsers (iOS Safari 14.5+, Android Chrome 88+) over HTTPS
+  - AC11: Permission-gated: only users with `canUpdateStatus` can see and use the scan feature
+
+- **Blocked By**: US-1.3.1
+
+- **Notes**:
+  - Library: `@yudiel/react-qr-scanner` (v2.5.1) — React-first, TypeScript, actively maintained
+  - Next.js SSR: Use `dynamic(() => import(...), { ssr: false })` for client-only rendering
+  - Requires HTTPS (Vercel deploy satisfies this)
+  - Supports QR codes and 1D barcodes (Code 128, EAN-13, etc.)
+  - Consider adding haptic/sound feedback on successful scan
+
+---
+
+**US-1.3.5: Completion Tracking — Log Completed By & Show Actual Duration**
+
+- **Description**: As a Staff member / Admin, I need the system to record who completed each order (for staff performance reporting) and display the actual processing duration in the Completed tab (time from `receivedDate` to `completedAt`), including overdue indication showing how much time exceeded the deadline.
+
+- **Acceptance Criteria**:
+  - AC1: When marking an order as complete, the `completedById` (current user ID) is recorded in the Order record
+  - AC2: Schema change: add `completedById` (optional FK → User) and `completedBy` relation to Order model
+  - AC3: Completed tab displays a "Completed By" column showing the name of the user who completed the order
+  - AC4: Completed tab displays an "Actual Duration" column showing elapsed time from `receivedDate` to `completedAt` (e.g., "2d 5h", "18h 30m")
+  - AC5: If the order was completed after `requiredDate` (overdue): display overdue indicator with how long past deadline (e.g., "⚠️ Overdue 1d 3h" in red)
+  - AC6: If the order was completed before or on `requiredDate`: display on-time indicator (e.g., "✅ On time" or green styling)
+  - AC7: Actual Duration calculation: `completedAt - receivedDate` (consistent with existing progress bar logic which uses `receivedDate`)
+  - AC8: Overdue calculation: `completedAt - requiredDate` (only when `completedAt > requiredDate`)
+  - AC9: Undo completion (`US-1.3.3`) must also clear `completedById` (set to null)
+  - AC10: "Completed By" is sortable and filterable in the Completed tab
+  - AC11: QR scan completion (`US-1.3.4`) must also log `completedById`
+
+- **Blocked By**: US-1.3.1, US-1.3.2
+
+- **Notes**:
+  - Schema: `completedById String?` + `completedBy User? @relation("CompletedBy", ...)` on Order model
+  - Actual Duration uses `receivedDate` (sample received time) as start, matching existing progress bar
+  - Overdue uses `requiredDate` as deadline reference
+  - Supports future staff performance reporting (filter/group by `completedBy`)
+
+---
+
+---
+
+## Phase 2: Reporting & Analytics
+
+### Epic 2.1: Performance Dashboard
+
+---
+
+**US-2.1.1: Performance Dashboard with Chart Visualization**
+
+- **Description**: As an Admin / Super Admin, I need the main dashboard to display performance charts and KPI metrics showing completion data by team, group, or individual user over configurable time ranges, so I can monitor team productivity at a glance.
+
+- **Acceptance Criteria**:
+  - AC1: Dashboard page (`/`) shows performance section for Admin and Super Admin roles (Staff sees current view unchanged)
+  - AC2: Scope selector: "All Team", "Group" (select group), "Individual" (select user) — defaults to "All Team"
+  - AC3: Time range filter with presets: Today, Last 7 Days, This Month, Last Month, Last 3 Months, Custom date range picker
+  - AC4: KPI summary cards: Total Completed, On-Time Rate (%), Average Processing Time, Overdue Count
+  - AC5: Bar chart: completed orders per user (horizontal bar, sorted descending) for the selected scope/range
+  - AC6: Pie/donut chart: On-Time vs Overdue ratio
+  - AC7: Line chart (optional): completion trend over time for selected range (daily/weekly granularity)
+  - AC8: Table view below charts showing per-user breakdown: User Name, Completed Count, On-Time %, Avg Duration, Overdue Count
+  - AC9: Chart library: `recharts` (React-native, lightweight, composable, SSR-friendly with `dynamic()`)
+  - AC10: Data aggregation computed server-side (Server Action) — client receives pre-computed metrics
+  - AC11: Empty state shown when no completed orders exist in selected range
+  - AC12: Responsive layout — charts stack vertically on mobile, grid on desktop
+
+- **Blocked By**: US-1.3.5
+
+- **Notes**:
+  - Charts rendered on existing dashboard page (`(dashboard)/page.tsx`), not a separate route
+  - Only Admin/Super Admin see the performance section; Staff view remains unchanged
+  - Library: `recharts` — React-first, composable, lightweight (~45kB gzipped)
+  - Next.js SSR: Use `dynamic(() => import(...), { ssr: false })` for chart components
+  - Server Action returns pre-aggregated data to minimize client-side computation
+
+---
+
+**US-2.1.2: Export Performance Report & Orders to Excel**
+
+- **Description**: As an Admin / Super Admin, I need to export aggregated performance summary (with team average comparison) and/or filtered completed orders to Excel files from the dashboard, for KPI reporting and staff evaluation.
+
+- **Acceptance Criteria**:
+  - AC1: "Export Summary" button generates `.xlsx` with KPI metrics for the selected scope and time range
+  - AC2: Summary Excel: per-user rows (User Name, Completed Count, On-Time %, Avg Duration, Overdue Count) + "Team Average" comparison row
+  - AC3: Each user row includes above/below team average indicator column
+  - AC4: "Export Orders" button generates `.xlsx` with completed orders for current filters
+  - AC5: Orders Excel columns: Job Number, Customer, Priority, Received Date, Required Date, Completed At, Completed By, Actual Duration, On-Time/Overdue status
+  - AC6: Export respects all current filters: time range, scope, search query
+  - AC7: File naming: `performance-report-{scope}-{dateRange}.xlsx`, `completed-orders-{scope}-{dateRange}.xlsx`
+  - AC8: Excel generation server-side (Server Action) using `exceljs` or `xlsx` library
+  - AC9: Loading indicator while export generates
+  - AC10: Reasonable export limit (e.g., 10,000 orders) with warning if exceeded
+
+- **Blocked By**: US-2.1.1
+
+- **Notes**:
+  - Excel library: `exceljs` or `xlsx` — evaluate during implementation
+  - Server Action generates buffer, returns as downloadable file
+  - Team average row enables quick comparison for staff evaluation
+  - Export buttons placed near the charts/table section on dashboard
+
+---
+
 ---
 
 ## User Story Summary Table
@@ -621,9 +766,14 @@ Phase 1 MVP:                                    │
 | US-1.2.3 | Priority Color Coding | US-1.2.1 | 1 |
 | US-1.2.4 | Filter Orders by Status | US-1.2.1 | 1 |
 | US-1.2.5 | Sort Orders | US-1.2.1 | 1 |
+| US-1.2.7 | Multi-Select Registered By Filter with Dedicated Lookup Table | US-1.2.6 | 1 |
 | US-1.3.1 | Mark Order as Done | US-1.2.1 | 1 |
 | US-1.3.2 | Visual Distinction for Completed Orders | US-1.3.1 | 1 |
 | US-1.3.3 | Undo Order Completion | US-1.3.1 | 1 |
+| US-1.3.4 | Scan QR/Barcode to Mark Order Complete | US-1.3.1 | 1 |
+| US-1.3.5 | Completion Tracking — Log Completed By & Actual Duration | US-1.3.1, US-1.3.2 | 1 |
+| US-2.1.1 | Performance Dashboard with Chart Visualization | US-1.3.5 | 2 |
+| US-2.1.2 | Export Performance Report & Orders to Excel | US-2.1.1 | 2 |
 
 ---
 
@@ -638,6 +788,7 @@ These stories can be worked on in parallel after their dependencies are met:
 | US-0.2.1 | US-0.2.2, US-0.2.5 |
 | US-0.2.2 | US-0.2.7, US-0.2.8 |
 | US-1.2.1 | US-1.2.2, US-1.2.3, US-1.2.4, US-1.2.5, US-1.3.1 |
+| US-1.3.5 | US-2.1.1 |
 
 ---
 
@@ -953,6 +1104,34 @@ These stories can be worked on in parallel after their dependencies are met:
 
 - **Ghi chú**: ETA theo priority nên được lưu hoặc suy ra từ cấu hình `priority_to_eta` (ví dụ: Priority 1 -> 2h, Priority 2 -> 8h)
 
+---
+
+**US-1.2.7: Bộ lọc Registered By Multi-Select với Bảng Tra cứu Riêng**
+
+- **Mô tả**: Là nhân viên / Admin, tôi cần bộ lọc "Registered By" trên cả tab In Progress và Completed hỗ trợ chọn nhiều, với nguồn dữ liệu đầy đủ từ bảng tra cứu `Registrant` riêng (được tạo khi upload Excel và seed từ dữ liệu Order hiện có), để lọc đơn theo nhiều người đăng ký cùng lúc và không bỏ sót registrant chỉ xuất hiện ở trang khác.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Model Prisma mới `Registrant` với `name String @unique` — bảng tra cứu tất cả tên registrant
+  - AC2: Khi upload Excel (upsert), trích xuất `registeredBy` duy nhất và thêm vào bảng `Registrant` nếu chưa có
+  - AC3: Script seed/migration để tạo dữ liệu `Registrant` từ Order hiện có qua `SELECT DISTINCT`
+  - AC4: API endpoint hoặc Server Action lấy tất cả registrant từ bảng `Registrant`
+  - AC5: Bộ lọc "Registered By" trên tab **In Progress** đổi từ single-select sang multi-select
+  - AC6: Bộ lọc "Registered By" trên tab **Completed** đổi từ single-select sang multi-select (cùng component)
+  - AC7: Logic lọc: khi chọn nhiều registrant, hiện đơn khớp BẤT KỲ registrant nào (logic `OR`)
+  - AC8: UI multi-select hiện badge số đã chọn (VD: "2 đã chọn") và cho phép xóa từng hoặc tất cả
+  - AC9: Kiểu `OrderFilters` cập nhật: `registeredBy: string` → `registeredBy: string[]`
+  - AC10: Query server-side tab Completed hỗ trợ `registeredBy` dạng mảng (Prisma `in`)
+  - AC11: Filter client-side tab In Progress hỗ trợ `registeredBy` dạng mảng
+
+- **Bị chặn bởi**: US-1.2.6
+
+- **Ghi chú**:
+  - Hạn chế hiện tại: Tab In Progress trích xuất registrant từ đơn đã tải qua `Set`; tab Completed chỉ lấy từ trang hiện tại (tối đa 50)
+  - Bảng `Registrant` đảm bảo dữ liệu đầy đủ bất kể phân trang
+  - Component multi-select: dùng pattern shadcn `Popover` + `Command` (combobox) hoặc tương tự
+  - Schema: `model Registrant { id String @id @default(cuid()); name String @unique; createdAt DateTime @default(now()) }`
+
+---
 
 **US-1.2.3: Mã màu theo Priority**
 
@@ -1054,6 +1233,124 @@ These stories can be worked on in parallel after their dependencies are met:
   - AC5: Sau 5 phút, tùy chọn hoàn tác không còn khả dụng
 
 - **Bị chặn bởi**: US-1.3.1
+
+---
+
+**US-1.3.4: Quét QR/Barcode để Đánh dấu Đơn Hoàn thành**
+
+- **Mô tả**: Là nhân viên, tôi có thể quét mã QR hoặc barcode trên hồ sơ giấy để nhanh chóng tìm đơn theo Job Number và đánh dấu hoàn thành, mà không cần tìm kiếm thủ công trên danh sách.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Nút/icon "Quét" trên trang orders (chỉ hiển thị với user có quyền `canUpdateStatus`)
+  - AC2: Click "Quét" mở scanner camera sử dụng `@yudiel/react-qr-scanner`
+  - AC3: Scanner dùng camera sau (`facingMode: 'environment'`) mặc định trên mobile
+  - AC4: Khi phát hiện QR/barcode, text giải mã được dùng để tìm Job Number (không phân biệt hoa thường)
+  - AC5: Nếu Job Number tồn tại VÀ trạng thái `IN_PROGRESS`: hiện alert/dialog với thông tin đơn và nút "Đánh dấu Hoàn thành"
+  - AC6: Nếu Job Number tồn tại VÀ trạng thái `COMPLETED`: hiện thông báo "Đơn đã hoàn thành"
+  - AC7: Nếu không tìm thấy Job Number: hiện thông báo lỗi "Không tìm thấy đơn hàng"
+  - AC8: Sau khi mark complete thành công, scanner vẫn mở để quét tiếp (quy trình batch)
+  - AC9: Scanner có thể đóng bất cứ lúc nào
+  - AC10: Hoạt động trên trình duyệt mobile (iOS Safari 14.5+, Android Chrome 88+) qua HTTPS
+  - AC11: Phân quyền: chỉ user có `canUpdateStatus` mới thấy và dùng tính năng quét
+
+- **Bị chặn bởi**: US-1.3.1
+
+- **Ghi chú**:
+  - Thư viện: `@yudiel/react-qr-scanner` (v2.5.1) — React-first, TypeScript, đang được duy trì
+  - Next.js SSR: Dùng `dynamic(() => import(...), { ssr: false })` để render client-only
+  - Yêu cầu HTTPS (deploy Vercel đáp ứng)
+  - Hỗ trợ QR codes và 1D barcodes (Code 128, EAN-13, v.v.)
+  - Cân nhắc thêm phản hồi haptic/âm thanh khi quét thành công
+
+---
+
+**US-1.3.5: Theo dõi Hoàn thành — Ghi nhận Người Hoàn thành & Hiển thị Thời gian Thực tế**
+
+- **Mô tả**: Là nhân viên / Admin, tôi cần hệ thống ghi nhận ai hoàn thành mỗi đơn (để báo cáo hiệu suất nhân viên) và hiển thị thời gian xử lý thực tế trong tab Hoàn Thành (từ `receivedDate` đến `completedAt`), bao gồm chỉ báo quá hạn cho biết vượt deadline bao lâu.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Khi đánh dấu đơn hoàn thành, `completedById` (ID user hiện tại) được ghi vào Order
+  - AC2: Thay đổi schema: thêm `completedById` (FK tùy chọn → User) và relation `completedBy` vào Order model
+  - AC3: Tab Hoàn Thành hiển thị cột "Người Hoàn thành" (tên user đã complete)
+  - AC4: Tab Hoàn Thành hiển thị cột "Thời gian Thực tế" — thời gian từ `receivedDate` đến `completedAt` (VD: "2d 5h", "18h 30m")
+  - AC5: Nếu đơn hoàn thành sau `requiredDate` (quá hạn): hiển thị chỉ báo quá hạn với thời gian vượt (VD: "⚠️ Quá hạn 1d 3h" màu đỏ)
+  - AC6: Nếu đơn hoàn thành trước hoặc đúng `requiredDate`: hiển thị chỉ báo đúng hạn (VD: "✅ Đúng hạn" hoặc styling xanh)
+  - AC7: Tính Thời gian Thực tế: `completedAt - receivedDate` (nhất quán với progress bar hiện tại dùng `receivedDate`)
+  - AC8: Tính Quá hạn: `completedAt - requiredDate` (chỉ khi `completedAt > requiredDate`)
+  - AC9: Hoàn tác completion (`US-1.3.3`) phải xóa cả `completedById` (set null)
+  - AC10: "Người Hoàn thành" có thể sắp xếp và lọc trong tab Hoàn Thành
+  - AC11: Hoàn thành bằng quét QR (`US-1.3.4`) cũng phải ghi `completedById`
+
+- **Bị chặn bởi**: US-1.3.1, US-1.3.2
+
+- **Ghi chú**:
+  - Schema: `completedById String?` + `completedBy User? @relation("CompletedBy", ...)` trên Order model
+  - Thời gian Thực tế dùng `receivedDate` (thời điểm nhận mẫu) làm mốc bắt đầu, nhất quán với progress bar
+  - Quá hạn dùng `requiredDate` làm mốc deadline
+  - Hỗ trợ báo cáo hiệu suất nhân viên tương lai (lọc/nhóm theo `completedBy`)
+
+---
+
+---
+
+## Phase 2: Báo cáo & Phân tích
+
+### Epic 2.1: Dashboard Hiệu suất
+
+---
+
+**US-2.1.1: Dashboard Hiệu suất với Biểu đồ Trực quan**
+
+- **Mô tả**: Là Admin / Super Admin, tôi cần dashboard chính hiển thị biểu đồ hiệu suất và chỉ số KPI thể hiện dữ liệu hoàn thành theo toàn team, nhóm hoặc cá nhân với bộ lọc thời gian linh hoạt, để theo dõi năng suất team ngay khi đăng nhập.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Trang Dashboard (`/`) hiển thị phần hiệu suất cho Admin và Super Admin (Staff giữ giao diện hiện tại)
+  - AC2: Bộ chọn phạm vi: "Toàn Team", "Nhóm" (chọn nhóm), "Cá nhân" (chọn user) — mặc định "Toàn Team"
+  - AC3: Bộ lọc thời gian: preset (Hôm nay, 7 ngày qua, Tháng này, Tháng trước, 3 tháng qua) + chọn khoảng thời gian tùy chỉnh
+  - AC4: Thẻ KPI tổng hợp: Tổng Hoàn thành, Tỷ lệ Đúng hạn (%), Thời gian Xử lý TB, Số đơn Quá hạn
+  - AC5: Biểu đồ cột: số đơn hoàn thành theo user (cột ngang, sắp xếp giảm dần) cho phạm vi/thời gian đã chọn
+  - AC6: Biểu đồ tròn/donut: Tỷ lệ Đúng hạn vs Quá hạn
+  - AC7: Biểu đồ đường (tùy chọn): xu hướng hoàn thành theo thời gian (theo ngày/tuần)
+  - AC8: Bảng dưới biểu đồ hiển thị chi tiết từng user: Tên, Số đơn HT, % Đúng hạn, TG TB, Số đơn Quá hạn
+  - AC9: Thư viện biểu đồ: `recharts` (React-native, nhẹ, composable, tương thích SSR với `dynamic()`)
+  - AC10: Tổng hợp dữ liệu tính toán phía server (Server Action) — client nhận metrics đã tính sẵn
+  - AC11: Trạng thái trống khi không có đơn hoàn thành trong khoảng thời gian đã chọn
+  - AC12: Layout responsive — biểu đồ xếp dọc trên mobile, dạng grid trên desktop
+
+- **Bị chặn bởi**: US-1.3.5
+
+- **Ghi chú**:
+  - Biểu đồ render trên trang dashboard hiện tại (`(dashboard)/page.tsx`), không tạo route riêng
+  - Chỉ Admin/Super Admin thấy phần hiệu suất; Staff giữ giao diện hiện tại
+  - Thư viện: `recharts` — React-first, composable, nhẹ (~45kB gzipped)
+  - Next.js SSR: Dùng `dynamic(() => import(...), { ssr: false })` cho chart components
+  - Server Action trả về dữ liệu đã tổng hợp, giảm tính toán phía client
+
+---
+
+**US-2.1.2: Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel**
+
+- **Mô tả**: Là Admin / Super Admin, tôi cần xuất báo cáo tổng hợp hiệu suất (so sánh với trung bình team) và/hoặc danh sách đơn đã hoàn thành ra file Excel từ dashboard, để làm báo cáo KPI và đánh giá nhân viên.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Nút "Xuất Tổng hợp" tạo file `.xlsx` với chỉ số KPI cho phạm vi và khoảng thời gian đã chọn
+  - AC2: Excel Tổng hợp: các dòng theo user (Tên, Số đơn HT, % Đúng hạn, TG TB, Số Quá hạn) + dòng "Trung bình Team" để so sánh
+  - AC3: Mỗi dòng user có cột chỉ báo trên/dưới trung bình team
+  - AC4: Nút "Xuất Đơn hàng" tạo file `.xlsx` với danh sách đơn đã hoàn thành theo bộ lọc hiện tại
+  - AC5: Cột Excel đơn hàng: Mã Job, Khách hàng, Priority, Ngày nhận, Ngày yêu cầu, Ngày hoàn thành, Người hoàn thành, TG Thực tế, Đúng hạn/Quá hạn
+  - AC6: Xuất file tuân thủ tất cả bộ lọc hiện tại: thời gian, phạm vi, tìm kiếm
+  - AC7: Đặt tên file: `performance-report-{scope}-{dateRange}.xlsx`, `completed-orders-{scope}-{dateRange}.xlsx`
+  - AC8: Tạo Excel phía server (Server Action) dùng thư viện `exceljs` hoặc `xlsx`
+  - AC9: Hiển thị loading indicator khi đang tạo file
+  - AC10: Giới hạn xuất hợp lý (VD: 10,000 đơn) với cảnh báo nếu vượt quá
+
+- **Bị chặn bởi**: US-2.1.1
+
+- **Ghi chú**:
+  - Thư viện Excel: `exceljs` hoặc `xlsx` — đánh giá khi triển khai
+  - Server Action tạo buffer, trả về file tải xuống
+  - Dòng trung bình team giúp so sánh nhanh để đánh giá nhân viên
+  - Nút xuất đặt gần phần biểu đồ/bảng trên dashboard
 
 ---
 
