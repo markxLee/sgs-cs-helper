@@ -33,6 +33,14 @@ interface CreatedOrderInfo {
   jobNumber: string;
 }
 
+interface UpdatedOrderInfo {
+  jobNumber: string;
+}
+
+interface UnchangedOrderInfo {
+  jobNumber: string;
+}
+
 interface FailedOrderInfo {
   jobNumber: string;
   error: string;
@@ -42,8 +50,12 @@ interface SubmitResult {
   success: boolean;
   message: string;
   created: number;
+  updated: number;
+  unchanged: number;
   failed: number;
   createdOrders: CreatedOrderInfo[];
+  updatedOrders: UpdatedOrderInfo[];
+  unchangedOrders: UnchangedOrderInfo[];
   failedOrders: FailedOrderInfo[];
 }
 
@@ -186,8 +198,12 @@ export function UploadForm() {
         success: false,
         message: "No valid orders to submit",
         created: 0,
+        updated: 0,
+        unchanged: 0,
         failed: 0,
         createdOrders: [],
+        updatedOrders: [],
+        unchangedOrders: [],
         failedOrders: [],
       });
       return;
@@ -202,14 +218,26 @@ export function UploadForm() {
       // Call server action
       const result: BatchCreateResult = await createOrders(orderInputs);
 
+      const success = result.failed.length === 0;
+      const parts: string[] = [];
+      if (result.created.length > 0) parts.push(`Created ${result.created.length}`);
+      if (result.updated.length > 0) parts.push(`Updated ${result.updated.length}`);
+      if (result.unchanged.length > 0) parts.push(`Unchanged ${result.unchanged.length}`);
+      if (result.failed.length > 0) parts.push(`Failed ${result.failed.length}`);
+      const message = parts.join(", ");
+
       setSubmitResult({
-        success: result.success,
-        message: result.message,
+        success,
+        message,
         created: result.created.length,
+        updated: result.updated.length,
+        unchanged: result.unchanged.length,
         failed: result.failed.length,
         createdOrders: result.created.map((o) => ({ jobNumber: o.jobNumber })),
+        updatedOrders: result.updated.map((o) => ({ jobNumber: o.jobNumber })),
+        unchangedOrders: result.unchanged.map((o) => ({ jobNumber: o.jobNumber })),
         failedOrders: result.failed.map((f) => ({
-          jobNumber: f.order.jobNumber,
+          jobNumber: f.input.jobNumber,
           error: f.error,
         })),
       });
@@ -217,7 +245,7 @@ export function UploadForm() {
       setStep("results");
 
       // Clear files on success
-      if (result.success) {
+      if (success) {
         setFiles([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -229,8 +257,12 @@ export function UploadForm() {
         success: false,
         message: error instanceof Error ? error.message : "Unknown error",
         created: 0,
+        updated: 0,
+        unchanged: 0,
         failed: validOrders.length,
         createdOrders: [],
+        updatedOrders: [],
+        unchangedOrders: [],
         failedOrders: validOrders.map((o) => ({
           jobNumber: o.jobNumber,
           error: error instanceof Error ? error.message : "Unknown error",
@@ -433,7 +465,7 @@ export function UploadForm() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <p className="text-gray-600">Creating orders...</p>
+          <p className="text-gray-600">Processing orders...</p>
         </div>
       )}
 
@@ -488,13 +520,15 @@ export function UploadForm() {
                 >
                   {submitResult.message}
                 </p>
-                {(submitResult.created > 0 || submitResult.failed > 0) && (
+                {(submitResult.created > 0 || submitResult.updated > 0 || submitResult.unchanged > 0 || submitResult.failed > 0) && (
                   <p
                     className={`text-xs mt-2 ${
                       submitResult.success ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    Created: {submitResult.created} | Failed:{" "}
+                    Created: {submitResult.created} | Updated:{" "}
+                    {submitResult.updated} | Unchanged:{" "}
+                    {submitResult.unchanged} | Failed:{" "}
                     {submitResult.failed}
                   </p>
                 )}
@@ -524,6 +558,64 @@ export function UploadForm() {
                   <span
                     key={idx}
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  >
+                    {order.jobNumber}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Detail: Updated orders */}
+          {submitResult.updatedOrders.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                <svg
+                  className="h-5 w-5 text-blue-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                  />
+                </svg>
+                Đã cập nhật ({submitResult.updatedOrders.length} order)
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {submitResult.updatedOrders.map((order, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    {order.jobNumber}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Detail: Unchanged orders */}
+          {submitResult.unchangedOrders.length > 0 && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                <svg
+                  className="h-5 w-5 text-gray-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Không thay đổi ({submitResult.unchangedOrders.length} order)
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {submitResult.unchangedOrders.map((order, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                   >
                     {order.jobNumber}
                   </span>

@@ -121,14 +121,11 @@ RULES:
   - Blocked By: ~~US-1.1.1~~ ✅
   - ✅ Completed: 2026-02-07
 
-- [ ] **US-1.1.3** — Store Order with Upsert by Job Number
-  - Status: `TODO` (needs update from duplicate detection to upsert)
+- [x] **US-1.1.3** — Store Order with Upsert by Job Number
+  - Status: `DONE`
   - Blocked By: ~~US-1.1.2~~ ✅
-  - Note: Changed from duplicate skip to upsert (create or update)
-  - TODO: Update upload action to use upsert instead of skip duplicates
-  - TODO: Preserve existing status (don't overwrite COMPLETED)
-  - TODO: Show summary: X created, Y updated, Z unchanged
-  - TODO: Broadcast SSE after bulk upsert
+  - ✅ Completed: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.1.3`
 
 ---
 
@@ -282,14 +279,11 @@ RULES:
   - Bị chặn bởi: ~~US-1.1.1~~ ✅
   - ✅ Hoàn thành: 2026-02-07
 
-- [ ] **US-1.1.3** — Lưu Đơn hàng với Upsert theo Job Number
-  - Trạng thái: `TODO` (cần update từ skip duplicate sang upsert)
+- [x] **US-1.1.3** — Lưu Đơn hàng với Upsert theo Job Number
+  - Trạng thái: `DONE`
   - Bị chặn bởi: ~~US-1.1.2~~ ✅
-  - Ghi chú: Đổi từ skip duplicate sang upsert (tạo hoặc cập nhật)
-  - TODO: Update upload action dùng upsert thay vì skip duplicates
-  - TODO: Giữ nguyên status hiện tại (không overwrite COMPLETED)
-  - TODO: Hiển thị summary: X tạo mới, Y cập nhật, Z không đổi
-  - TODO: Broadcast SSE sau khi bulk upsert
+  - ✅ Hoàn thành: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.1.3`
 
 ---
 

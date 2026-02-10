@@ -49,7 +49,7 @@ export interface ProgressInfo {
  */
 const PRIORITY_DURATION_MAP: Record<number, number> = {
   0: 0.25, // P0: 15 minutes
-  1: 1, // P1: 1 hour
+  1: 2, // P1: 1 hour
   2: 2.5, // P2: 2.5 hours
 };
 
