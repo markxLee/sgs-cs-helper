@@ -188,9 +188,12 @@ RULES:
   - Blocked By: ~~US-1.3.1~~ ✅
   - ✅ Completed: 2026-02-09 (covered by US-1.3.2)
 
-- [ ] **US-1.3.4** — Scan QR/Barcode to Mark Order Complete
-  - Status: `PLANNED`
+- [x] **US-1.3.4** — Scan QR/Barcode to Mark Order Complete
+  - Status: `DONE`
+  - Started: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.3.4`
   - Blocked By: ~~US-1.3.1~~ ✅
+  - ✅ Completed: 2026-02-10
   - Notes: Use `@yudiel/react-qr-scanner`, camera-based scan on mobile, HTTPS required
 
 - [ ] **US-1.3.5** — Completion Tracking — Log Completed By & Show Actual Duration
@@ -368,9 +371,12 @@ RULES:
   - Bị chặn bởi: ~~US-1.3.1~~ ✅
   - ✅ Hoàn thành: 2026-02-09 (bao gồm trong US-1.3.2)
 
-- [ ] **US-1.3.4** — Quét QR/Barcode để Đánh dấu Đơn Hoàn thành
-  - Trạng thái: `PLANNED`
+- [x] **US-1.3.4** — Quét QR/Barcode để Đánh dấu Đơn Hoàn thành
+  - Trạng thái: `DONE`
+  - Bắt đầu: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.3.4`
   - Bị chặn bởi: ~~US-1.3.1~~ ✅
+  - ✅ Hoàn thành: 2026-02-10
   - Ghi chú: Dùng `@yudiel/react-qr-scanner`, quét bằng camera trên mobile, yêu cầu HTTPS
 
 - [ ] **US-1.3.5** — Theo dõi Hoàn thành — Ghi nhận Người Hoàn thành & Thời gian Thực tế
