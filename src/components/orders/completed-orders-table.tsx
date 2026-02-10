@@ -321,9 +321,9 @@ export function CompletedOrdersTable({
                   {order.completedBy ? (
                     <span
                       className="truncate block"
-                      title={`${order.completedBy.name} (${order.completedBy.email})`}
+                      title={order.completedBy.email ? `${order.completedBy.name} (${order.completedBy.email})` : order.completedBy.name}
                     >
-                      {order.completedBy.name} ({order.completedBy.email})
+                      {order.completedBy.name}{order.completedBy.email ? ` (${order.completedBy.email})` : ''}
                     </span>
                   ) : (
                     <span className="text-muted-foreground">—</span>
@@ -348,8 +348,12 @@ export function CompletedOrdersTable({
                       const priorityDurationMs =
                         priorityDurationHours * MS_PER_HOUR;
                       const isCompletedOverdue = actualMs > priorityDurationMs;
+                      const isCompletedEarly = actualMs < priorityDurationMs;
                       const overdueDurationMs = isCompletedOverdue
                         ? actualMs - priorityDurationMs
+                        : null;
+                      const earlyDurationMs = isCompletedEarly
+                        ? priorityDurationMs - actualMs
                         : null;
 
                       return (
@@ -366,6 +370,11 @@ export function CompletedOrdersTable({
                           {overdueDurationMs != null && (
                             <span className="block text-xs text-purple-500">
                               Overdue: {formatDuration(overdueDurationMs)}
+                            </span>
+                          )}
+                          {earlyDurationMs != null && (
+                            <span className="block text-xs text-green-500">
+                              Early: {formatDuration(earlyDurationMs)}
                             </span>
                           )}
                         </div>

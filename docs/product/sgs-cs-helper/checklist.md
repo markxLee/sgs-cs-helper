@@ -213,6 +213,13 @@ RULES:
   - Blocked By: ~~US-1.3.4~~ ✅
   - Notes: USB/Bluetooth scanner as HID keyboard input, reuse lookup API + mark-done flow, passive listener on orders page
 
+- [x] **US-1.3.7** — Completed Tab UI Polish — Email Display & Early Completion Indicator
+  - Status: `DONE`
+  - Blocked By: ~~US-1.3.5~~ ✅
+  - ✅ Completed: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.3.7`
+  - Notes: Hide empty `()` when user has no email, show "Early: {time}" sub-line for early completions (mirrors overdue)
+
 ---
 
 ## Phase 2: Reporting & Analytics
@@ -403,6 +410,13 @@ RULES:
   - Branch: `feature/sgs-cs-helper-us-1.3.6`
   - Bị chặn bởi: ~~US-1.3.4~~ ✅
   - Ghi chú: Máy quét USB/Bluetooth nhập qua bàn phím, tái sử dụng API lookup + flow mark-done, listener ngầm trên trang orders
+
+- [x] **US-1.3.7** — Cải thiện UI tab Hoàn thành — Hiển thị Email & Chỉ báo Hoàn thành Sớm
+  - Trạng thái: `DONE`
+  - Bị chặn bởi: ~~US-1.3.5~~ ✅
+  - ✅ Hoàn thành: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.3.7`
+  - Ghi chú: Ẩn `()` khi user không có email, hiển thị "Early: {time}" cho đơn hoàn thành sớm (giống overdue)
 
 ---
 
