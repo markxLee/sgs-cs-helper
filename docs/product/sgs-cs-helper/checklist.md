@@ -206,8 +206,10 @@ RULES:
   - ✅ Completed: 2026-02-10
   - Notes: Add `completedById` to schema, show "Completed By" + "Actual Duration" columns in Completed tab, overdue indicator
 
-- [ ] **US-1.3.6** — Barcode Scanner Device Support (USB/Bluetooth Keyboard Input)
-  - Status: `PLANNED`
+- [x] **US-1.3.6** — Barcode Scanner Device Support (USB/Bluetooth Keyboard Input)
+  - Status: `DONE`
+  - ✅ Completed: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.3.6`
   - Blocked By: ~~US-1.3.4~~ ✅
   - Notes: USB/Bluetooth scanner as HID keyboard input, reuse lookup API + mark-done flow, passive listener on orders page
 
@@ -395,8 +397,10 @@ RULES:
   - ✅ Hoàn thành: 2026-02-10
   - Ghi chú: Thêm `completedById` vào schema, hiển thị cột "Người Hoàn thành" + "Thời gian Thực tế" trong tab Hoàn Thành, chỉ báo quá hạn
 
-- [ ] **US-1.3.6** — Hỗ trợ Máy quét Barcode (USB/Bluetooth — Nhập qua Bàn phím)
-  - Trạng thái: `PLANNED`
+- [x] **US-1.3.6** — Hỗ trợ Máy quét Barcode (USB/Bluetooth — Nhập qua Bàn phím)
+  - Trạng thái: `DONE`
+  - ✅ Hoàn thành: 2026-02-10
+  - Branch: `feature/sgs-cs-helper-us-1.3.6`
   - Bị chặn bởi: ~~US-1.3.4~~ ✅
   - Ghi chú: Máy quét USB/Bluetooth nhập qua bàn phím, tái sử dụng API lookup + flow mark-done, listener ngầm trên trang orders
 

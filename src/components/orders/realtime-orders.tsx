@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * Realtime Orders Container
  *
@@ -38,6 +39,12 @@ interface RealtimeOrdersProps {
 
 export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }: RealtimeOrdersProps) {
   const [isConnected, setIsConnected] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Fix hydration: only render time after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Order controls: filtering, sorting, search
   const {
@@ -159,8 +166,8 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
             }`}
           />
           {isConnected ? "Live" : "Reconnecting..."}
-          <span className="text-gray-400" suppressHydrationWarning>
-            Updated: {formatTime(lastUpdated)}
+          <span className="text-gray-400">
+            Updated: {mounted ? formatTime(lastUpdated) : '--:--:--'}
           </span>
         </div>
       </div>

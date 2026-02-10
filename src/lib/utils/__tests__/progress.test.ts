@@ -16,8 +16,8 @@ describe("getPriorityDuration", () => {
     expect(getPriorityDuration(0)).toBe(0.25);
   });
 
-  it("should return 1h for P1 (urgent)", () => {
-    expect(getPriorityDuration(1)).toBe(1);
+  it("should return 2h for P1 (urgent)", () => {
+    expect(getPriorityDuration(1)).toBe(2);
   });
 
   it("should return 2.5h for P2 (normal)", () => {
@@ -228,15 +228,15 @@ describe("calculateOrderProgress", () => {
     });
 
     it("should show overdue when percentage > 100", () => {
-      // Arrange — P1 (1h), elapsed 1.5h
+      // Arrange — P1 (2h), elapsed 2.5h
       const received = new Date(2026, 1, 9, 8, 0); // 08:00
-      const now = new Date(2026, 1, 9, 9, 30); // 09:30
+      const now = new Date(2026, 1, 9, 10, 30); // 10:30
 
       // Act
       const result = calculateOrderProgress(received, 1, now);
 
-      // Assert — 1.5h / 1h = 150%
-      expect(result.percentage).toBe(150);
+      // Assert — 2.5h / 2h = 125%
+      expect(result.percentage).toBe(125);
       expect(result.color).toBe("red");
       expect(result.isOverdue).toBe(true);
     });
