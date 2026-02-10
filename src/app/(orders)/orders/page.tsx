@@ -15,6 +15,7 @@ import { getOrders } from "@/lib/actions/order";
 import { auth } from "@/lib/auth";
 import { RealtimeOrders } from "@/components/orders/realtime-orders";
 import { CompletedOrders } from "@/components/orders/completed-orders";
+import { OrdersHeader } from "@/components/orders/orders-header";
 import type { OrderData } from "@/hooks/use-realtime-progress";
 
 // ============================================================================
@@ -76,12 +77,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
-        <p className="text-muted-foreground mt-2">
-          View all laboratory orders and their progress status
-        </p>
-      </div>
+      <OrdersHeader canScan={canMarkDone} />
 
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b">
