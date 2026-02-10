@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@/generated/prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import type { Prisma } from "@/generated/prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 
 // ============================================================================
 // Constants
@@ -17,6 +17,7 @@ const ALLOWED_SORT_FIELDS = new Set([
   "completedAt",
   "registeredDate",
   "requiredDate",
+  "completedBy",
 ]);
 
 /** Fields returned to client */
@@ -30,6 +31,10 @@ const ORDER_SELECT = {
   priority: true,
   status: true,
   completedAt: true,
+  completedById: true,
+  completedBy: {
+    select: { id: true, name: true, email: true },
+  },
 } satisfies Prisma.OrderSelect;
 
 // ============================================================================
@@ -88,10 +93,11 @@ export async function GET(request: NextRequest) {
     const page = parsePositiveInt(searchParams.get("page"), DEFAULT_PAGE);
     const limit = parsePositiveInt(searchParams.get("limit"), DEFAULT_LIMIT);
     const search = searchParams.get("search")?.trim() || undefined;
-    const registeredBy =
-      searchParams.get("registeredBy")?.trim() || undefined;
+    const registeredBy = searchParams.get("registeredBy")?.trim() || undefined;
     const dateFrom = searchParams.get("dateFrom") || undefined;
     const dateTo = searchParams.get("dateTo") || undefined;
+    const completedById =
+      searchParams.get("completedById")?.trim() || undefined;
 
     const rawSortField = searchParams.get("sortField") || DEFAULT_SORT_FIELD;
     const sortField = ALLOWED_SORT_FIELDS.has(rawSortField)
@@ -119,6 +125,11 @@ export async function GET(request: NextRequest) {
       where.registeredBy = registeredBy;
     }
 
+    // Filter: exact match on completedById
+    if (completedById) {
+      where.completedById = completedById;
+    }
+
     // Filter: date range on requiredDate
     if (dateFrom || dateTo) {
       where.requiredDate = {};
@@ -135,10 +146,15 @@ export async function GET(request: NextRequest) {
     // ------------------------------------------------------------------
     const skip = (page - 1) * limit;
 
+    const orderBy =
+      sortField === "completedBy"
+        ? { completedBy: { name: sortDir } }
+        : { [sortField]: sortDir };
+
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
         where,
-        orderBy: { [sortField]: sortDir },
+        orderBy: orderBy as Prisma.OrderOrderByWithRelationInput,
         skip,
         take: limit,
         select: ORDER_SELECT,

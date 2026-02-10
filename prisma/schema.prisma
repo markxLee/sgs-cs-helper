@@ -79,6 +79,7 @@ model User {
 
   // Relations
   orders    Order[]  @relation("UploadedBy")
+  completedOrders Order[] @relation("CompletedBy")
   auditLogs AuditLog[]
 }
 
@@ -100,6 +101,8 @@ model Order {
 
   // Tracking
   completedAt     DateTime?
+  completedById   String?
+  completedBy     User?       @relation("CompletedBy", fields: [completedById], references: [id])
   uploadedAt      DateTime    @default(now())
   uploadedById    String
   uploadedBy      User        @relation("UploadedBy", fields: [uploadedById], references: [id])
