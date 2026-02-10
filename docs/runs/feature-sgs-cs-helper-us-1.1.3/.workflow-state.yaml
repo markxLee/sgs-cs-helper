@@ -1,0 +1,175 @@
+# Workflow State File
+# US-1.1.3: Store Order with Upsert by Job Number
+# Created: 2026-02-09
+
+meta:
+  branch_slug: feature-sgs-cs-helper-us-1.1.3
+  docs_root: sgs-cs-hepper
+  tooling_root: a-z-copilot-flow
+  feature_name: "Store Order with Upsert by Job Number"
+  created_at: "2026-02-09"
+  last_updated: "2026-02-09"
+  updated_by: copilot
+  dev_mode: standard
+  base_branch: main
+
+  # Flow 1 ↔ Flow 2 Integration
+  user_story_id: US-1.1.3
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+
+  affected_roots:
+    - root: sgs-cs-hepper
+      role: primary
+      changes:
+        - src/lib/actions/order.ts
+        - src/components/orders/upload-form.tsx
+        - src/lib/actions/__tests__/order.test.ts
+
+status:
+  current_phase: 5
+  phase_name: done-check
+  phase_status: complete
+  current_task: null
+  current_root: sgs-cs-hepper
+  last_action: "Phase 5 Done Check — all DoD criteria met"
+  next_action: "User commits and creates PR"
+  blockers: []
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: "2026-02-09"
+    completed_at: "2026-02-09"
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: initialized
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/diagrams/flow-overview.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+    decisions:
+      - id: D1
+        decision: "findUnique + compare over Prisma upsert"
+        rationale: "Need 3-way categorization (create/update/unchanged) for AC4"
+      - id: D2
+        decision: "findFirst with mode: insensitive for case-insensitive matching"
+        rationale: "Native Prisma support on PostgreSQL, type safe"
+      - id: D3
+        decision: "prisma.$transaction() for batch integrity"
+        rationale: "AC9 requires data integrity, all-or-nothing"
+      - id: D4
+        decision: "Compare 7 fields only (from CreateOrderInput)"
+        rationale: "Only uploadable fields; preserve status, completedAt, system fields"
+      - id: D5
+        decision: "unchanged as separate result array"
+        rationale: "Clear 3-way reporting for users (AC4)"
+
+  phase_1_spec:
+    status: approved
+    started_at: "2026-02-09"
+    completed_at: "2026-02-09"
+    reviewed_at: "2026-02-09"
+    requirements_count:
+      functional: 6
+      non_functional: 4
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+
+  phase_2_tasks:
+    status: awaiting-review
+    started_at: "2026-02-09"
+    completed_at: "2026-02-09"
+    tasks_summary:
+      total: 5
+      by_root:
+        sgs-cs-hepper: 5
+    test_plan:
+      included: true
+      test_cases_count: 18
+      coverage_target: 80%
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+
+  phase_3_impl:
+    status: complete
+    tasks:
+      - id: T-001
+        title: "Extend BatchCreateResult & add UnchangedOrder type"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: "2026-02-09T00:00:00Z"
+        reviewed_by: user-manual
+        completed_at: "2026-02-09T00:00:00Z"
+        depends_on: []
+      - id: T-002
+        title: "Implement hasOrderChanged() helper"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: "2026-02-09T00:00:00Z"
+        reviewed_by: user-manual
+        completed_at: "2026-02-09T00:00:00Z"
+        depends_on: [T-001]
+      - id: T-003
+        title: "Refactor createOrders() to upsert with transaction"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: "2026-02-09T00:00:00Z"
+        reviewed_by: user-manual
+        completed_at: "2026-02-09T00:00:00Z"
+        depends_on: [T-001, T-002]
+      - id: T-004
+        title: "Update SubmitResult & upload results UI"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: "2026-02-09T00:00:00Z"
+        reviewed_by: user-manual
+        completed_at: "2026-02-09T00:00:00Z"
+        depends_on: [T-001, T-003]
+      - id: T-005
+        title: "Update tests for upsert behavior"
+        root: sgs-cs-hepper
+        status: completed
+        implemented_at: "2026-02-09T00:00:00Z"
+        reviewed_by: user-manual
+        completed_at: "2026-02-10T00:00:00Z"
+        depends_on: [T-001, T-002, T-003]
+
+  phase_4_tests:
+    status: skipped
+    note: "Skipped per user request — tests written in T-005 (Phase 3)"
+
+  phase_5_done:
+    status: complete
+    completed_at: "2026-02-10"
+    dod_results:
+      total_criteria: 16
+      passed: 16
+      failed: 0
+
+context:
+  decisions:
+    - "Work review: READY (High confidence)"
+    - "D1: findUnique + compare over Prisma upsert (3-way categorization)"
+    - "D2: findFirst with mode: insensitive (case-insensitive jobNumber)"
+    - "D3: prisma.$transaction() for batch integrity"
+    - "D4: Compare 7 fields only (from CreateOrderInput)"
+    - "D5: unchanged as separate result array"
+  important_notes:
+    - "Changing from skip-duplicate to upsert pattern"
+    - "Must preserve existing order status on update"
+    - "Job Number matching must be case-insensitive"
+  user_preferences:
+    language: bilingual
+    review_style: manual
+
+history:
+  - timestamp: "2026-02-09"
+    action: "Flow 1 → Flow 2 handoff"
+    details: "Selected US-1.1.3, created branch, started work intake"

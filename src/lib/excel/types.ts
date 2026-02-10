@@ -133,33 +133,39 @@ export interface CreateOrderInput {
 // Server Response Types
 // ============================================================================
 
+// Removed legacy FailedOrder and BatchCreateResult interface (pre-upsert)
+  
 /**
- * Failed order information
+ * Represents an order that was unchanged during upsert, with a reason.
  */
-export interface FailedOrder {
-  /** The order input that failed */
-  order: CreateOrderInput;
-
-  /** Error message explaining failure */
-  error: string;
-}
+export type UnchangedOrder = {
+  /**
+   * The job number of the order (primary key for upsert logic)
+   */
+  jobNumber: string;
+  /**
+   * The original order data (as returned from DB)
+   */
+  order: Order;
+  /**
+   * Reason why this order was unchanged (e.g., 'identical data')
+   */
+  reason: string;
+};
 
 /**
- * Result from batch order creation server action
+ * Batch result for createOrders upsert: 3-way + failed.
  */
-export interface BatchCreateResult {
-  /** Overall success (all orders created) */
-  success: boolean;
-
-  /** Successfully created orders */
+export type BatchCreateResult = {
   created: Order[];
+  updated: Order[];
+  unchanged: UnchangedOrder[];
+  failed: {
+    input: CreateOrderInput;
+    error: string;
+  }[];
+};
 
-  /** Orders that failed to create */
-  failed: FailedOrder[];
-
-  /** Summary message */
-  message: string;
-}
 
 // ============================================================================
 // UI State Types
