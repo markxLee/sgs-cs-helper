@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { broadcastOrderUpdate } from "@/lib/sse/broadcaster";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
@@ -28,7 +28,10 @@ export async function POST(
 
     if (!isAuthorized) {
       return NextResponse.json(
-        { success: false, error: "You do not have permission to update order status" },
+        {
+          success: false,
+          error: "You do not have permission to update order status",
+        },
         { status: 403 }
       );
     }
@@ -61,6 +64,7 @@ export async function POST(
       data: {
         status: "COMPLETED",
         completedAt: new Date(),
+        completedById: session.user.id,
       },
       select: {
         id: true,
@@ -72,6 +76,7 @@ export async function POST(
         priority: true,
         status: true,
         completedAt: true,
+        completedById: true,
       },
     });
 

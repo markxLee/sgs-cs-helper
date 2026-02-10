@@ -1,17 +1,18 @@
 # Product Checklist: SGS CS Order Tracker
+
 <!-- Generated: 2026-02-05 | Product Slug: sgs-cs-helper -->
 
 ---
 
 ## Product Checklist Overview / Tổng quan Checklist
 
-| Field | Value |
-|-------|-------|
-| **Product Name** | SGS CS Order Tracker |
-| **Product Slug** | `sgs-cs-helper` |
-| **Purpose** | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 27 |
-| **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE` |
+| Field             | Value                                                        |
+| ----------------- | ------------------------------------------------------------ |
+| **Product Name**  | SGS CS Order Tracker                                         |
+| **Product Slug**  | `sgs-cs-helper`                                              |
+| **Purpose**       | Track execution state across phases, epics, and user stories |
+| **Total Stories** | 26                                                           |
+| **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE`                           |
 
 ---
 
@@ -196,9 +197,10 @@ RULES:
   - ✅ Completed: 2026-02-10
   - Notes: Use `@yudiel/react-qr-scanner`, camera-based scan on mobile, HTTPS required
 
-- [ ] **US-1.3.5** — Completion Tracking — Log Completed By & Show Actual Duration
-  - Status: `PLANNED`
+- [x] **US-1.3.5** — Completion Tracking — Log Completed By & Show Actual Duration
+  - Status: `DONE`
   - Blocked By: ~~US-1.3.1~~ ✅, ~~US-1.3.2~~ ✅
+  - ✅ Completed: 2026-02-10
   - Notes: Add `completedById` to schema, show "Completed By" + "Actual Duration" columns in Completed tab, overdue indicator
 
 - [ ] **US-1.3.6** — Barcode Scanner Device Support (USB/Bluetooth Keyboard Input)
@@ -214,7 +216,7 @@ RULES:
 
 - [ ] **US-2.1.1** — Performance Dashboard with Chart Visualization
   - Status: `PLANNED`
-  - Blocked By: US-1.3.5
+  - Blocked By: ~~US-1.3.5~~ ✅
   - Notes: Add charts (recharts) + KPI cards to existing dashboard page, Admin/Super Admin only, scope/time filters
 
 - [ ] **US-2.1.2** — Export Performance Report & Orders to Excel
@@ -226,28 +228,28 @@ RULES:
 
 ## Quick Stats
 
-| Phase | Epic | Stories | Ready to Start |
-|-------|------|---------|----------------|
-| 0 | 0.1 Project Setup | 2 | ✅ US-0.1.1 done, US-0.1.2 ready |
-| 0 | 0.2 Authentication | 4 | ⏳ Blocked by US-0.3.1 |
-| 0 | 0.3 Database Schema | 2 | ✅ US-0.3.1 ready |
-| 1 | 1.1 Upload & Parsing | 3 | ⏳ Blocked |
-| 1 | 1.2 Dashboard | 6 | ⏳ Blocked |
-| 1 | 1.3 Completion | 6 | ⏳ Blocked |
-| 2 | 2.1 Performance Dashboard | 2 | ⏳ Blocked |
-| **Total** | | **23** | **2 ready** |
+| Phase     | Epic                      | Stories | Ready to Start                   |
+| --------- | ------------------------- | ------- | -------------------------------- |
+| 0         | 0.1 Project Setup         | 2       | ✅ US-0.1.1 done, US-0.1.2 ready |
+| 0         | 0.2 Authentication        | 4       | ⏳ Blocked by US-0.3.1           |
+| 0         | 0.3 Database Schema       | 2       | ✅ US-0.3.1 ready                |
+| 1         | 1.1 Upload & Parsing      | 3       | ⏳ Blocked                       |
+| 1         | 1.2 Dashboard             | 6       | ⏳ Blocked                       |
+| 1         | 1.3 Completion            | 5       | ⏳ Blocked                       |
+| 2         | 2.1 Performance Dashboard | 2       | ⏳ Blocked                       |
+| **Total** |                           | **22**  | **2 ready**                      |
 
 ---
 
 ## Parallelization Guide
 
-| When Completed | Can Start |
-|----------------|-----------|
-| US-0.1.1 | US-0.1.2, US-0.3.1 |
-| US-0.3.1 | US-0.2.1, US-0.3.2 |
-| US-0.2.1 | US-0.2.2, US-0.2.3 |
-| US-0.2.3 + US-0.3.1 | US-1.1.1 |
-| US-1.2.1 | US-1.2.2, US-1.2.3, US-1.2.4, US-1.2.5, US-1.3.1 |
+| When Completed      | Can Start                                        |
+| ------------------- | ------------------------------------------------ |
+| US-0.1.1            | US-0.1.2, US-0.3.1                               |
+| US-0.3.1            | US-0.2.1, US-0.3.2                               |
+| US-0.2.1            | US-0.2.2, US-0.2.3                               |
+| US-0.2.3 + US-0.3.1 | US-1.1.1                                         |
+| US-1.2.1            | US-1.2.2, US-1.2.3, US-1.2.4, US-1.2.5, US-1.3.1 |
 
 ---
 
@@ -384,9 +386,10 @@ RULES:
   - ✅ Hoàn thành: 2026-02-10
   - Ghi chú: Dùng `@yudiel/react-qr-scanner`, quét bằng camera trên mobile, yêu cầu HTTPS
 
-- [ ] **US-1.3.5** — Theo dõi Hoàn thành — Ghi nhận Người Hoàn thành & Thời gian Thực tế
-  - Trạng thái: `PLANNED`
+- [x] **US-1.3.5** — Theo dõi Hoàn thành — Ghi nhận Người Hoàn thành & Thời gian Thực tế
+  - Trạng thái: `DONE`
   - Bị chặn bởi: ~~US-1.3.1~~ ✅, ~~US-1.3.2~~ ✅
+  - ✅ Hoàn thành: 2026-02-10
   - Ghi chú: Thêm `completedById` vào schema, hiển thị cột "Người Hoàn thành" + "Thời gian Thực tế" trong tab Hoàn Thành, chỉ báo quá hạn
 
 - [ ] **US-1.3.6** — Hỗ trợ Máy quét Barcode (USB/Bluetooth — Nhập qua Bàn phím)
@@ -402,7 +405,7 @@ RULES:
 
 - [ ] **US-2.1.1** — Dashboard Hiệu suất với Biểu đồ Trực quan
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-1.3.5
+  - Bị chặn bởi: ~~US-1.3.5~~ ✅
   - Ghi chú: Thêm biểu đồ (recharts) + thẻ KPI vào trang dashboard hiện tại, chỉ Admin/Super Admin, bộ lọc phạm vi/thời gian
 
 - [ ] **US-2.1.2** — Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel
@@ -414,16 +417,16 @@ RULES:
 
 ## Thống kê
 
-| Phase | Epic | Stories | Sẵn sàng |
-|-------|------|---------|----------|
-| 0 | 0.1 Thiết lập | 2 | ✅ US-0.1.1 xong, US-0.1.2 sẵn sàng |
-| 0 | 0.2 Xác thực | 4 | ⏳ Chờ US-0.3.1 |
-| 0 | 0.3 Database | 2 | ✅ US-0.3.1 sẵn sàng |
-| 1 | 1.1 Upload | 3 | ⏳ Đang chặn |
-| 1 | 1.2 Dashboard | 6 | ⏳ Đang chặn |
-| 1 | 1.3 Hoàn thành | 6 | ⏳ Đang chặn |
-| 2 | 2.1 Dashboard Hiệu suất | 2 | ⏳ Đang chặn |
-| **Tổng** | | **23** | **2 sẵn sàng** |
+| Phase    | Epic                    | Stories | Sẵn sàng                            |
+| -------- | ----------------------- | ------- | ----------------------------------- |
+| 0        | 0.1 Thiết lập           | 2       | ✅ US-0.1.1 xong, US-0.1.2 sẵn sàng |
+| 0        | 0.2 Xác thực            | 4       | ⏳ Chờ US-0.3.1                     |
+| 0        | 0.3 Database            | 2       | ✅ US-0.3.1 sẵn sàng                |
+| 1        | 1.1 Upload              | 3       | ⏳ Đang chặn                        |
+| 1        | 1.2 Dashboard           | 6       | ⏳ Đang chặn                        |
+| 1        | 1.3 Hoàn thành          | 5       | ⏳ Đang chặn                        |
+| 2        | 2.1 Dashboard Hiệu suất | 2       | ⏳ Đang chặn                        |
+| **Tổng** |                         | **22**  | **2 sẵn sàng**                      |
 
 ---
 
