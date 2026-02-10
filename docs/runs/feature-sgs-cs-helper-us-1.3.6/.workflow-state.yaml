@@ -1,0 +1,121 @@
+# Workflow State — US-1.3.6: Barcode Scanner Device Support (USB/Bluetooth)
+# Generated: 2026-02-10
+
+meta:
+  branch: feature/sgs-cs-helper-us-1.3.6
+  branch_slug: feature-sgs-cs-helper-us-1.3.6
+  base_branch: main
+  docs_root: sgs-cs-hepper
+  tooling_root: a-z-copilot-flow
+  dev_mode: standard
+  user_story_id: US-1.3.6
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+
+status:
+  current_phase: phase_5_done
+  last_action: "Phase 5 Done Check complete — All DoD criteria met"
+  next_action: "User commits and creates PR"
+  updated_at: "2026-02-10"
+  blockers: []
+
+context:
+  session_decisions:
+    - "Work type: FEATURE"
+    - "Affected roots: sgs-cs-hepper"
+    - "Reuse APIs from US-1.3.4: GET /api/orders/lookup + POST /api/orders/[id]/mark-done"
+    - "Reuse ConfirmDialog for mark-done confirmation"
+    - "D1: Custom hook useBarcodeScanner (not inline logic)"
+    - "D2: Integrate in OrdersHeader (co-located with camera scanner)"
+    - "D3: Speed threshold 50ms (industry standard for HID scanners)"
+    - "D4: Disable when input element focused"
+    - "D5: Disable when camera overlay open"
+    - "D6: No new UI elements — passive operation"
+
+phases:
+  phase_0_analysis:
+    status: approved
+    approved_at: "2026-02-10"
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: initialized
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+  phase_1_spec:
+    status: approved
+    approved_at: "2026-02-10"
+    started_at: "2026-02-10"
+    completed_at: "2026-02-10"
+    requirements_count:
+      functional: 6
+      non_functional: 4
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+  phase_2_tasks:
+    status: awaiting-review
+    started_at: "2026-02-10"
+    completed_at: "2026-02-10"
+    tasks_summary:
+      total: 4
+      by_root:
+        sgs-cs-hepper: 4
+    test_plan:
+      included: true
+      test_cases_count: 27
+      coverage_target: key-paths
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+  phase_3_impl:
+    status: not-started
+    tasks:
+      - id: T-001
+        title: "Create useBarcodeScanner hook — types & state machine"
+        root: sgs-cs-hepper
+        status: pending
+        depends_on: []
+        test_cases: [TC-001]
+      - id: T-002
+        title: "Implement keyboard listener & barcode detection logic"
+        root: sgs-cs-hepper
+        status: pending
+        depends_on: [T-001]
+        test_cases: [TC-002, TC-003, TC-004, TC-005, TC-006, TC-007, TC-008]
+      - id: T-003
+        title: "Implement lookup & mark-done API flow"
+        root: sgs-cs-hepper
+        status: pending
+        depends_on: [T-001]
+        test_cases: [TC-009, TC-010, TC-011, TC-012, TC-013, TC-014, TC-015, TC-016]
+      - id: T-004
+        title: "Integrate hook into OrdersHeader with ConfirmDialog & result feedback"
+        root: sgs-cs-hepper
+        status: pending
+        depends_on: [T-002, T-003]
+        test_cases: [TC-017, TC-018]
+  phase_4_tests:
+    status: skipped
+    note: "Skipped per user request"
+  phase_5_done:
+    status: complete
+    completed_at: "2026-02-10"
+    dod_results:
+      total_criteria: 16
+      passed: 16
+      failed: 0
+
+flow_1:
+  current_step: 12
+  step_name: roadmap-to-delivery
+  status: complete
+  product_slug: sgs-cs-helper
+  selected_user_story: US-1.3.6
+  git_branch: feature/sgs-cs-helper-us-1.3.6
+  flow_1_complete: true
+  handoff_to_flow_2: /work-intake
+  updated_at: "2026-02-10"
