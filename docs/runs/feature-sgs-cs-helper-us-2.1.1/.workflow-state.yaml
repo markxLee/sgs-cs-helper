@@ -1,0 +1,143 @@
+meta:
+  user_story_id: US-2.1.1
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+  base_branch: main
+  dev_mode: standard
+  update_count: 1
+phases:
+  phase_0_analysis:
+    status: approved
+    completed_at: 2026-02-10
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: complete
+      - path: 00_analysis/solution-design.md
+        status: complete
+    decisions:
+      - id: D-001
+        decision: "Server Action over API route"
+        rationale: "Consistent with project pattern, better type safety"
+      - id: D-002
+        decision: "Group = multi-select users (no DB entity)"
+        rationale: "User clarified: no separate Group model needed"
+      - id: D-003
+        decision: "recharts for charts"
+        rationale: "Mandated by AC9, React-native, composable"
+      - id: D-004
+        decision: "Server-side JS aggregation (not pure SQL)"
+        rationale: "Need calcActualDuration logic (lunch break) which is JS-only"
+      - id: D-005
+        decision: "Initial data fetched in Server Component"
+        rationale: "Avoids loading flash on first render"
+  phase_1_spec:
+    status: approved
+    previous_status: awaiting-review
+    requirements_count:
+      functional: 8
+      non_functional: 4
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+      - path: 01_spec/spec-review.md
+        status: complete
+      - path: 01_spec/spec-update-1.md
+        status: complete
+  phase_2_tasks:
+    status: in-progress
+    previous_status: pending-update-1
+    started_at: 2026-02-11
+    completed_at: 2026-02-11
+    tasks_summary:
+      total: 6
+      by_root:
+        sgs-cs-helper: 6
+    test_plan:
+      included: true
+      test_cases_count: 15
+      edge_cases_count: 7
+      coverage_target: "80%"
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+      - path: 02_tasks/tasks-update-1.md
+        status: complete
+  phase_3_impl:
+    status: pending
+    tasks:
+      - id: T-U01
+        title: "Update types & schemas (remove group scope)"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: []
+        test_cases: [TC-U001, TC-U002]
+      - id: T-U02
+        title: "Update Server Action for ratio-based metrics"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: [T-U01]
+        test_cases: [TC-U003, TC-U004, TC-U005]
+      - id: T-U03
+        title: "Simplify DashboardFilters (remove Group)"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: [T-U01, T-U04]
+        test_cases: [TC-U006, TC-U007]
+      - id: T-U04
+        title: "Fix Calendar component (auto-select & range)"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: []
+        test_cases: [TC-U008, TC-U009, TC-U010]
+      - id: T-U05
+        title: "Update KPI Cards (ratio display)"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: [T-U02]
+        test_cases: [TC-U011, TC-U012]
+      - id: T-U06
+        title: "Convert charts to stacked columns"
+        root: sgs-cs-helper
+        status: pending
+        depends_on: [T-U02]
+        test_cases: [TC-U013, TC-U014, TC-U015]
+status:
+  current_phase: 2
+  phase_name: tasks
+  phase_status: awaiting-review
+  last_action: "Phase 2 Task Plan (Update #1) complete"
+  next_action: "Awaiting task plan review"
+  pending_approval: null
+  current_update: 1
+context:
+  session_decisions:
+    - "Work type: FEATURE"
+    - "Affected roots: sgs-cs-helper"
+    - "Group = multi-select users (UI filter, no DB change)"
+    - "Server Action pattern (not API route)"
+    - "recharts with dynamic import { ssr: false }"
+    - "Initial data from Server Component to avoid loading flash"
+flow_1:
+  current_step: 12
+  step_name: roadmap-to-delivery
+  status: complete
+  product_slug: sgs-cs-helper
+  selected_user_story: US-2.1.1
+  git_branch: feature/sgs-cs-helper-us-2.1.1
+  flow_1_complete: true
+  handoff_to_flow_2: /work-intake
+  updated_at: 2026-02-10T00:00:00Z
+updates:
+  - number: 1
+    timestamp: 2026-02-11T00:00:00Z
+    type: REQUIREMENT_CHANGE
+    source: "User Feedback / Testing"
+    description: "UI/UX improvements: simplified scope selector, column charts, date picker fixes, ratio displays"
+    restart_from: 1
+    affected_phases: [1, 2, 3, 4, 5]
+    affected_requirements:
+      modified: [FR-002, FR-003, FR-004, FR-005, FR-007]
+    status: approved
+    approved_at: 2026-02-11T00:00:00Z

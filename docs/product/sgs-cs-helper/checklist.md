@@ -226,14 +226,16 @@ RULES:
 
 ### Epic 2.1: Performance Dashboard
 
-- [ ] **US-2.1.1** — Performance Dashboard with Chart Visualization
-  - Status: `PLANNED`
+- [x] **US-2.1.1** — Performance Dashboard with Chart Visualization
+  - Status: `DONE`
   - Blocked By: ~~US-1.3.5~~ ✅
-  - Notes: Add charts (recharts) + KPI cards to existing dashboard page, Admin/Super Admin only, scope/time filters
+  - Branch: `feature/sgs-cs-helper-us-2.1.1`
+  - ✅ Completed: 2026-02-11
+  - Notes: Dashboard with KPI cards (On-Time Rate, Overdue), stacked charts, per-user breakdown, date filters
 
 - [ ] **US-2.1.2** — Export Performance Report & Orders to Excel
   - Status: `PLANNED`
-  - Blocked By: US-2.1.1
+  - Blocked By: ~~US-2.1.1~~ ✅
   - Notes: Export summary report (.xlsx) with team avg comparison + export filtered orders, server-side generation
 
 ---
@@ -424,14 +426,16 @@ RULES:
 
 ### Epic 2.1: Dashboard Hiệu suất
 
-- [ ] **US-2.1.1** — Dashboard Hiệu suất với Biểu đồ Trực quan
-  - Trạng thái: `PLANNED`
+- [x] **US-2.1.1** — Dashboard Hiệu suất với Biểu đồ Trực quan
+  - Trạng thái: `DONE`
   - Bị chặn bởi: ~~US-1.3.5~~ ✅
-  - Ghi chú: Thêm biểu đồ (recharts) + thẻ KPI vào trang dashboard hiện tại, chỉ Admin/Super Admin, bộ lọc phạm vi/thời gian
+  - Branch: `feature/sgs-cs-helper-us-2.1.1`
+  - ✅ Hoàn thành: 2026-02-11
+  - Ghi chú: Dashboard với thẻ KPI (On-Time Rate, Overdue), biểu đồ stacked, phân tích theo user, bộ lọc ngày
 
 - [ ] **US-2.1.2** — Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel
   - Trạng thái: `PLANNED`
-  - Bị chặn bởi: US-2.1.1
+  - Bị chặn bởi: ~~US-2.1.1~~ ✅
   - Ghi chú: Xuất báo cáo tổng hợp (.xlsx) so sánh TB team + xuất đơn theo bộ lọc, tạo file phía server
 
 ---
