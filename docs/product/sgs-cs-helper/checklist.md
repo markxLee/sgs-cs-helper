@@ -11,7 +11,7 @@
 | **Product Name**  | SGS CS Order Tracker                                         |
 | **Product Slug**  | `sgs-cs-helper`                                              |
 | **Purpose**       | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 26                                                           |
+| **Total Stories** | 28                                                           |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE`                           |
 
 ---
@@ -127,6 +127,19 @@ RULES:
   - Blocked By: ~~US-1.1.2~~ ✅
   - ✅ Completed: 2026-02-10
   - Branch: `feature/sgs-cs-helper-us-1.1.3`
+
+- [x] **US-1.1.4** — Batch Upload Processing — Client-Side Chunking
+  - Status: `DONE`
+  - Started: 2026-02-11
+  - Branch: `feature/sgs-cs-helper-us-1.1.4`
+  - Blocked By: ~~US-1.1.3~~ ✅
+  - ✅ Completed: 2026-02-11
+  - Notes: Client-side batching (10 orders/batch), batch progress UI, server action N+1→batch optimization
+
+- [ ] **US-1.1.5** — Parse Test Request Samples & Display Total Samples
+  - Status: `PLANNED`
+  - Blocked By: ~~US-1.1.3~~ ✅
+  - Notes: Parse "Phiếu yêu cầu test" from row 10+, new OrderSample table, display Total Samples column
 
 ---
 
@@ -340,6 +353,19 @@ RULES:
   - Bị chặn bởi: ~~US-1.1.2~~ ✅
   - ✅ Hoàn thành: 2026-02-10
   - Branch: `feature/sgs-cs-helper-us-1.1.3`
+
+- [x] **US-1.1.4** — Xử lý Upload theo Batch — Chia chunk phía Client
+  - Trạng thái: `DONE`
+  - Bắt đầu: 2026-02-11
+  - Branch: `feature/sgs-cs-helper-us-1.1.4`
+  - Bị chặn bởi: ~~US-1.1.3~~ ✅
+  - ✅ Hoàn thành: 2026-02-11
+  - Ghi chú: Client-side batching (10 orders/batch), batch progress UI, server action N+1→batch optimization
+
+- [ ] **US-1.1.5** — Phân tích Phiếu Yêu cầu Test & Hiển thị Tổng Sample
+  - Trạng thái: `PLANNED`
+  - Bị chặn bởi: ~~US-1.1.3~~ ✅
+  - Ghi chú: Parse "Phiếu yêu cầu test" từ dòng 10+, bảng OrderSample mới, hiển thị cột Tổng Samples
 
 ---
 

@@ -381,6 +381,47 @@ Phase 1 MVP:                                    │
 
 ---
 
+**US-1.1.4: Batch Upload Processing — Client-Side Chunking**
+
+- **Description**: As a Staff member, I want uploaded files to be processed in batches of maximum 5 files at a time so that large uploads don't cause request timeouts.
+
+- **Acceptance Criteria**:
+  - AC1: Client-side batching splits files into chunks of max 5 files each
+  - AC2: Each batch is sent as a separate request to the server
+  - AC3: Progress shows current batch (e.g., "Processing batch 2/4...")
+  - AC4: If one batch fails, error is shown but remaining batches continue
+  - AC5: Final summary aggregates results from all batches (total created, updated, unchanged)
+  - AC6: UI remains responsive during batch processing (no blocking)
+
+- **Blocked By**: US-1.1.3
+
+- **Notes**: Purely client-side change to UploadArea component. No API changes needed.
+
+---
+
+**US-1.1.5: Parse Test Request Samples & Display Total Samples**
+
+- **Description**: As a Staff member, I want the system to parse "Phiếu yêu cầu test" data from Excel (row 10+) and display the total sample count in the Orders table so I can see the scope of each order.
+
+- **Acceptance Criteria**:
+  - AC1: Parse Excel rows from row 10 onwards with columns: Section (A), Sample ID (B), Description (C), Analyte (D), Method (E), LOD (F), LOQ (G), Unit (H), Required Date (I)
+  - AC2: Empty rows are skipped (no data in key columns)
+  - AC3: Store test samples in new `OrderSample` table linked to Order
+  - AC4: Calculate total samples from Sample ID format `XXXX.NNN` — largest NNN value = total samples
+  - AC5: Display "Total Samples" column in Orders table (In Progress tab)
+  - AC6: Display "Total Samples" column in Completed Orders table (Completed tab)
+  - AC7: Upsert logic: samples are replaced on re-upload of same order
+  - AC8: If no samples found (row 10+ empty), total samples = 0
+
+- **Blocked By**: US-1.1.3
+
+- **Notes**: 
+  - Sample ID format: `2602A-00931.001` → `.001` means sample 1, max = total samples
+  - Requires schema update: new `OrderSample` model
+  - Requires parsing enhancement in Excel processor
+
+---
+
 ### Epic 1.2: Order Dashboard
 
 ---
@@ -1092,6 +1133,47 @@ These stories can be worked on in parallel after their dependencies are met:
 - **Bị chặn bởi**: US-1.1.2
 
 - **Ghi chú**: Job Number là unique identifier. Liên kết order với user đã upload.
+
+---
+
+**US-1.1.4: Xử lý Upload theo Batch — Chia chunk phía Client**
+
+- **Mô tả**: Là Nhân viên, tôi muốn các file upload được xử lý theo batch tối đa 5 file mỗi lần để upload nhiều file không bị timeout.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Client-side batching chia file thành các chunk tối đa 5 file mỗi chunk
+  - AC2: Mỗi batch được gửi như một request riêng đến server
+  - AC3: Progress hiển thị batch hiện tại (vd: "Đang xử lý batch 2/4...")
+  - AC4: Nếu một batch lỗi, hiển thị lỗi nhưng các batch còn lại vẫn tiếp tục
+  - AC5: Tổng kết cuối cùng gom kết quả từ tất cả batch (tổng created, updated, unchanged)
+  - AC6: UI vẫn responsive trong khi xử lý batch (không blocking)
+
+- **Bị chặn bởi**: US-1.1.3
+
+- **Ghi chú**: Thay đổi hoàn toàn phía client ở component UploadArea. Không cần thay đổi API.
+
+---
+
+**US-1.1.5: Phân tích Phiếu Yêu cầu Test & Hiển thị Tổng Sample**
+
+- **Mô tả**: Là Nhân viên, tôi muốn hệ thống phân tích dữ liệu "Phiếu yêu cầu test" từ Excel (dòng 10 trở đi) và hiển thị tổng số sample trong bảng Orders để tôi thấy phạm vi của mỗi đơn.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Phân tích Excel từ dòng 10 trở đi với các cột: Section (A), Sample ID (B), Description (C), Analyte (D), Method (E), LOD (F), LOQ (G), Unit (H), Required Date (I)
+  - AC2: Bỏ qua các dòng trống (không có dữ liệu ở các cột chính)
+  - AC3: Lưu test samples vào bảng `OrderSample` mới liên kết với Order
+  - AC4: Tính tổng samples từ định dạng Sample ID `XXXX.NNN` — giá trị NNN lớn nhất = tổng samples
+  - AC5: Hiển thị cột "Tổng Samples" trong bảng Orders (tab Đang xử lý)
+  - AC6: Hiển thị cột "Tổng Samples" trong bảng Completed Orders (tab Hoàn thành)
+  - AC7: Logic upsert: samples được thay thế khi upload lại cùng order
+  - AC8: Nếu không tìm thấy samples (dòng 10+ trống), tổng samples = 0
+
+- **Bị chặn bởi**: US-1.1.3
+
+- **Ghi chú**: 
+  - Định dạng Sample ID: `2602A-00931.001` → `.001` nghĩa là sample 1, max = tổng samples
+  - Cần cập nhật schema: model `OrderSample` mới
+  - Cần nâng cấp parser Excel
 
 ---
 

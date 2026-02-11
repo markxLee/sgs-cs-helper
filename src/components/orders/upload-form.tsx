@@ -16,10 +16,11 @@
 
 import { useState, useRef, useCallback } from "react";
 import { parseExcelFiles } from "@/lib/excel/parser";
-import { createOrders } from "@/lib/actions/order";
 import { toCreateOrderInput } from "@/lib/excel/types";
-import type { ParsedOrder, BatchCreateResult } from "@/lib/excel/types";
+import type { ParsedOrder } from "@/lib/excel/types";
 import { formatFileSize, ALLOWED_EXTENSIONS, MAX_FILE_SIZE } from "@/lib/upload/validation";
+import { submitOrdersInBatches } from "@/lib/upload/batch-upload";
+import type { BatchProgressInfo } from "@/types/batch-upload";
 import { OrderPreviewList, type PreviewItemData } from "./order-preview";
 import { OrderEditForm } from "./order-edit-form";
 
@@ -81,6 +82,19 @@ export function UploadForm() {
   // Submit result state
   const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null);
 
+  // Batch progress state
+  const [batchProgress, setBatchProgress] = useState<{
+    current: number;
+    total: number;
+    totalOrders: number;
+    processedOrders: number;
+    created: number;
+    updated: number;
+    unchanged: number;
+    failed: number;
+    batchErrors: number;
+  } | null>(null);
+
   // ============================================================================
   // File Selection Handlers
   // ============================================================================
@@ -114,6 +128,7 @@ export function UploadForm() {
     setPreviewItems([]);
     setStep("select");
     setSubmitResult(null);
+    setBatchProgress(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -210,39 +225,88 @@ export function UploadForm() {
     }
 
     setStep("submitting");
+    setBatchProgress(null);
 
     try {
       // Convert to server format
       const orderInputs = validOrders.map(toCreateOrderInput);
 
-      // Call server action
-      const result: BatchCreateResult = await createOrders(orderInputs);
+      // Submit in batches with progress tracking
+      const totalOrders = orderInputs.length;
+      let processedOrders = 0;
+      let createdSoFar = 0;
+      let updatedSoFar = 0;
+      let unchangedSoFar = 0;
+      let failedSoFar = 0;
+      let batchErrorsSoFar = 0;
 
-      const success = result.failed.length === 0;
+      const handleBatchProgress = (info: BatchProgressInfo) => {
+        if (info.batchResult) {
+          processedOrders += info.batchResult.created.length
+            + info.batchResult.updated.length
+            + info.batchResult.unchanged.length
+            + info.batchResult.failed.length;
+          createdSoFar += info.batchResult.created.length;
+          updatedSoFar += info.batchResult.updated.length;
+          unchangedSoFar += info.batchResult.unchanged.length;
+          failedSoFar += info.batchResult.failed.length;
+        } else {
+          batchErrorsSoFar++;
+        }
+        setBatchProgress({
+          current: info.current,
+          total: info.total,
+          totalOrders,
+          processedOrders,
+          created: createdSoFar,
+          updated: updatedSoFar,
+          unchanged: unchangedSoFar,
+          failed: failedSoFar,
+          batchErrors: batchErrorsSoFar,
+        });
+      };
+
+      const batchResult = await submitOrdersInBatches(orderInputs, {
+        onBatchProgress: handleBatchProgress,
+      });
+
+      const success =
+        batchResult.failed.length === 0 && batchResult.failedBatches === 0;
       const parts: string[] = [];
-      if (result.created.length > 0) parts.push(`Created ${result.created.length}`);
-      if (result.updated.length > 0) parts.push(`Updated ${result.updated.length}`);
-      if (result.unchanged.length > 0) parts.push(`Unchanged ${result.unchanged.length}`);
-      if (result.failed.length > 0) parts.push(`Failed ${result.failed.length}`);
+      if (batchResult.created.length > 0)
+        parts.push(`Created ${batchResult.created.length}`);
+      if (batchResult.updated.length > 0)
+        parts.push(`Updated ${batchResult.updated.length}`);
+      if (batchResult.unchanged.length > 0)
+        parts.push(`Unchanged ${batchResult.unchanged.length}`);
+      if (batchResult.failed.length > 0)
+        parts.push(`Failed ${batchResult.failed.length}`);
       const message = parts.join(", ");
 
       setSubmitResult({
         success,
         message,
-        created: result.created.length,
-        updated: result.updated.length,
-        unchanged: result.unchanged.length,
-        failed: result.failed.length,
-        createdOrders: result.created.map((o) => ({ jobNumber: o.jobNumber })),
-        updatedOrders: result.updated.map((o) => ({ jobNumber: o.jobNumber })),
-        unchangedOrders: result.unchanged.map((o) => ({ jobNumber: o.jobNumber })),
-        failedOrders: result.failed.map((f) => ({
+        created: batchResult.created.length,
+        updated: batchResult.updated.length,
+        unchanged: batchResult.unchanged.length,
+        failed: batchResult.failed.length,
+        createdOrders: batchResult.created.map((o) => ({
+          jobNumber: o.jobNumber,
+        })),
+        updatedOrders: batchResult.updated.map((o) => ({
+          jobNumber: o.jobNumber,
+        })),
+        unchangedOrders: batchResult.unchanged.map((o) => ({
+          jobNumber: o.jobNumber,
+        })),
+        failedOrders: batchResult.failed.map((f) => ({
           jobNumber: f.input.jobNumber,
           error: f.error,
         })),
       });
 
       setStep("results");
+      setBatchProgress(null);
 
       // Clear files on success
       if (success) {
@@ -269,6 +333,7 @@ export function UploadForm() {
         })),
       });
       setStep("results");
+      setBatchProgress(null);
     }
   }, [previewItems]);
 
@@ -444,28 +509,139 @@ export function UploadForm() {
 
       {/* Submitting State */}
       {step === "submitting" && (
-        <div className="flex flex-col items-center justify-center py-8">
-          <svg
-            className="animate-spin h-8 w-8 text-green-600 mb-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          <p className="text-gray-600">Processing orders...</p>
+        <div className="py-6 space-y-5">
+          {/* Header with spinner */}
+          <div className="flex items-center justify-center gap-3">
+            <svg
+              className="animate-spin h-6 w-6 text-green-600 flex-shrink-0"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            <p className="text-gray-700 font-semibold text-lg">
+              {batchProgress
+                ? `Đang xử lý batch ${batchProgress.current}/${batchProgress.total}...`
+                : "Đang chuẩn bị xử lý..."}
+            </p>
+          </div>
+
+          {/* Progress bar */}
+          {batchProgress && (
+            <div className="space-y-2">
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-green-500 h-3 rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${(batchProgress.current / batchProgress.total) * 100}%`,
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>
+                  {batchProgress.processedOrders}/{batchProgress.totalOrders} orders
+                </span>
+                <span>
+                  {Math.round((batchProgress.current / batchProgress.total) * 100)}%
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Real-time stats */}
+          {batchProgress && batchProgress.processedOrders > 0 && (
+            <div className="grid grid-cols-4 gap-2 text-center">
+              {batchProgress.created > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                  <p className="text-lg font-bold text-green-700">
+                    {batchProgress.created}
+                  </p>
+                  <p className="text-xs text-green-600">Tạo mới</p>
+                </div>
+              )}
+              {batchProgress.updated > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+                  <p className="text-lg font-bold text-blue-700">
+                    {batchProgress.updated}
+                  </p>
+                  <p className="text-xs text-blue-600">Cập nhật</p>
+                </div>
+              )}
+              {batchProgress.unchanged > 0 && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-2">
+                  <p className="text-lg font-bold text-gray-700">
+                    {batchProgress.unchanged}
+                  </p>
+                  <p className="text-xs text-gray-600">Không đổi</p>
+                </div>
+              )}
+              {batchProgress.failed > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-2">
+                  <p className="text-lg font-bold text-red-700">
+                    {batchProgress.failed}
+                  </p>
+                  <p className="text-xs text-red-600">Lỗi</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Batch status dots */}
+          {batchProgress && batchProgress.total > 1 && (
+            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+              {Array.from({ length: batchProgress.total }, (_, i) => {
+                const batchIndex = i + 1;
+                const isCompleted = batchIndex <= batchProgress.current;
+                const isCurrent = batchIndex === batchProgress.current + 1;
+                return (
+                  <div
+                    key={i}
+                    className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+                      isCompleted
+                        ? "bg-green-500"
+                        : isCurrent
+                          ? "bg-green-300 animate-pulse"
+                          : "bg-gray-300"
+                    }`}
+                    title={`Batch ${batchIndex}`}
+                  />
+                );
+              })}
+            </div>
+          )}
+
+          {/* Error warning */}
+          {batchProgress && batchProgress.batchErrors > 0 && (
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <svg
+                className="h-4 w-4 text-amber-500 flex-shrink-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-xs text-amber-700">
+                {batchProgress.batchErrors} batch bị lỗi — các batch còn lại vẫn tiếp tục xử lý
+              </p>
+            </div>
+          )}
         </div>
       )}
 
