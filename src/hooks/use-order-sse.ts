@@ -103,6 +103,7 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
       receivedDate: string;
       requiredDate: string;
       priority: number;
+      sampleCount: number;
       status: string;
     };
     return {
@@ -113,6 +114,7 @@ export function useOrderSSE(options: UseOrderSSEOptions) {
       receivedDate: new Date(o.receivedDate),
       requiredDate: new Date(o.requiredDate),
       priority: o.priority,
+      sampleCount: o.sampleCount ?? 0,
       status: o.status,
     } as OrderData;
   }, []);

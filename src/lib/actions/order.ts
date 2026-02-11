@@ -23,6 +23,18 @@ import { broadcastBulkUpdate } from "@/lib/sse/broadcaster";
 // Zod Schemas
 // ============================================================================
 
+const createSampleSchema = z.object({
+  section: z.string().nullable(),
+  sampleId: z.string().min(1),
+  description: z.string().nullable(),
+  analyte: z.string().nullable(),
+  method: z.string().nullable(),
+  lod: z.string().nullable(),
+  loq: z.string().nullable(),
+  unit: z.string().nullable(),
+  requiredDate: z.string().nullable(),
+});
+
 /**
  * Schema for validating a single order input
  */
@@ -36,6 +48,8 @@ const createOrderSchema = z.object({
   priority: z.number().int().min(0, "Priority must be non-negative"),
   note: z.string().optional(),
   sourceFileName: z.string().min(1, "Source file name is required"),
+  sampleCount: z.number().int().min(0).default(0),
+  samples: z.array(createSampleSchema).default([]),
 });
 
 /**
@@ -267,17 +281,41 @@ export async function createOrders(
               requiredDate: new Date(input.requiredDate),
               priority: input.priority,
               note: input.note,
+              sampleCount: input.sampleCount ?? 0,
               uploadedById: userId,
             })),
           });
+
+          // Create samples for new orders
+          for (const created of txCreated) {
+            const matchingInput = toCreate.find(
+              (i) => i.jobNumber.toLowerCase() === created.jobNumber.toLowerCase()
+            );
+            if (matchingInput?.samples && matchingInput.samples.length > 0) {
+              await tx.orderSample.createMany({
+                data: matchingInput.samples.map((s) => ({
+                  orderId: created.id,
+                  section: s.section,
+                  sampleId: s.sampleId,
+                  description: s.description,
+                  analyte: s.analyte,
+                  method: s.method,
+                  lod: s.lod,
+                  loq: s.loq,
+                  unit: s.unit,
+                  requiredDate: s.requiredDate,
+                })),
+              });
+            }
+          }
         }
 
         // Batch update — parallel promises in 1 transaction round-trip
         let txUpdated: Order[] = [];
         if (toUpdate.length > 0) {
           txUpdated = await Promise.all(
-            toUpdate.map(({ existing, input }) =>
-              tx.order.update({
+            toUpdate.map(async ({ existing, input }) => {
+              const updatedOrder = await tx.order.update({
                 where: { id: existing.id },
                 data: {
                   registeredDate: new Date(input.registeredDate),
@@ -287,9 +325,72 @@ export async function createOrders(
                   requiredDate: new Date(input.requiredDate),
                   priority: input.priority,
                   note: input.note,
+                  sampleCount: input.sampleCount ?? 0,
                 },
-              })
-            )
+              });
+
+              // Delete old samples + create new (upsert strategy)
+              await tx.orderSample.deleteMany({
+                where: { orderId: existing.id },
+              });
+              if (input.samples && input.samples.length > 0) {
+                await tx.orderSample.createMany({
+                  data: input.samples.map((s) => ({
+                    orderId: existing.id,
+                    section: s.section,
+                    sampleId: s.sampleId,
+                    description: s.description,
+                    analyte: s.analyte,
+                    method: s.method,
+                    lod: s.lod,
+                    loq: s.loq,
+                    unit: s.unit,
+                    requiredDate: s.requiredDate,
+                  })),
+                });
+              }
+
+              return updatedOrder;
+            })
+          );
+        }
+
+        // For unchanged orders: still replace samples + update sampleCount
+        if (unchanged.length > 0) {
+          await Promise.all(
+            unchanged.map(async (uo) => {
+              const matchingInput = uniqueOrders.find(
+                (i) => i.jobNumber.toLowerCase() === uo.jobNumber.toLowerCase()
+              );
+              if (!matchingInput) return;
+
+              // Update sampleCount
+              await tx.order.update({
+                where: { id: uo.order.id },
+                data: { sampleCount: matchingInput.sampleCount ?? 0 },
+              });
+
+              // Delete old samples + create new
+              await tx.orderSample.deleteMany({
+                where: { orderId: uo.order.id },
+              });
+              if (matchingInput.samples && matchingInput.samples.length > 0) {
+                await tx.orderSample.createMany({
+                  data: matchingInput.samples.map((s) => ({
+                    orderId: uo.order.id,
+                    section: s.section,
+                    sampleId: s.sampleId,
+                    description: s.description,
+                    analyte: s.analyte,
+                    method: s.method,
+                    lod: s.lod,
+                    loq: s.loq,
+                    unit: s.unit,
+                    requiredDate: s.requiredDate,
+                  })),
+                });
+              }
+            })
           );
         }
 

@@ -107,6 +107,9 @@ model Order {
   uploadedById    String
   uploadedBy      User        @relation("UploadedBy", fields: [uploadedById], references: [id])
 
+  // Relations
+  samples         OrderSample[]
+
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -130,4 +133,24 @@ model Config {
   value     String
   // login_mode: quick_code, full_login, both
   updatedAt DateTime @updatedAt
+}
+
+model OrderSample {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  section      String?  // Column A
+  sampleId     String   // Column B - e.g., "XXXX.001"
+  description  String?  // Column C
+  analyte      String?  // Column D
+  method       String?  // Column E
+  lod          String?  // Column F
+  loq          String?  // Column G
+  unit         String?  // Column H
+  requiredDate String?  // Column I (stored as string from Excel)
+
+  createdAt    DateTime @default(now())
+
+  @@index([orderId])
 }

@@ -35,6 +35,7 @@ export interface OrderData {
   receivedDate: Date;
   requiredDate: Date;
   priority: number;
+  sampleCount: number;
   status: OrderStatus;
 }
 

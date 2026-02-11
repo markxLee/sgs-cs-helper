@@ -1,0 +1,200 @@
+# ================================================================
+# Workflow State — feature/sgs-cs-helper-us-1.1.5
+# ================================================================
+
+meta:
+  branch_slug: feature-sgs-cs-helper-us-1.1.5
+  base_branch: main
+  docs_root: sgs-cs-hepper
+  tooling_root: a-z-copilot-flow
+  dev_mode: standard
+  user_story_id: US-1.1.5
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+  created_at: "2026-02-11"
+  updated_at: "2026-02-11"
+  update_count: 7
+
+status:
+  current_phase: 5
+  phase_name: done-check
+  phase_status: complete
+  last_action: "Phase 5 Done Check — all DoD criteria met"
+  next_action: "User commits and creates PR"
+
+phases:
+  phase_0_analysis:
+    status: approved
+    started_at: "2026-02-11"
+    completed_at: "2026-02-11"
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: initialized
+      - path: 00_analysis/solution-design.md
+        status: complete
+      - path: 00_analysis/diagrams/flow-overview.md
+        status: complete
+      - path: 00_analysis/diagrams/sequence-main.md
+        status: complete
+      - path: 00_analysis/decision-log.md
+        status: complete
+    decisions:
+      - id: D-001
+        decision: "Use OrderSample table to store individual sample records (REVISED)"
+        rationale: "AC3 requires storing samples in DB, enables future sample-level features"
+      - id: D-002
+        decision: "Parse all 9 columns (A-I) from rows 10+ (REVISED)"
+        rationale: "AC1 explicitly requires all 9 columns"
+      - id: D-003
+        decision: "Add Total Samples column after Priority, before Progress"
+        rationale: "Logical grouping and natural reading order"
+      - id: D-004
+        decision: "Delete+recreate samples on re-upload (upsert strategy)"
+        rationale: "Simpler than diffing individual sample rows, atomic in transaction"
+
+  phase_1_spec:
+    status: approved
+    started_at: "2026-02-11"
+    completed_at: "2026-02-11"
+    requirements_count:
+      functional: 5
+      non_functional: 4
+    artifacts:
+      - path: 01_spec/spec.md
+        status: complete
+
+  phase_2_tasks:
+    status: awaiting-review
+    started_at: "2026-02-11"
+    completed_at: "2026-02-11"
+    tasks_summary:
+      total: 8
+      by_root:
+        sgs-cs-hepper: 8
+    test_plan:
+      included: true
+      test_cases_count: 9
+      coverage_target: 80%
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: complete
+
+  phase_3_impl:
+    status: completed
+    started_at: "2026-02-11"
+    completed_at: "2026-02-11"
+    tasks:
+      - id: T-001
+        title: "Add OrderSample Prisma model + migration"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: []
+        files: ["prisma/schema.prisma"]
+        frs: [FR-2]
+        acs: [AC3]
+      - id: T-002
+        title: "Add ParsedSample type + update ParsedOrder & CreateOrderInput"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-001]
+        files: ["src/lib/excel/types.ts"]
+        frs: [FR-1, FR-2]
+        acs: [AC1, AC3]
+      - id: T-003
+        title: "Implement sample parsing logic (rows 10+)"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-002]
+        files: ["src/lib/excel/parser.ts"]
+        frs: [FR-1]
+        acs: [AC1, AC2]
+      - id: T-004
+        title: "Implement sampleCount calculation (max .NNN)"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-003]
+        files: ["src/lib/excel/parser.ts"]
+        frs: [FR-3]
+        acs: [AC4, AC8]
+      - id: T-005
+        title: "Update createOrders server action with sample upsert"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-002, T-004]
+        files: ["src/lib/actions/order.ts"]
+        frs: [FR-2, FR-5]
+        acs: [AC3, AC7]
+      - id: T-006
+        title: "Update getOrders to include sampleCount + data flow pipeline"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-001]
+        files: ["src/lib/actions/order.ts", "src/hooks/use-realtime-progress.ts", "src/hooks/use-order-sse.ts", "src/lib/sse/broadcaster.ts", "src/app/(orders)/orders/page.tsx"]
+        frs: [FR-4]
+        acs: [AC5, AC6]
+      - id: T-007
+        title: "Add Total Samples column to In Progress table"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-006]
+        files: ["src/components/orders/orders-table.tsx"]
+        frs: [FR-4]
+        acs: [AC5]
+      - id: T-008
+        title: "Add Total Samples column to Completed table"
+        root: sgs-cs-hepper
+        status: done
+        reviewed_at: "2026-02-11"
+        review_verdict: approved
+        depends_on: [T-006]
+        files: ["src/components/orders/completed-orders-table.tsx", "src/hooks/use-completed-orders.ts", "src/app/api/orders/completed/route.ts"]
+        frs: [FR-4]
+        acs: [AC6]
+
+  phase_4_tests:
+    status: skipped
+    note: "Skipped by user — automated tests verified (128/128 pass)"
+
+  phase_5_done:
+    status: complete
+    completed_at: "2026-02-11"
+    dod_results:
+      total_criteria: 19
+      passed: 18
+      skipped: 1
+      failed: 0
+    artifacts:
+      - path: 05_done/done-check.md
+        status: complete
+    flow_1_integration:
+      user_story_id: US-1.1.5
+      product_slug: sgs-cs-helper
+      checklist_updated: true
+      checklist_path: docs/product/sgs-cs-helper/checklist.md
+
+flow_1:
+  current_step: 12
+  step_name: roadmap-to-delivery
+  status: complete
+  product_slug: sgs-cs-helper
+  selected_user_story: US-1.1.5
+  git_branch: feature/sgs-cs-helper-us-1.1.5
+  flow_1_complete: true
+  handoff_to_flow_2: /work-intake
+  updated_at: "2026-02-11"

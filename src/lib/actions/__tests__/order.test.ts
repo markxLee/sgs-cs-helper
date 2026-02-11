@@ -8,6 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { CreateOrderInput } from "@/lib/excel/types";
 
 // ============================================================================
 // Mocks
@@ -28,12 +29,18 @@ const mockFindMany = vi.fn();
 const mockCreateManyAndReturn = vi.fn();
 const mockUpdate = vi.fn();
 const mockRegistrantCreateMany = vi.fn();
+const mockSampleCreateMany = vi.fn();
+const mockSampleDeleteMany = vi.fn();
 
 // Transaction proxy — delegates to the same mock fns
 const txProxy = {
   order: {
     createManyAndReturn: (args: unknown) => mockCreateManyAndReturn(args),
     update: (args: unknown) => mockUpdate(args),
+  },
+  orderSample: {
+    createMany: (args: unknown) => mockSampleCreateMany(args),
+    deleteMany: (args: unknown) => mockSampleDeleteMany(args),
   },
 };
 
@@ -62,7 +69,7 @@ vi.mock("@/lib/sse/broadcaster", () => ({
 // Test Data
 // ============================================================================
 
-const validOrderInput = {
+const validOrderInput: CreateOrderInput = {
   jobNumber: "JOB-001",
   registeredDate: "2026-02-01T00:00:00.000Z",
   registeredBy: "Test User",
@@ -72,6 +79,8 @@ const validOrderInput = {
   priority: 2,
   note: "Test note",
   sourceFileName: "test.xlsx",
+  sampleCount: 0,
+  samples: [],
 };
 
 const mockCreatedOrder = {
@@ -227,9 +236,8 @@ describe("createOrders Action", () => {
       expect(result.created).toHaveLength(0);
       expect(result.updated).toHaveLength(0);
       expect(result.failed).toHaveLength(0);
-      // No DB write for unchanged
+      // No order create for unchanged, but sampleCount update + sample replace still happens
       expect(mockCreateManyAndReturn).not.toHaveBeenCalled();
-      expect(mockUpdate).not.toHaveBeenCalled();
     });
 
     // TC-004: Mixed batch — create + update + unchanged in one call

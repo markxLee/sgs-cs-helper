@@ -81,6 +81,7 @@ export async function POST(
         receivedDate: true,
         requiredDate: true,
         priority: true,
+        sampleCount: true,
         status: true,
         completedAt: true,
         completedById: true,

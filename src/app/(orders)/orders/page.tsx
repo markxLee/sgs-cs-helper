@@ -70,6 +70,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       receivedDate: order.receivedDate,
       requiredDate: order.requiredDate,
       priority: order.priority,
+      sampleCount: order.sampleCount,
       status: order.status,
     }));
     inProgressCount = initialOrders.length;

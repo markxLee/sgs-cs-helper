@@ -32,6 +32,7 @@ export async function GET() {
         requiredDate: true,
         registeredBy: true,
         priority: true,
+        sampleCount: true,
         status: true,
       },
       orderBy: { createdAt: "desc" },

@@ -33,6 +33,7 @@ export interface CompletedOrder {
   receivedDate: string;
   requiredDate: string;
   priority: number;
+  sampleCount: number;
   status: string;
   completedAt: string | null;
   completedById: string | null;
