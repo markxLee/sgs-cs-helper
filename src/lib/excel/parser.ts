@@ -19,7 +19,7 @@
  */
 
 import * as XLSX from "xlsx";
-import type { ParseResult, ParsedOrder, ParseError } from "./types";
+import type { ParseResult, ParsedOrder, ParseError, ParsedSample } from "./types";
 import { parseExcelDateCell } from "./date-utils";
 
 // ============================================================================
@@ -42,6 +42,22 @@ const ROW_MAP = {
   jobNumberFallback: 1,
   metadata: 2,
   note: 3,
+} as const;
+
+/** First row containing sample data (0-indexed) */
+const SAMPLE_START_ROW = 10;
+
+/** Column indices for sample data (0-indexed) */
+const SAMPLE_COLUMN_MAP = {
+  section: 0,      // Column A
+  sampleId: 1,     // Column B
+  description: 2,  // Column C
+  analyte: 3,      // Column D
+  method: 4,       // Column E
+  lod: 5,          // Column F
+  loq: 6,          // Column G
+  unit: 7,         // Column H
+  requiredDate: 8, // Column I
 } as const;
 
 /** Job number patterns */
@@ -126,6 +142,83 @@ function extractNote(row: unknown[]): string | null {
   }
 
   return null;
+}
+
+// ============================================================================
+// Sample Parser Functions
+// ============================================================================
+
+/**
+ * Parse sample rows from Excel data (rows 10+)
+ *
+ * Reads all rows starting from SAMPLE_START_ROW. Each row has 9 columns (A-I).
+ * Rows where Sample ID (column B) is empty are skipped.
+ *
+ * @param data - 2D array of Excel data (rows × columns)
+ * @returns Array of parsed samples
+ */
+function parseSamples(data: unknown[][]): ParsedSample[] {
+  const samples: ParsedSample[] = [];
+
+  for (let rowIdx = SAMPLE_START_ROW; rowIdx < data.length; rowIdx++) {
+    const row = data[rowIdx];
+    if (!row) continue;
+
+    // Skip row if Sample ID (column B) is empty
+    const sampleId = getStringValue(row, SAMPLE_COLUMN_MAP.sampleId);
+    if (!sampleId) continue;
+
+    samples.push({
+      section: getStringValue(row, SAMPLE_COLUMN_MAP.section),
+      sampleId,
+      description: getStringValue(row, SAMPLE_COLUMN_MAP.description),
+      analyte: getStringValue(row, SAMPLE_COLUMN_MAP.analyte),
+      method: getStringValue(row, SAMPLE_COLUMN_MAP.method),
+      lod: getStringValue(row, SAMPLE_COLUMN_MAP.lod),
+      loq: getStringValue(row, SAMPLE_COLUMN_MAP.loq),
+      unit: getStringValue(row, SAMPLE_COLUMN_MAP.unit),
+      requiredDate: getStringValue(row, SAMPLE_COLUMN_MAP.requiredDate),
+    });
+  }
+
+  return samples;
+}
+
+/**
+ * Calculate total sample count from Sample IDs
+ *
+ * Extracts the numeric suffix from format "XXXX.NNN" and returns
+ * the maximum value. Falls back to array length if no valid suffixes found.
+ * Returns 0 for empty array.
+ *
+ * @param samples - Array of parsed samples
+ * @returns Total sample count
+ *
+ * @example
+ * // Samples: XXXX.001, XXXX.002, XXXX.003 → returns 3
+ * // Samples: XXXX.001, XXXX.005 → returns 5
+ * // Samples: [no .NNN pattern] → returns samples.length
+ * // Samples: [] → returns 0
+ */
+function calculateSampleCount(samples: ParsedSample[]): number {
+  if (samples.length === 0) return 0;
+
+  const suffixPattern = /\.(\d+)$/;
+  let maxSuffix = 0;
+  let hasValidSuffix = false;
+
+  for (const sample of samples) {
+    const match = sample.sampleId.match(suffixPattern);
+    if (match?.[1]) {
+      const num = parseInt(match[1], 10);
+      if (num > maxSuffix) {
+        maxSuffix = num;
+      }
+      hasValidSuffix = true;
+    }
+  }
+
+  return hasValidSuffix ? maxSuffix : samples.length;
 }
 
 // ============================================================================
@@ -270,6 +363,10 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
     const noteRow = data[ROW_MAP.note];
     const note = noteRow ? extractNote(noteRow) : null;
 
+    // Parse samples from rows 10+
+    const samples = parseSamples(data);
+    const sampleCount = calculateSampleCount(samples);
+
     // Build ParsedOrder
     const order: ParsedOrder = {
       jobNumber,
@@ -281,6 +378,8 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
       priority,
       note,
       sourceFileName: fileName,
+      samples,
+      sampleCount,
     };
     console.log("Parsed order:", order);
     return {

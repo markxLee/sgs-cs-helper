@@ -42,6 +42,7 @@ export interface OrderWithProgress {
   receivedDate: Date;
   requiredDate: Date;
   priority: number;
+  sampleCount: number;
   status: OrderStatus;
   progress: ProgressInfo;
 }
@@ -259,6 +260,7 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
                 "Priority"
               )}
             </TableHead>
+            <TableHead className="w-[100px]">Total Samples</TableHead>
             {/* <TableHead className="w-[100px]">Status</TableHead> */}
             <TableHead className={cn("w-[180px]", sortConfig && onSort && "hover:bg-muted/50 transition-colors")}>
               {sortConfig && onSort ? (
@@ -295,6 +297,7 @@ export function OrdersTable({ orders, activeTab = "in-progress", canMarkDone = f
                   {getPriorityLabel(order.priority, getPriorityDuration(order.priority))}
                 </span>
               </TableCell>
+              <TableCell className="text-center">{order.sampleCount}</TableCell>
               {/* <TableCell>
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getStatusClass(order.status)}`}

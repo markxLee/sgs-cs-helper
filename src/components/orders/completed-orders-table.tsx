@@ -117,6 +117,9 @@ function SkeletonRow() {
         <Skeleton className="h-4 w-16" />
       </TableCell>
       <TableCell>
+        <Skeleton className="h-4 w-12" />
+      </TableCell>
+      <TableCell>
         <Skeleton className="h-4 w-28" />
       </TableCell>
       <TableCell>
@@ -227,6 +230,7 @@ export function CompletedOrdersTable({
                 />
               </TableHead>
               <TableHead className="w-[100px]">Priority</TableHead>
+              <TableHead className="w-[100px]">Total Samples</TableHead>
               <TableHead
                 className={cn(
                   "w-[170px]",
@@ -273,7 +277,7 @@ export function CompletedOrdersTable({
             {!isLoading && orders.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={canUndo ? 9 : 8}
+                  colSpan={canUndo ? 10 : 9}
                   className="h-32 text-center"
                 >
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -308,6 +312,7 @@ export function CompletedOrdersTable({
                     {getPriorityLabel(order.priority)}
                   </span>
                 </TableCell>
+                <TableCell className="text-center">{order.sampleCount}</TableCell>
                 <TableCell>
                   {order.completedAt ? (
                     <span className="text-green-700 font-medium">

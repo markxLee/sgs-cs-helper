@@ -12,6 +12,39 @@ import type { Order } from "@/generated/prisma/client";
 // ============================================================================
 
 /**
+ * Parsed sample data from Excel rows 10+
+ * Each row represents one sample record with 9 columns (A-I)
+ */
+export interface ParsedSample {
+  /** Column A - Section grouping */
+  section: string | null;
+
+  /** Column B - Sample ID (e.g., "XXXX.001") - REQUIRED */
+  sampleId: string;
+
+  /** Column C - Sample description */
+  description: string | null;
+
+  /** Column D - Analyte name */
+  analyte: string | null;
+
+  /** Column E - Test method */
+  method: string | null;
+
+  /** Column F - Limit of Detection */
+  lod: string | null;
+
+  /** Column G - Limit of Quantitation */
+  loq: string | null;
+
+  /** Column H - Unit of measurement */
+  unit: string | null;
+
+  /** Column I - Required date (stored as string from Excel) */
+  requiredDate: string | null;
+}
+
+/**
  * Parsed order data from Excel file
  * All dates are JavaScript Date objects (converted from Excel serial)
  */
@@ -42,6 +75,12 @@ export interface ParsedOrder {
 
   /** Source file name for tracking origin */
   sourceFileName: string;
+
+  /** Parsed sample rows from rows 10+ */
+  samples: ParsedSample[];
+
+  /** Total sample count (max .NNN suffix or samples.length fallback) */
+  sampleCount: number;
 }
 
 // ============================================================================
@@ -97,6 +136,21 @@ export type ParseResult = ParseResultSuccess | ParseResultError;
 // ============================================================================
 
 /**
+ * Input for creating a sample record on the server
+ */
+export interface CreateSampleInput {
+  section: string | null;
+  sampleId: string;
+  description: string | null;
+  analyte: string | null;
+  method: string | null;
+  lod: string | null;
+  loq: string | null;
+  unit: string | null;
+  requiredDate: string | null;
+}
+
+/**
  * Input for creating a single order on the server
  * Dates are ISO strings for JSON serialization
  */
@@ -127,6 +181,12 @@ export interface CreateOrderInput {
 
   /** Source file name for tracking */
   sourceFileName: string;
+
+  /** Total sample count */
+  sampleCount: number;
+
+  /** Sample records to create */
+  samples: CreateSampleInput[];
 }
 
 // ============================================================================
@@ -212,5 +272,17 @@ export function toCreateOrderInput(order: ParsedOrder): CreateOrderInput {
     priority: order.priority,
     note: order.note ?? undefined,
     sourceFileName: order.sourceFileName,
+    sampleCount: order.sampleCount,
+    samples: order.samples.map((s) => ({
+      section: s.section,
+      sampleId: s.sampleId,
+      description: s.description,
+      analyte: s.analyte,
+      method: s.method,
+      lod: s.lod,
+      loq: s.loq,
+      unit: s.unit,
+      requiredDate: s.requiredDate,
+    })),
   };
 }

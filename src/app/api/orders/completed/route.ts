@@ -29,6 +29,7 @@ const ORDER_SELECT = {
   receivedDate: true,
   requiredDate: true,
   priority: true,
+  sampleCount: true,
   status: true,
   completedAt: true,
   completedById: true,

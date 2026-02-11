@@ -23,6 +23,7 @@ type OrderData = Pick<
   | "receivedDate"
   | "requiredDate"
   | "priority"
+  | "sampleCount"
   | "status"
 >;
 
