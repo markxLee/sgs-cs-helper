@@ -321,9 +321,16 @@ export function CompletedOrdersTable({
                   {order.completedBy ? (
                     <span
                       className="truncate block"
-                      title={order.completedBy.email ? `${order.completedBy.name} (${order.completedBy.email})` : order.completedBy.name}
+                      title={
+                        order.completedBy.email
+                          ? `${order.completedBy.name} (${order.completedBy.email})`
+                          : order.completedBy.name
+                      }
                     >
-                      {order.completedBy.name}{order.completedBy.email ? ` (${order.completedBy.email})` : ''}
+                      {order.completedBy.name}
+                      {order.completedBy.email
+                        ? ` (${order.completedBy.email})`
+                        : ""}
                     </span>
                   ) : (
                     <span className="text-muted-foreground">—</span>

@@ -1,4 +1,10 @@
+import {
+  getDashboardMetrics,
+  getDashboardUsers,
+} from "@/app/actions/dashboard";
+import { PerformanceDashboard } from "@/components/dashboard/performance-dashboard";
 import { auth } from "@/lib/auth";
+import type { DashboardMetrics, DashboardUser } from "@/types/dashboard";
 import { Metadata } from "next";
 import Link from "next/link";
 import { LogoutButton } from "./_components/logout-button";
@@ -9,10 +15,45 @@ export const metadata: Metadata = {
 };
 
 /**
+ * Get default dashboard filters for this month
+ * Update #1: Uses new filter structure with startDate/endDate and scope="all-team"
+ */
+function getDefaultDashboardFilters() {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  monthEnd.setHours(23, 59, 59, 999);
+
+  return {
+    scope: "all-team" as const,
+    userId: undefined,
+    startDate: monthStart,
+    endDate: monthEnd,
+  };
+}
+
+/**
+ * Get empty metrics for error fallback
+ * Update #1.1: Uses new KPI structure with totalCompleted and avgEfficiency
+ */
+function getEmptyMetrics() {
+  return {
+    kpis: {
+      totalCompleted: { count: 0 },
+      onTime: { onTime: 0, total: 0, ratio: 0 },
+      avgDuration: { avgMs: 0, avgHours: 0, avgEfficiency: 0, trend: 0 },
+      overdue: { overdue: 0, total: 0, ratio: 0 },
+    },
+    completionPerUser: [],
+    completionTrend: [],
+  };
+}
+
+/**
  * Dashboard Page - Server Component
- * 
+ *
  * Displays welcome message with user info and logout button.
- * This is a placeholder - full dashboard features in later user stories.
+ * For Admin/Super Admin, also displays performance dashboard.
  */
 export default async function DashboardPage() {
   const session = await auth();
@@ -22,6 +63,39 @@ export default async function DashboardPage() {
   const canUpload = session?.user?.canUpload === true;
   // Upload access is determined inline in the JSX below:
   // ADMIN/SUPER_ADMIN always, STAFF with canUpload=true
+
+  // Fetch initial dashboard data for Admin/Super Admin
+  let initialMetrics: DashboardMetrics | null = null;
+  let initialUsers: DashboardUser[] = [];
+
+  if (isAdmin || isSuperAdmin) {
+    try {
+      const defaultFilters = getDefaultDashboardFilters();
+
+      const [metricsResult, usersResult] = await Promise.all([
+        getDashboardMetrics(defaultFilters),
+        getDashboardUsers(),
+      ]);
+
+      if (metricsResult.success && usersResult.success) {
+        initialMetrics = metricsResult.data;
+        initialUsers = usersResult.data;
+      } else {
+        console.error("Failed to fetch initial dashboard data:", {
+          metrics: metricsResult.success ? "OK" : metricsResult.error,
+          users: usersResult.success ? "OK" : usersResult.error,
+        });
+        // Set empty defaults to prevent crashes (Update #1: new structure)
+        initialMetrics = getEmptyMetrics();
+        initialUsers = [];
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      // Set empty defaults to prevent crashes (Update #1: new structure)
+      initialMetrics = getEmptyMetrics();
+      initialUsers = [];
+    }
+  }
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
@@ -124,6 +198,19 @@ export default async function DashboardPage() {
               </Link>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Performance Dashboard - Admin & Super Admin */}
+      {(isAdmin || isSuperAdmin) && initialMetrics && initialUsers && (
+        <div className="border-t pt-6 mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Performance Dashboard
+          </h3>
+          <PerformanceDashboard
+            initialData={initialMetrics}
+            initialUsers={initialUsers}
+          />
         </div>
       )}
 
