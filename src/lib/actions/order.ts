@@ -155,30 +155,26 @@ function hasOrderChanged(
 /**
  * Create or update multiple orders in batch (upsert by jobNumber)
  *
- * Features:
- * - Validates each order with Zod
- * - Case-insensitive jobNumber matching (findFirst + mode: insensitive)
- * - 3-way result: created / updated / unchanged
- * - Preserves status and completedAt on update (FR-003)
- * - Batch wrapped in prisma.$transaction for atomicity (NFR-001)
- * - SSE broadcast for created + updated orders only (NFR-003)
+ * Optimized flow:
+ * 1. Auth + Zod validation
+ * 2. Upsert registrants (outside transaction — idempotent, no rollback needed)
+ * 3. Batch lookup existing orders by jobNumber array (1 query)
+ * 4. Categorize: new / changed / unchanged
+ * 5. Transaction: createManyAndReturn for new, batch update promises for changed
+ * 6. SSE broadcast for created + updated
  *
  * @param orders - Array of order inputs
  * @returns BatchCreateResult with created, updated, unchanged, and failed arrays
- *
- * @example
- * const result = await createOrders([order1, order2]);
- * console.log(`Created ${result.created.length}, Updated ${result.updated.length}`);
  */
 export async function createOrders(
   orders: CreateOrderInput[]
 ): Promise<BatchCreateResult> {
   try {
-    // Auth check
+    // 1. Auth check
     const session = await requireUploadPermission();
     const userId = session.user.id;
 
-    // Validate array structure
+    // 2. Validate array structure
     const parseResult = createOrdersSchema.safeParse(orders);
     if (!parseResult.success) {
       return {
@@ -194,114 +190,146 @@ export async function createOrders(
 
     const validatedOrders = parseResult.data;
 
-    // Process all orders inside a transaction for atomicity (NFR-001)
-    const { created, updated, unchanged, failed } =
-      await prisma.$transaction(
-        async (tx) => {
-          // ============================================================
-          // FR-003: Upsert unique registrants from orders into Registrant table
-          // ============================================================
-          const registrantNames = new Set<string>();
-          
-          for (const order of validatedOrders) {
-            if (order.registeredBy && order.registeredBy.trim().length > 0) {
-              registrantNames.add(order.registeredBy);
-            }
-          }
-          
-          // Upsert each unique registrant (idempotent)
-          for (const name of registrantNames) {
-            await tx.registrant.upsert({
-              where: { name },
-              update: {}, // No updates needed, just ensure exists
-              create: { name },
-            });
-          }
-          
-          // ============================================================
-          // Process orders (create/update/unchanged)
-          // ============================================================
-          const created: Order[] = [];
-          const updated: Order[] = [];
-          const unchanged: UnchangedOrder[] = [];
-          const failed: BatchCreateResult["failed"] = [];
+    // 3. Upsert registrants OUTSIDE transaction (idempotent, safe to retry)
+    const registrantNames = [
+      ...new Set(
+        validatedOrders
+          .map((o) => o.registeredBy?.trim())
+          .filter((name): name is string => !!name && name.length > 0)
+      ),
+    ];
 
-          for (const orderInput of validatedOrders) {
-            try {
-              // Case-insensitive lookup (FR-004)
-              const existing = await tx.order.findFirst({
-                where: {
-                  jobNumber: {
-                    equals: orderInput.jobNumber,
-                    mode: "insensitive",
-                  },
+    if (registrantNames.length > 0) {
+      await prisma.registrant.createMany({
+        data: registrantNames.map((name) => ({ name })),
+        skipDuplicates: true,
+      });
+    }
+
+    // 4. Deduplicate input by jobNumber (case-insensitive, keep last occurrence)
+    const deduped = new Map<string, CreateOrderInput>();
+    for (const order of validatedOrders) {
+      deduped.set(order.jobNumber.toLowerCase(), order);
+    }
+    const uniqueOrders = [...deduped.values()];
+
+    // 5. Batch lookup existing orders — 1 query instead of N
+    const jobNumbers = uniqueOrders.map((o) => o.jobNumber);
+    const existingOrders = await prisma.order.findMany({
+      where: {
+        jobNumber: { in: jobNumbers, mode: "insensitive" },
+      },
+    });
+
+    // Build lookup map (lowercase key for case-insensitive matching)
+    const existingMap = new Map<string, Order>(
+      existingOrders.map((o) => [o.jobNumber.toLowerCase(), o])
+    );
+
+    // 6. Categorize orders
+    const toCreate: CreateOrderInput[] = [];
+    const toUpdate: { existing: Order; input: CreateOrderInput }[] = [];
+    const unchanged: UnchangedOrder[] = [];
+    const failed: BatchCreateResult["failed"] = [];
+
+    for (const input of uniqueOrders) {
+      const existing = existingMap.get(input.jobNumber.toLowerCase());
+
+      if (!existing) {
+        toCreate.push(input);
+      } else if (hasOrderChanged(existing, input)) {
+        toUpdate.push({ existing, input });
+      } else {
+        unchanged.push({
+          jobNumber: existing.jobNumber,
+          order: existing,
+          reason: "All fields identical",
+        });
+      }
+    }
+
+    // 7. Execute writes in transaction (only actual DB mutations)
+    let created: Order[] = [];
+    let updated: Order[] = [];
+
+    try {
+      const txResult = await prisma.$transaction(async (tx) => {
+        // Batch create — 1 query for all new orders
+        let txCreated: Order[] = [];
+        if (toCreate.length > 0) {
+          txCreated = await tx.order.createManyAndReturn({
+            data: toCreate.map((input) => ({
+              jobNumber: input.jobNumber,
+              registeredDate: new Date(input.registeredDate),
+              registeredBy: input.registeredBy,
+              receivedDate: new Date(input.receivedDate),
+              checkedBy: input.checkedBy,
+              requiredDate: new Date(input.requiredDate),
+              priority: input.priority,
+              note: input.note,
+              uploadedById: userId,
+            })),
+          });
+        }
+
+        // Batch update — parallel promises in 1 transaction round-trip
+        let txUpdated: Order[] = [];
+        if (toUpdate.length > 0) {
+          txUpdated = await Promise.all(
+            toUpdate.map(({ existing, input }) =>
+              tx.order.update({
+                where: { id: existing.id },
+                data: {
+                  registeredDate: new Date(input.registeredDate),
+                  registeredBy: input.registeredBy,
+                  receivedDate: new Date(input.receivedDate),
+                  checkedBy: input.checkedBy,
+                  requiredDate: new Date(input.requiredDate),
+                  priority: input.priority,
+                  note: input.note,
                 },
-              });
+              })
+            )
+          );
+        }
 
-              if (!existing) {
-                // CREATE — new order
-                const order = await tx.order.create({
-                  data: {
-                    jobNumber: orderInput.jobNumber,
-                    registeredDate: new Date(orderInput.registeredDate),
-                    registeredBy: orderInput.registeredBy,
-                    receivedDate: new Date(orderInput.receivedDate),
-                    checkedBy: orderInput.checkedBy,
-                    requiredDate: new Date(orderInput.requiredDate),
-                    priority: orderInput.priority,
-                    note: orderInput.note,
-                    uploadedById: userId,
-                  },
-                });
-                created.push(order);
-              } else if (hasOrderChanged(existing, orderInput)) {
-                // UPDATE — data changed, preserve status + completedAt (FR-003)
-                const order = await tx.order.update({
-                  where: { id: existing.id },
-                  data: {
-                    registeredDate: new Date(orderInput.registeredDate),
-                    registeredBy: orderInput.registeredBy,
-                    receivedDate: new Date(orderInput.receivedDate),
-                    checkedBy: orderInput.checkedBy,
-                    requiredDate: new Date(orderInput.requiredDate),
-                    priority: orderInput.priority,
-                    note: orderInput.note,
-                    // status — NOT updated (preserved)
-                    // completedAt — NOT updated (preserved)
-                  },
-                });
-                updated.push(order);
-              } else {
-                // UNCHANGED — no data changes, no metadata to refresh
-                unchanged.push({
-                  jobNumber: existing.jobNumber,
-                  order: existing,
-                  reason: "All fields identical",
-                });
-              }
-            } catch (error) {
-              console.error("[createOrders] Error processing order:", error);
-              const errorMessage =
-                error instanceof Error ? error.message : "Unknown error";
-              failed.push({
-                input: orderInput,
-                error: errorMessage,
-              });
-            }
-          }
+        return { created: txCreated, updated: txUpdated };
+      }, { timeout: 10000 });
 
-          return { created, updated, unchanged, failed };
-        },
-        { timeout: 10000 }
-      );
+      created = txResult.created;
+      updated = txResult.updated;
+    } catch (txError) {
+      // Transaction failed — summarize which jobNumbers were affected
+      const affectedJobs = [
+        ...toCreate.map((o) => o.jobNumber),
+        ...toUpdate.map((o) => o.input.jobNumber),
+      ];
+      const summary =
+        txError instanceof Error ? txError.message : "Transaction failed";
+      // Extract short reason (e.g. "Unique constraint failed on jobNumber")
+      const shortReason = summary.includes("Unique constraint")
+        ? "Trùng jobNumber trong DB"
+        : summary.slice(0, 100);
 
-    // Broadcast SSE events for created + updated orders only (NFR-003)
+      for (const jobNumber of affectedJobs) {
+        const matchedInput = uniqueOrders.find(
+          (o) => o.jobNumber.toLowerCase() === jobNumber.toLowerCase()
+        );
+        if (matchedInput) {
+          failed.push({
+            input: matchedInput,
+            error: shortReason,
+          });
+        }
+      }
+    }
+
+    // 8. SSE broadcast for created + updated only
     const changedOrders = [...created, ...updated];
     if (changedOrders.length > 0) {
       try {
         broadcastBulkUpdate(changedOrders);
       } catch (sseError) {
-        // Log SSE error but don't fail the main operation
         console.error(
           "[createOrders] Failed to broadcast SSE events:",
           sseError

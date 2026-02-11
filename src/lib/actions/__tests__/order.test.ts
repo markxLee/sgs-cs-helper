@@ -19,16 +19,20 @@ vi.mock("@/lib/auth", () => ({
   auth: () => mockAuth(),
 }));
 
-// Mock prisma with $transaction + order.findFirst/create/update
-const mockFindFirst = vi.fn();
-const mockCreate = vi.fn();
+// Mock prisma with batch operations used by refactored createOrders:
+// - prisma.registrant.createMany (outside tx)
+// - prisma.order.findMany (outside tx)
+// - tx.order.createManyAndReturn (inside tx)
+// - tx.order.update (inside tx, via Promise.all)
+const mockFindMany = vi.fn();
+const mockCreateManyAndReturn = vi.fn();
 const mockUpdate = vi.fn();
+const mockRegistrantCreateMany = vi.fn();
 
 // Transaction proxy — delegates to the same mock fns
 const txProxy = {
   order: {
-    findFirst: (args: unknown) => mockFindFirst(args),
-    create: (args: unknown) => mockCreate(args),
+    createManyAndReturn: (args: unknown) => mockCreateManyAndReturn(args),
     update: (args: unknown) => mockUpdate(args),
   },
 };
@@ -39,10 +43,11 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: (fn: (tx: typeof txProxy) => Promise<unknown>, opts?: unknown) =>
       mockTransaction(fn, opts),
+    registrant: {
+      createMany: (args: unknown) => mockRegistrantCreateMany(args),
+    },
     order: {
-      findFirst: (args: unknown) => mockFindFirst(args),
-      create: (args: unknown) => mockCreate(args),
-      update: (args: unknown) => mockUpdate(args),
+      findMany: (args: unknown) => mockFindMany(args),
     },
   },
 }));
@@ -153,8 +158,8 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(null);
-      mockCreate.mockResolvedValue(mockCreatedOrder);
+      mockFindMany.mockResolvedValue([]); // No existing orders
+      mockCreateManyAndReturn.mockResolvedValue([mockCreatedOrder]);
 
       // Act
       const { createOrders } = await import("../order");
@@ -166,7 +171,7 @@ describe("createOrders Action", () => {
       expect(result.updated).toHaveLength(0);
       expect(result.unchanged).toHaveLength(0);
       expect(result.failed).toHaveLength(0);
-      expect(mockCreate).toHaveBeenCalledTimes(1);
+      expect(mockCreateManyAndReturn).toHaveBeenCalledTimes(1);
     });
 
     // TC-002: Update order when found + data changed
@@ -174,7 +179,7 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(mockExistingOrder);
+      mockFindMany.mockResolvedValue([mockExistingOrder]);
 
       const changedInput = {
         ...validOrderInput,
@@ -203,7 +208,7 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(mockExistingOrder);
+      mockFindMany.mockResolvedValue([mockExistingOrder]);
 
       const identicalInput = {
         ...validOrderInput,
@@ -223,7 +228,7 @@ describe("createOrders Action", () => {
       expect(result.updated).toHaveLength(0);
       expect(result.failed).toHaveLength(0);
       // No DB write for unchanged
-      expect(mockCreate).not.toHaveBeenCalled();
+      expect(mockCreateManyAndReturn).not.toHaveBeenCalled();
       expect(mockUpdate).not.toHaveBeenCalled();
     });
 
@@ -246,14 +251,10 @@ describe("createOrders Action", () => {
       const updatedOrder = { ...existingChanged, priority: 9 };
       const newOrder = { ...mockCreatedOrder, id: "new-1", jobNumber: "JOB-NEW" };
 
-      // findFirst: 1st call → not found, 2nd → changed, 3rd → unchanged
-      mockFindFirst
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(existingChanged)
-        .mockResolvedValueOnce(existingUnchanged);
-
-      mockCreate.mockResolvedValueOnce(newOrder);
-      mockUpdate.mockResolvedValueOnce(updatedOrder);
+      // findMany returns existing orders (changed + unchanged)
+      mockFindMany.mockResolvedValue([existingChanged, existingUnchanged]);
+      mockCreateManyAndReturn.mockResolvedValue([newOrder]);
+      mockUpdate.mockResolvedValue(updatedOrder);
 
       const inputs = [
         { ...validOrderInput, jobNumber: "JOB-NEW" },
@@ -286,7 +287,7 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(mockCompletedOrder);
+      mockFindMany.mockResolvedValue([mockCompletedOrder]);
 
       const changedInput = {
         ...validOrderInput,
@@ -319,12 +320,12 @@ describe("createOrders Action", () => {
   // ==========================================================================
 
   describe("Case-insensitive Matching", () => {
-    // TC-006: Case-insensitive matching "ABC-001" ↔ "abc-001"
-    it("should match jobNumber case-insensitively via findFirst", async () => {
+    // TC-006: Case-insensitive matching via findMany with mode: insensitive
+    it("should use findMany with case-insensitive mode for jobNumber lookup", async () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(mockExistingOrder);
+      mockFindMany.mockResolvedValue([mockExistingOrder]);
 
       const input = {
         ...validOrderInput,
@@ -335,12 +336,12 @@ describe("createOrders Action", () => {
       const { createOrders } = await import("../order");
       await createOrders([input]);
 
-      // Assert — verify findFirst called with mode: "insensitive"
-      const findFirstCall = mockFindFirst.mock.calls[0][0];
-      expect(findFirstCall).toEqual({
+      // Assert — verify findMany called with mode: "insensitive"
+      const findManyCall = mockFindMany.mock.calls[0][0];
+      expect(findManyCall).toEqual({
         where: {
           jobNumber: {
-            equals: "job-existing",
+            in: ["job-existing"],
             mode: "insensitive",
           },
         },
@@ -358,8 +359,8 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(null);
-      mockCreate.mockResolvedValue(mockCreatedOrder);
+      mockFindMany.mockResolvedValue([]); // No existing orders
+      mockCreateManyAndReturn.mockResolvedValue([mockCreatedOrder]);
 
       // Act
       const { createOrders } = await import("../order");
@@ -387,12 +388,10 @@ describe("createOrders Action", () => {
       const updatedOrder = { ...existingChanged, priority: 9 };
       const newOrder = { ...mockCreatedOrder, id: "new-1", jobNumber: "JOB-NEW" };
 
-      mockFindFirst
-        .mockResolvedValueOnce(null)             // new
-        .mockResolvedValueOnce(existingChanged);  // update
-
-      mockCreate.mockResolvedValueOnce(newOrder);
-      mockUpdate.mockResolvedValueOnce(updatedOrder);
+      // findMany returns the existing order (will be updated)
+      mockFindMany.mockResolvedValue([existingChanged]);
+      mockCreateManyAndReturn.mockResolvedValue([newOrder]);
+      mockUpdate.mockResolvedValue(updatedOrder);
 
       const inputs = [
         { ...validOrderInput, jobNumber: "JOB-NEW" },
@@ -416,7 +415,7 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(mockExistingOrder);
+      mockFindMany.mockResolvedValue([mockExistingOrder]);
 
       const identicalInput = {
         ...validOrderInput,
@@ -436,8 +435,8 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(null);
-      mockCreate.mockResolvedValue(mockCreatedOrder);
+      mockFindMany.mockResolvedValue([]); // No existing
+      mockCreateManyAndReturn.mockResolvedValue([mockCreatedOrder]);
       mockBroadcastBulkUpdate.mockImplementation(() => {
         throw new Error("SSE broadcast failed");
       });
@@ -463,13 +462,11 @@ describe("createOrders Action", () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(null);
+      mockFindMany.mockResolvedValue([]); // No existing orders
 
       const order1 = { ...mockCreatedOrder, id: "order-1", jobNumber: "JOB-001" };
       const order2 = { ...mockCreatedOrder, id: "order-2", jobNumber: "JOB-002" };
-      mockCreate
-        .mockResolvedValueOnce(order1)
-        .mockResolvedValueOnce(order2);
+      mockCreateManyAndReturn.mockResolvedValue([order1, order2]);
 
       const inputs = [
         { ...validOrderInput, jobNumber: "JOB-001" },
@@ -541,8 +538,8 @@ describe("createOrders Action", () => {
         },
       });
       setupTransaction();
-      mockFindFirst.mockResolvedValue(null);
-      mockCreate.mockResolvedValue(mockCreatedOrder);
+      mockFindMany.mockResolvedValue([]); // No existing
+      mockCreateManyAndReturn.mockResolvedValue([mockCreatedOrder]);
 
       // Act
       const { createOrders } = await import("../order");
@@ -580,17 +577,15 @@ describe("createOrders Action", () => {
   // ==========================================================================
 
   describe("Error Handling", () => {
-    // Individual order error within transaction
-    it("should catch individual order errors and put in failed array", async () => {
+    // Transaction error caught and put in failed array
+    it("should catch transaction errors and put in failed array", async () => {
       // Arrange
       setupAuth();
       setupTransaction();
-      mockFindFirst.mockResolvedValue(null);
-      mockCreate.mockRejectedValue(new Error("DB constraint violated"));
-
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      mockFindMany.mockResolvedValue([]); // No existing, so order goes to toCreate
+      mockCreateManyAndReturn.mockRejectedValue(
+        new Error("DB constraint violated")
+      );
 
       // Act
       const { createOrders } = await import("../order");
@@ -599,10 +594,8 @@ describe("createOrders Action", () => {
       // Assert
       expect(result.created).toHaveLength(0);
       expect(result.failed).toHaveLength(1);
-      expect(result.failed[0].error).toBe("DB constraint violated");
+      expect(result.failed[0].error).toContain("DB constraint violated");
       expect(result.failed[0].input).toEqual(validOrderInput);
-
-      consoleErrorSpy.mockRestore();
     });
   });
 });
