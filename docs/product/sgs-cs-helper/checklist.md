@@ -249,10 +249,12 @@ RULES:
   - ✅ Completed: 2026-02-11
   - Notes: Dashboard with KPI cards (On-Time Rate, Overdue), stacked charts, per-user breakdown, date filters
 
-- [ ] **US-2.1.2** — Export Performance Report & Orders to Excel
-  - Status: `PLANNED`
+- [x] **US-2.1.2** — Export Completed Orders to Excel
+  - Status: `DONE`
   - Blocked By: ~~US-2.1.1~~ ✅
-  - Notes: Export summary report (.xlsx) with team avg comparison + export filtered orders, server-side generation
+  - ✅ Completed: 2026-02-12
+  - Branch: `feature/sgs-cs-helper-us-2.1.2`
+  - Notes: Export filtered completed orders to Excel, client-side generation with ExcelJS, batch data fetching, Admin/Super Admin only
 
 ---
 
@@ -465,10 +467,12 @@ RULES:
   - ✅ Hoàn thành: 2026-02-11
   - Ghi chú: Dashboard với thẻ KPI (On-Time Rate, Overdue), biểu đồ stacked, phân tích theo user, bộ lọc ngày
 
-- [ ] **US-2.1.2** — Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel
-  - Trạng thái: `PLANNED`
+- [x] **US-2.1.2** — Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel
+  - Trạng thái: `DONE`
   - Bị chặn bởi: ~~US-2.1.1~~ ✅
-  - Ghi chú: Xuất báo cáo tổng hợp (.xlsx) so sánh TB team + xuất đơn theo bộ lọc, tạo file phía server
+  - ✅ Hoàn thành: 2026-02-12
+  - Branch: `feature/sgs-cs-helper-us-2.1.2`
+  - Ghi chú: Xuất đơn đã hoàn thành ra Excel, tạo file phía client bằng ExcelJS, fetch batch, chỉ Admin/Super Admin
 
 ---
 
