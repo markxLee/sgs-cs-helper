@@ -20,10 +20,10 @@ export function MarkDoneModal({
   return (
     <ConfirmDialog
       isOpen={isOpen}
-      title="Confirm Order Completion"
-      message={`Are you sure you want to mark order ${jobNumber} as complete?`}
-      confirmText={isLoading ? "Processing..." : "Confirm Complete"}
-      cancelText="Cancel"
+      title="Xác nhận hoàn thành đơn"
+      message={`Bạn có chắc muốn đánh dấu đơn ${jobNumber} là hoàn thành?`}
+      confirmText={isLoading ? "Đang xử lý..." : "Xác nhận hoàn thành"}
+      cancelText="Hủy"
       onConfirm={onConfirm}
       onCancel={onCancel}
       danger={false}

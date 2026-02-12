@@ -11,7 +11,7 @@
 | **Product Name**       | SGS CS Order Tracker                                                   |
 | **Product Slug**       | `sgs-cs-helper`                                                        |
 | **Scope Covered**      | Phase 0 (Foundation) + Phase 1 (MVP) + Phase 2 (Reporting & Analytics) |
-| **Total User Stories** | 25                                                                     |
+| **Total User Stories** | 26                                                                     |
 
 ---
 
@@ -566,6 +566,22 @@ Phase 1 MVP:                                    │
   - `Registrant` table ensures complete data regardless of pagination
   - Multi-select component: use shadcn `Popover` + `Command` (combobox) pattern or similar
   - Schema: `model Registrant { id String @id @default(cuid()); name String @unique; createdAt DateTime @default(now()) }`
+
+---
+
+**US-1.2.8: Reorder In Progress Table Columns**
+
+- **Description**: As a Staff member, I want the In Progress orders table columns reordered so that the most important columns (Job Number, Registered By, Total Samples, Progress, Time Left) appear first, improving at-a-glance readability.
+
+- **Acceptance Criteria**:
+  - AC1: In Progress table column order is: Job Number → Registered By → Total Samples → Progress → Time Left → (remaining columns: Registered Date, Received Date, Due Date, Priority, Action)
+  - AC2: All existing data, sorting, and functionality remain intact after reorder
+  - AC3: Table header labels unchanged — only column position changes
+  - AC4: Responsive behavior and overflow scrolling still work correctly
+
+- **Blocked By**: US-1.2.1
+
+- **Notes**: UI-only change in `orders-table.tsx`. No API or data model changes. Affects only the In Progress tab table — Completed tab is not changed.
 
 ---
 
@@ -1311,6 +1327,22 @@ These stories can be worked on in parallel after their dependencies are met:
   - AC5: Sắp xếp mặc định: Required Date tăng dần
 
 - **Bị chặn bởi**: US-1.2.1
+
+---
+
+**US-1.2.8: Sắp xếp lại Thứ tự Cột Bảng In Progress**
+
+- **Mô tả**: Là nhân viên, tôi muốn các cột trong bảng đơn hàng đang xử lý (In Progress) được sắp xếp lại để các cột quan trọng nhất (Job Number, Registered By, Total Samples, Progress, Time Left) hiển thị trước, giúp dễ đọc hơn.
+
+- **Tiêu chí nghiệm thu**:
+  - AC1: Thứ tự cột bảng In Progress: Job Number → Registered By → Total Samples → Progress → Time Left → (các cột còn lại: Registered Date, Received Date, Due Date, Priority, Action)
+  - AC2: Tất cả dữ liệu, sắp xếp và chức năng hiện có vẫn hoạt động bình thường sau khi đổi thứ tự
+  - AC3: Nhãn header cột không thay đổi — chỉ đổi vị trí cột
+  - AC4: Hành vi responsive và cuộn tràn vẫn hoạt động đúng
+
+- **Bị chặn bởi**: US-1.2.1
+
+- **Ghi chú**: Chỉ thay đổi UI trong `orders-table.tsx`. Không thay đổi API hoặc data model. Chỉ ảnh hưởng bảng tab In Progress — tab Completed không đổi.
 
 ---
 

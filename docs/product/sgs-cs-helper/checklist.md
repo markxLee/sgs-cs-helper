@@ -11,7 +11,7 @@
 | **Product Name**  | SGS CS Order Tracker                                         |
 | **Product Slug**  | `sgs-cs-helper`                                              |
 | **Purpose**       | Track execution state across phases, epics, and user stories |
-| **Total Stories** | 28                                                           |
+| **Total Stories** | 29                                                           |
 | **Status Legend** | `PLANNED` → `IN_PROGRESS` → `DONE`                           |
 
 ---
@@ -186,6 +186,14 @@ RULES:
   - ✅ Completed: 2026-02-10
   - Branch: `feature/sgs-cs-helper-us-1.2.7`
   - Notes: New `Registrant` lookup table, multi-select filter on both tabs, seed script from existing orders
+
+- [x] **US-1.2.8** — Reorder In Progress Table Columns
+  - Status: `DONE`
+  - Started: 2026-02-12
+  - ✅ Completed: 2026-02-12
+  - Blocked By: ~~US-1.2.1~~ ✅
+  - Branch: `feature/sgs-cs-helper-us-1.2.8`
+  - Notes: Column reorder, remove Registered Date, full Vietnamese translation, term renames
 
 ---
 
@@ -406,6 +414,14 @@ RULES:
   - Trạng thái: `PLANNED`
   - Bị chặn bởi: ~~US-1.2.6~~ ✅
   - Ghi chú: Bảng tra cứu `Registrant` mới, bộ lọc multi-select trên cả 2 tab, script seed từ đơn hiện có
+
+- [x] **US-1.2.8** — Sắp xếp lại Thứ tự Cột Bảng In Progress
+  - Trạng thái: `DONE`
+  - Bắt đầu: 2026-02-12
+  - ✅ Hoàn thành: 2026-02-12
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
+  - Branch: `feature/sgs-cs-helper-us-1.2.8`
+  - Ghi chú: Sắp xếp lại cột, ẩn Registered Date, dịch toàn bộ UI sang tiếng Việt, đổi tên thuật ngữ
 
 ---
 

@@ -1,0 +1,142 @@
+# Workflow State File — US-1.2.8: Reorder In Progress Table Columns
+# Created: 2026-02-12
+
+# ============================================================
+# META
+# ============================================================
+meta:
+  branch_slug: feature-sgs-cs-helper-us-1.2.8
+  docs_root: sgs-cs-helper
+  tooling_root: a-z-copilot-flow
+  feature_name: "Reorder In Progress Table Columns"
+  created_at: "2026-02-12"
+  last_updated: "2026-02-12"
+  updated_by: copilot
+
+  dev_mode: standard
+  base_branch: main
+
+  # Flow 1 ↔ Flow 2 Integration
+  user_story_id: US-1.2.8
+  product_slug: sgs-cs-helper
+  checklist_path: docs/product/sgs-cs-helper/checklist.md
+
+  affected_roots:
+    - root: sgs-cs-helper
+      role: primary
+      changes: ["src/components/orders/orders-table.tsx"]
+
+# ============================================================
+# CURRENT STATUS
+# ============================================================
+status:
+  current_phase: done
+  phase_name: done
+  phase_status: completed
+
+  current_task: null
+  current_root: sgs-cs-helper
+
+  last_action: "Lite mode completed — code review approved, minor fixes applied, checklist updated"
+  next_action: "Merge to main"
+
+  blockers: []
+
+# ============================================================
+# PHASE PROGRESS
+# ============================================================
+phases:
+  phase_0_analysis:
+    status: in-progress
+    started_at: "2026-02-12"
+    completed_at: null
+    approved_at: null
+    approved_by: null
+
+    artifacts:
+      - path: 00_analysis/work-description.md
+        status: complete
+      - path: 00_analysis/work-updates.md
+        status: initialized
+
+    decisions: []
+    open_questions: []
+
+  phase_1_spec:
+    status: not-started
+    started_at: null
+    completed_at: null
+    approved_at: null
+    artifacts:
+      - path: 01_spec/spec.md
+        status: pending
+    open_questions: []
+
+  phase_2_tasks:
+    status: not-started
+    started_at: null
+    completed_at: null
+    approved_at: null
+    artifacts:
+      - path: 02_tasks/tasks.md
+        status: pending
+    open_questions: []
+
+  phase_3_impl:
+    status: not-started
+    started_at: null
+    completed_at: null
+    approved_at: null
+    artifacts:
+      - path: 03_impl/impl-log.md
+        status: pending
+    tasks: []
+    open_questions: []
+
+  phase_4_tests:
+    status: not-started
+    started_at: null
+    completed_at: null
+    approved_at: null
+    artifacts: []
+    open_questions: []
+
+  phase_5_done:
+    status: not-started
+    started_at: null
+    completed_at: null
+    approved_at: null
+    artifacts:
+      - path: 05_done/done-check.md
+        status: pending
+    open_questions: []
+
+# ============================================================
+# FLOW 1 INTEGRATION
+# ============================================================
+flow_1_integration:
+  source_step: roadmap-to-delivery
+  user_story_id: US-1.2.8
+  checklist_updated: true
+  checklist_status: DONE
+
+# ============================================================
+# HISTORY
+# ============================================================
+history:
+  - timestamp: "2026-02-12"
+    phase: 0
+    action: phase_start
+    description: "Work intake completed. Created work-description.md from Flow 1 handoff."
+  - timestamp: "2026-02-12"
+    phase: lite-mode
+    action: implementation
+    description: "Lite mode: column reorder, remove Registered Date, full VN translation, term renames."
+  - timestamp: "2026-02-12"
+    phase: lite-mode
+    action: code_review_approved
+    description: "Batch code review: APPROVE. 3 minor fixes applied (scanner-overlay, completed-orders-table, orders-header)."
+  - timestamp: "2026-02-12"
+    phase: done
+    action: checklist_updated
+    description: "US-1.2.8 marked DONE in checklist (EN+VN). Workflow state closed."

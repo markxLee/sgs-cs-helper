@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { QrScanner } from "@/components/orders/qr-scanner";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { QrScanner } from "@/components/orders/qr-scanner";
 import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 type ScanPhase =
-  | "scanning"          // Camera active, waiting for decode
-  | "looking-up"        // Decoded, calling lookup API
-  | "found"             // Order found, IN_PROGRESS — ready to mark
+  | "scanning" // Camera active, waiting for decode
+  | "looking-up" // Decoded, calling lookup API
+  | "found" // Order found, IN_PROGRESS — ready to mark
   | "already-completed" // Order found but already COMPLETED
-  | "not-found"         // No order matched
-  | "marking"           // Calling mark-done API
-  | "done"              // Successfully marked complete
-  | "mark-error"        // Mark-done failed — can retry without re-scanning
-  | "error";            // Generic error state (lookup/camera)
+  | "not-found" // No order matched
+  | "marking" // Calling mark-done API
+  | "done" // Successfully marked complete
+  | "mark-error" // Mark-done failed — can retry without re-scanning
+  | "error"; // Generic error state (lookup/camera)
 
 interface OrderResult {
   id: string;
@@ -170,8 +170,7 @@ export function ScannerOverlay({ isOpen, onClose }: ScannerOverlayProps) {
 
   const handleScanError = useCallback((error: unknown) => {
     console.error("Scanner error:", error);
-    const message =
-      error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? error.message : String(error);
 
     // Detect camera permission denied
     if (
@@ -211,9 +210,7 @@ export function ScannerOverlay({ isOpen, onClose }: ScannerOverlayProps) {
     } catch (error) {
       setShowConfirm(false);
       setPhase("mark-error");
-      setErrorMessage(
-        error instanceof Error ? error.message : "Có lỗi xảy ra"
-      );
+      setErrorMessage(error instanceof Error ? error.message : "Có lỗi xảy ra");
     } finally {
       setIsMarkingDone(false);
     }
@@ -243,11 +240,13 @@ export function ScannerOverlay({ isOpen, onClose }: ScannerOverlayProps) {
         className="fixed inset-0 z-40 bg-black/80 flex flex-col"
         role="dialog"
         aria-modal="true"
-        aria-label="QR/Barcode Scanner"
+        aria-label="Máy quét QR/Mã vạch"
       >
         {/* Header bar */}
         <div className="flex items-center justify-between px-4 py-3 bg-black/60">
-          <h2 className="text-white text-lg font-semibold">Scan QR / Barcode</h2>
+          <h2 className="text-white text-lg font-semibold">
+            Quét QR / Mã vạch
+          </h2>
           <button
             ref={closeButtonRef}
             onClick={onClose}
@@ -370,35 +369,43 @@ function ResultCard({
         </div>
 
         {/* Order details (when found) */}
-        {order && (phase === "found" || phase === "already-completed" || phase === "done" || phase === "marking" || phase === "mark-error") && (
-          <div className="border rounded-lg p-3 space-y-2 text-sm">
-            <DetailRow label="Job Number" value={order.jobNumber} />
-            <DetailRow label="Trạng thái" value={formatStatus(order.status)} />
-            <DetailRow
-              label="Ngày đăng ký"
-              value={formatDate(order.registeredDate)}
-            />
-            {order.registeredBy && (
-              <DetailRow label="Người đăng ký" value={order.registeredBy} />
-            )}
-            <DetailRow
-              label="Hạn hoàn thành"
-              value={formatDate(order.requiredDate)}
-            />
-            {order.completedAt && (
+        {order &&
+          (phase === "found" ||
+            phase === "already-completed" ||
+            phase === "done" ||
+            phase === "marking" ||
+            phase === "mark-error") && (
+            <div className="border rounded-lg p-3 space-y-2 text-sm">
+              <DetailRow label="Số đơn hàng" value={order.jobNumber} />
               <DetailRow
-                label="Hoàn thành lúc"
-                value={formatDate(order.completedAt)}
+                label="Trạng thái"
+                value={formatStatus(order.status)}
               />
-            )}
-          </div>
-        )}
+              <DetailRow
+                label="Ngày đăng ký"
+                value={formatDate(order.registeredDate)}
+              />
+              {order.registeredBy && (
+                <DetailRow label="CS" value={order.registeredBy} />
+              )}
+              <DetailRow
+                label="Ngày trả kết quả"
+                value={formatDate(order.requiredDate)}
+              />
+              {order.completedAt && (
+                <DetailRow
+                  label="Hoàn thành lúc"
+                  value={formatDate(order.completedAt)}
+                />
+              )}
+            </div>
+          )}
 
         {/* Not found message */}
         {phase === "not-found" && (
           <p className="text-sm text-gray-600">
-            Không tìm thấy đơn hàng với mã <strong>{scannedValue}</strong>.
-            Vui lòng kiểm tra lại mã và thử quét lại.
+            Không tìm thấy đơn hàng với mã <strong>{scannedValue}</strong>. Vui
+            lòng kiểm tra lại mã và thử quét lại.
           </p>
         )}
 

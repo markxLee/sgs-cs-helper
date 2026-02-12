@@ -72,7 +72,7 @@ export function OrderProgressBar({
       aria-valuenow={percentage}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={`Order progress: ${percentage}%${isOverdue ? " (overdue)" : ""}`}
+      aria-label={`Tiến độ đơn: ${percentage}%${isOverdue ? " (trễ hạn)" : ""}`}
     >
       <Progress
         value={displayPercentage}

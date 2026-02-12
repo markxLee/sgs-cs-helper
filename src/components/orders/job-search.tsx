@@ -9,10 +9,10 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 // ============================================================================
 // Types
@@ -54,7 +54,7 @@ function useDebounce<T>(value: T, delay: number): T {
 export function JobSearch({
   value,
   onChange,
-  placeholder = "Search job number...",
+  placeholder = "Tìm số đơn hàng...",
 }: JobSearchProps) {
   const [inputValue, setInputValue] = useState(value);
   const debouncedValue = useDebounce(inputValue, 300);
@@ -92,7 +92,7 @@ export function JobSearch({
           onClick={handleClear}
         >
           <X className="h-4 w-4" />
-          <span className="sr-only">Clear search</span>
+          <span className="sr-only">Xóa tìm kiếm</span>
         </Button>
       )}
     </div>

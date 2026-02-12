@@ -13,14 +13,17 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useRealtimeProgress, type OrderData } from "@/hooks/use-realtime-progress";
-import { useOrderSSE } from "@/hooks/use-order-sse";
-import { useOrderControls } from "@/hooks/use-order-controls";
-import { OrdersTable } from "@/components/orders/orders-table";
-import { OrderFiltersComponent } from "@/components/orders/order-filters";
 import { JobSearch } from "@/components/orders/job-search";
+import { OrderFiltersComponent } from "@/components/orders/order-filters";
+import { OrdersTable } from "@/components/orders/orders-table";
+import { useOrderControls } from "@/hooks/use-order-controls";
+import { useOrderSSE } from "@/hooks/use-order-sse";
+import {
+  useRealtimeProgress,
+  type OrderData,
+} from "@/hooks/use-realtime-progress";
 import { fetchRegistrants } from "@/lib/actions/order";
+import { useEffect, useMemo, useState } from "react";
 
 // ============================================================================
 // Types
@@ -37,7 +40,11 @@ interface RealtimeOrdersProps {
 // Component
 // ============================================================================
 
-export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }: RealtimeOrdersProps) {
+export function RealtimeOrders({
+  initialOrders,
+  activeTab,
+  canMarkDone = false,
+}: RealtimeOrdersProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -100,7 +107,7 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
   // Filter and sort based on active tab, then apply user controls
   const filteredOrders = useMemo(() => {
     let result: typeof ordersWithProgress;
-    
+
     if (activeTab === "completed") {
       result = ordersWithProgress
         .filter((order) => order.status === "COMPLETED")
@@ -110,12 +117,12 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
         .filter((order) => order.status !== "COMPLETED")
         .sort((a, b) => b.progress.percentage - a.progress.percentage);
     }
-    
+
     // Apply user controls (filter, sort, search) for in-progress tab
     if (activeTab === "in-progress") {
       result = processOrders(result);
     }
-    
+
     return result;
   }, [ordersWithProgress, activeTab, processOrders]);
 
@@ -137,7 +144,9 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
       .finally(() => {
         if (!cancelled) setIsLoadingRegistrants(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Counts for display
@@ -153,11 +162,10 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
       {/* Connection status indicator */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-sm text-muted-foreground">
-          Showing {filteredOrders.length} order
-          {filteredOrders.length !== 1 ? "s" : ""}
+          Hiển thị {filteredOrders.length} đơn
           {activeTab === "in-progress"
-            ? ` (${inProgressCount} in progress)`
-            : ` (${completedCount} completed)`}
+            ? ` (${inProgressCount} đang xử lý)`
+            : ` (${completedCount} đã hoàn thành)`}
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span
@@ -165,9 +173,9 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
               isConnected ? "bg-green-500" : "bg-red-500"
             }`}
           />
-          {isConnected ? "Live" : "Reconnecting..."}
+          {isConnected ? "Trực tuyến" : "Đang kết nối lại..."}
           <span className="text-gray-400">
-            Updated: {mounted ? formatTime(lastUpdated) : '--:--:--'}
+            Cập nhật: {mounted ? formatTime(lastUpdated) : "--:--:--"}
           </span>
         </div>
       </div>
@@ -179,14 +187,14 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
           <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/50 rounded-lg">
             {/* Job Search */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Job Number</span>
+              <span className="text-sm font-medium">Số đơn hàng</span>
               <JobSearch
                 value={search}
                 onChange={setSearch}
-                placeholder="Search Job Number..."
+                placeholder="Tìm số đơn hàng..."
               />
             </div>
-            
+
             {/* Filters - inline */}
             <OrderFiltersComponent
               filters={filters}
@@ -195,16 +203,16 @@ export function RealtimeOrders({ initialOrders, activeTab, canMarkDone = false }
               onFiltersChange={setFilters}
             />
           </div>
-          
+
           {/* Active filters indicator */}
           {hasActiveControls && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Filtering/Sorting active</span>
+              <span>Đang lọc/sắp xếp</span>
               <button
                 onClick={resetControls}
                 className="text-primary hover:underline"
               >
-                Clear all
+                Xóa tất cả
               </button>
             </div>
           )}
@@ -240,7 +248,13 @@ function formatTime(date: Date): string {
   }).format(date);
 }
 
-function EmptyState({ tab, hasFilters = false }: { tab: string; hasFilters?: boolean }) {
+function EmptyState({
+  tab,
+  hasFilters = false,
+}: {
+  tab: string;
+  hasFilters?: boolean;
+}) {
   const isCompleted = tab === "completed";
 
   // Show different message when filters are active
@@ -264,11 +278,10 @@ function EmptyState({ tab, hasFilters = false }: { tab: string; hasFilters?: boo
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold mb-2">
-          No orders found
-        </h2>
+        <h2 className="text-xl font-semibold mb-2">Không tìm thấy đơn hàng</h2>
         <p className="text-muted-foreground max-w-sm">
-          No orders match the current filters. Try adjusting filter criteria.
+          Không có đơn hàng phù hợp với bộ lọc hiện tại. Hãy thử điều chỉnh tiêu
+          chí lọc.
         </p>
       </div>
     );
@@ -297,12 +310,12 @@ function EmptyState({ tab, hasFilters = false }: { tab: string; hasFilters?: boo
         </svg>
       </div>
       <h2 className="text-xl font-semibold mb-2">
-        {isCompleted ? "No completed orders" : "No orders in progress"}
+        {isCompleted ? "Chưa có đơn hoàn thành" : "Chưa có đơn đang xử lý"}
       </h2>
       <p className="text-muted-foreground max-w-sm">
         {isCompleted
-          ? "Completed orders will appear here."
-          : "Orders will appear here once they are uploaded to the system."}
+          ? "Đơn hàng đã hoàn thành sẽ hiển thị ở đây."
+          : "Đơn hàng sẽ hiển thị ở đây sau khi được tải lên hệ thống."}
       </p>
     </div>
   );
