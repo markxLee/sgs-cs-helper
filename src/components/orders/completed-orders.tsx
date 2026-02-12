@@ -9,15 +9,16 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useCompletedOrders } from "@/hooks/use-completed-orders";
 import { CompletedOrdersTable } from "@/components/orders/completed-orders-table";
+import { ExportExcelButton } from "@/components/orders/export-excel-button";
 import { JobSearch } from "@/components/orders/job-search";
 import {
   OrderFiltersComponent,
   type OrderFilters,
 } from "@/components/orders/order-filters";
+import { useCompletedOrders } from "@/hooks/use-completed-orders";
 import { fetchRegistrants } from "@/lib/actions/order";
+import { useCallback, useEffect, useState } from "react";
 
 // ============================================================================
 // Types
@@ -26,6 +27,8 @@ import { fetchRegistrants } from "@/lib/actions/order";
 interface CompletedOrdersProps {
   /** Whether current user can undo completed orders */
   canUndo: boolean;
+  /** Whether current user can export to Excel (Admin/Super Admin only) */
+  canExport: boolean;
   /** Current active tab — used to control fetch timing */
   activeTab: string;
 }
@@ -34,7 +37,11 @@ interface CompletedOrdersProps {
 // Component
 // ============================================================================
 
-export function CompletedOrders({ canUndo, activeTab }: CompletedOrdersProps) {
+export function CompletedOrders({
+  canUndo,
+  canExport,
+  activeTab,
+}: CompletedOrdersProps) {
   const {
     orders,
     total,
@@ -75,7 +82,9 @@ export function CompletedOrders({ canUndo, activeTab }: CompletedOrdersProps) {
       .finally(() => {
         if (!cancelled) setIsLoadingRegistrants(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // ---------------------------------------------------------------------------
@@ -140,6 +149,15 @@ export function CompletedOrders({ canUndo, activeTab }: CompletedOrdersProps) {
           onFiltersChange={handleFiltersChange}
           registrants={registrants}
           isLoading={isLoadingRegistrants}
+        />
+        <ExportExcelButton
+          canExport={canExport}
+          search={search}
+          registeredBy={registeredBy}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          sortField={sortField}
+          sortDir={sortDir}
         />
       </div>
 

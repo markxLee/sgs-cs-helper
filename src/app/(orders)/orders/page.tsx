@@ -9,14 +9,14 @@
  * @route /orders?tab=completed - Show completed orders
  */
 
-import type { Metadata } from "next";
-import Link from "next/link";
-import { getOrders } from "@/lib/actions/order";
-import { auth } from "@/lib/auth";
-import { RealtimeOrders } from "@/components/orders/realtime-orders";
 import { CompletedOrders } from "@/components/orders/completed-orders";
 import { OrdersHeader } from "@/components/orders/orders-header";
+import { RealtimeOrders } from "@/components/orders/realtime-orders";
 import type { OrderData } from "@/hooks/use-realtime-progress";
+import { getOrders } from "@/lib/actions/order";
+import { auth } from "@/lib/auth";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 // ============================================================================
 // Metadata
@@ -56,6 +56,11 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   // canUndo uses the same permission as canMarkDone
   const canUndo = canMarkDone;
 
+  // canExport: only ADMIN and SUPER_ADMIN (STAFF excluded)
+  const canExport = session?.user
+    ? session.user.role === "SUPER_ADMIN" || session.user.role === "ADMIN"
+    : false;
+
   // Fetch in-progress orders only when on that tab (completed tab fetches client-side)
   let initialOrders: OrderData[] = [];
   let inProgressCount = 0;
@@ -90,7 +95,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          In Progress{activeTab === "in-progress" ? ` (${inProgressCount})` : ""}
+          In Progress
+          {activeTab === "in-progress" ? ` (${inProgressCount})` : ""}
         </Link>
         <Link
           href="/orders?tab=completed"
@@ -106,7 +112,11 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
       {/* Tab content */}
       {activeTab === "completed" ? (
-        <CompletedOrders canUndo={canUndo} activeTab={activeTab} />
+        <CompletedOrders
+          canUndo={canUndo}
+          canExport={canExport}
+          activeTab={activeTab}
+        />
       ) : (
         <RealtimeOrders
           initialOrders={initialOrders}

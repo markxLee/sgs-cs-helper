@@ -1,16 +1,17 @@
 # User Stories: SGS CS Order Tracker
+
 <!-- Generated: 2026-02-05 | Product Slug: sgs-cs-helper -->
 
 ---
 
 ## User Stories Overview / Tổng quan User Stories
 
-| Field | Value |
-|-------|-------|
-| **Product Name** | SGS CS Order Tracker |
-| **Product Slug** | `sgs-cs-helper` |
-| **Scope Covered** | Phase 0 (Foundation) + Phase 1 (MVP) + Phase 2 (Reporting & Analytics) |
-| **Total User Stories** | 25 |
+| Field                  | Value                                                                  |
+| ---------------------- | ---------------------------------------------------------------------- |
+| **Product Name**       | SGS CS Order Tracker                                                   |
+| **Product Slug**       | `sgs-cs-helper`                                                        |
+| **Scope Covered**      | Phase 0 (Foundation) + Phase 1 (MVP) + Phase 2 (Reporting & Analytics) |
+| **Total User Stories** | 25                                                                     |
 
 ---
 
@@ -360,7 +361,7 @@ Phase 1 MVP:                                    │
 
 - **Blocked By**: US-1.1.2
 
-- **Notes**: 
+- **Notes**:
   - Use Prisma upsert with jobNumber as unique key
   - Preserve existing status to avoid overwriting COMPLETED orders back to IN_PROGRESS
   - Show clear summary: "Created: 5, Updated: 3, Unchanged: 2"
@@ -371,10 +372,10 @@ Phase 1 MVP:                                    │
     await prisma.order.upsert({
       where: { jobNumber: order.jobNumber },
       create: { ...orderData, status: "IN_PROGRESS" },
-      update: { 
+      update: {
         ...orderData,
         // Do NOT update status - preserve existing
-      }
+      },
     });
     ```
   - **SSE Broadcast**: After batch upsert, call `broadcastBulkUpdate(orders)` from `@/lib/sse/broadcaster`
@@ -415,7 +416,7 @@ Phase 1 MVP:                                    │
 
 - **Blocked By**: US-1.1.3
 
-- **Notes**: 
+- **Notes**:
   - Sample ID format: `2602A-00931.001` → `.001` means sample 1, max = total samples
   - Requires schema update: new `OrderSample` model
   - Requires parsing enhancement in Excel processor
@@ -594,10 +595,11 @@ Phase 1 MVP:                                    │
   - **Broadcaster**: When updating order status, call `broadcastOrderUpdate(order)` from `@/lib/sse/broadcaster`
   - **Client Progress**: Progress bar updates every 60s client-side without server calls
   - **Implementation Pattern**:
+
     ```typescript
     // In server action after updating order status:
     import { broadcastOrderUpdate } from "@/lib/sse/broadcaster";
-    
+
     // After prisma update
     const updatedOrder = await prisma.order.update({...});
     broadcastOrderUpdate(updatedOrder); // Push to all connected clients
@@ -642,7 +644,7 @@ Phase 1 MVP:                                    │
 
 - **Blocked By**: US-1.3.1
 
-- **Notes**: 
+- **Notes**:
   - No time window limit - staff can revert anytime if they have permission
   - Update available from Completed tab on /orders page
 
@@ -658,7 +660,7 @@ Phase 1 MVP:                                    │
     }
     const order = await prisma.order.update({
       where: { id: orderId },
-      data: { status: "IN_PROGRESS", completedAt: null }
+      data: { status: "IN_PROGRESS", completedAt: null },
     });
     broadcastOrderUpdate(order);
     ```
@@ -806,29 +808,29 @@ Phase 1 MVP:                                    │
 
 ---
 
-**US-2.1.2: Export Performance Report & Orders to Excel**
+**US-2.1.2: Export Completed Orders to Excel**
 
-- **Description**: As an Admin / Super Admin, I need to export aggregated performance summary (with team average comparison) and/or filtered completed orders to Excel files from the dashboard, for KPI reporting and staff evaluation.
+- **Description**: As an Admin / Super Admin, I need to export the filtered completed orders list from the Completed tab to an Excel file, for record-keeping and offline reporting.
 
 - **Acceptance Criteria**:
-  - AC1: "Export Summary" button generates `.xlsx` with KPI metrics for the selected scope and time range
-  - AC2: Summary Excel: per-user rows (User Name, Completed Count, On-Time %, Avg Duration, Overdue Count) + "Team Average" comparison row
-  - AC3: Each user row includes above/below team average indicator column
-  - AC4: "Export Orders" button generates `.xlsx` with completed orders for current filters
-  - AC5: Orders Excel columns: Job Number, Customer, Priority, Received Date, Required Date, Completed At, Completed By, Actual Duration, On-Time/Overdue status
-  - AC6: Export respects all current filters: time range, scope, search query
-  - AC7: File naming: `performance-report-{scope}-{dateRange}.xlsx`, `completed-orders-{scope}-{dateRange}.xlsx`
-  - AC8: Excel generation server-side (Server Action) using `exceljs` or `xlsx` library
-  - AC9: Loading indicator while export generates
-  - AC10: Reasonable export limit (e.g., 10,000 orders) with warning if exceeded
+  - AC1: "Export Excel" button on Completed Orders tab, visible only to Admin and Super Admin
+  - AC2: Clicking Export fetches all completed orders matching current search/filter/sort in batches
+  - AC3: Excel file is generated entirely on the client side using ExcelJS library
+  - AC4: Downloaded file is valid `.xlsx` with proper column headers and formatted data
+  - AC5: Excel columns: Job Number, Registered By, Registered Date, Received Date, Required Date, Priority, Sample Count, Completed At, Completed By
+  - AC6: Export respects all current filters: search, registeredBy, date range, sort
+  - AC7: File naming: `completed-orders-YYYY-MM-DD.xlsx`
+  - AC8: Progress indicator shows during batch fetching
+  - AC9: Export button disabled while export is in progress
+  - AC10: STAFF users cannot see or use the export button
 
 - **Blocked By**: US-2.1.1
 
 - **Notes**:
-  - Excel library: `exceljs` or `xlsx` — evaluate during implementation
-  - Server Action generates buffer, returns as downloadable file
-  - Team average row enables quick comparison for staff evaluation
-  - Export buttons placed near the charts/table section on dashboard
+  - Excel library: `exceljs` — client-side generation with `writeBuffer()`
+  - Client fetches data in batches via existing `/api/orders/completed` API until all data collected, then creates file and triggers download
+  - No server-side file generation — all processing happens in the browser
+  - Performance summary report export deferred to future US
 
 ---
 
@@ -836,35 +838,35 @@ Phase 1 MVP:                                    │
 
 ## User Story Summary Table
 
-| ID | Title | Blocked By | Phase |
-|----|-------|------------|-------|
-| US-0.1.1 | Initialize Project Structure | None | 0 |
-| US-0.1.2 | Configure Development Environment | US-0.1.1 | 0 |
-| US-0.2.1 | Super Admin Seeded Login | US-0.1.1, US-0.3.1 | 0 |
-| US-0.2.2 | Admin Google OAuth Login | US-0.2.1, US-0.3.1 | 0 |
-| US-0.2.5 | Staff Code Login (Per-User) | US-0.2.1, US-0.3.1 | 0 |
-| US-0.2.6 | Role-Based Route Protection | US-0.2.1, US-0.2.3-5 | 0 |
-| US-0.2.7 | Staff User Management | US-0.2.2 | 0 |
-| US-0.2.8 | Login Mode Configuration | US-0.2.2 | 0 |
-| US-0.3.1 | Create Core Database Schema | US-0.1.1 | 0 |
-| US-0.3.2 | Seed Initial Data | US-0.3.1 | 0 |
-| US-1.1.1 | Upload Excel Files UI | US-0.2.5, US-0.3.1 | 1 |
-| US-1.1.2 | Parse Excel and Extract Order Data | US-1.1.1 | 1 |
-| US-1.1.3 | Store Order with Upsert by Job Number | US-1.1.2 | 1 |
-| US-1.2.1 | Display Orders List | US-1.1.3 | 1 |
-| US-1.2.2 | Display Progress Bar | US-1.2.1 | 1 |
-| US-1.2.3 | Priority Color Coding | US-1.2.1 | 1 |
-| US-1.2.4 | Filter Orders by Status | US-1.2.1 | 1 |
-| US-1.2.5 | Sort Orders | US-1.2.1 | 1 |
-| US-1.2.7 | Multi-Select Registered By Filter with Dedicated Lookup Table | US-1.2.6 | 1 |
-| US-1.3.1 | Mark Order as Done | US-1.2.1 | 1 |
-| US-1.3.2 | Visual Distinction for Completed Orders | US-1.3.1 | 1 |
-| US-1.3.3 | Undo Order Completion | US-1.3.1 | 1 |
-| US-1.3.4 | Scan QR/Barcode to Mark Order Complete | US-1.3.1 | 1 |
-| US-1.3.5 | Completion Tracking — Log Completed By & Actual Duration | US-1.3.1, US-1.3.2 | 1 |
-| US-1.3.6 | Barcode Scanner Device Support (USB/Bluetooth) | US-1.3.4 | 1 |
-| US-2.1.1 | Performance Dashboard with Chart Visualization | US-1.3.5 | 2 |
-| US-2.1.2 | Export Performance Report & Orders to Excel | US-2.1.1 | 2 |
+| ID       | Title                                                         | Blocked By           | Phase |
+| -------- | ------------------------------------------------------------- | -------------------- | ----- |
+| US-0.1.1 | Initialize Project Structure                                  | None                 | 0     |
+| US-0.1.2 | Configure Development Environment                             | US-0.1.1             | 0     |
+| US-0.2.1 | Super Admin Seeded Login                                      | US-0.1.1, US-0.3.1   | 0     |
+| US-0.2.2 | Admin Google OAuth Login                                      | US-0.2.1, US-0.3.1   | 0     |
+| US-0.2.5 | Staff Code Login (Per-User)                                   | US-0.2.1, US-0.3.1   | 0     |
+| US-0.2.6 | Role-Based Route Protection                                   | US-0.2.1, US-0.2.3-5 | 0     |
+| US-0.2.7 | Staff User Management                                         | US-0.2.2             | 0     |
+| US-0.2.8 | Login Mode Configuration                                      | US-0.2.2             | 0     |
+| US-0.3.1 | Create Core Database Schema                                   | US-0.1.1             | 0     |
+| US-0.3.2 | Seed Initial Data                                             | US-0.3.1             | 0     |
+| US-1.1.1 | Upload Excel Files UI                                         | US-0.2.5, US-0.3.1   | 1     |
+| US-1.1.2 | Parse Excel and Extract Order Data                            | US-1.1.1             | 1     |
+| US-1.1.3 | Store Order with Upsert by Job Number                         | US-1.1.2             | 1     |
+| US-1.2.1 | Display Orders List                                           | US-1.1.3             | 1     |
+| US-1.2.2 | Display Progress Bar                                          | US-1.2.1             | 1     |
+| US-1.2.3 | Priority Color Coding                                         | US-1.2.1             | 1     |
+| US-1.2.4 | Filter Orders by Status                                       | US-1.2.1             | 1     |
+| US-1.2.5 | Sort Orders                                                   | US-1.2.1             | 1     |
+| US-1.2.7 | Multi-Select Registered By Filter with Dedicated Lookup Table | US-1.2.6             | 1     |
+| US-1.3.1 | Mark Order as Done                                            | US-1.2.1             | 1     |
+| US-1.3.2 | Visual Distinction for Completed Orders                       | US-1.3.1             | 1     |
+| US-1.3.3 | Undo Order Completion                                         | US-1.3.1             | 1     |
+| US-1.3.4 | Scan QR/Barcode to Mark Order Complete                        | US-1.3.1             | 1     |
+| US-1.3.5 | Completion Tracking — Log Completed By & Actual Duration      | US-1.3.1, US-1.3.2   | 1     |
+| US-1.3.6 | Barcode Scanner Device Support (USB/Bluetooth)                | US-1.3.4             | 1     |
+| US-2.1.1 | Performance Dashboard with Chart Visualization                | US-1.3.5             | 2     |
+| US-2.1.2 | Export Completed Orders to Excel                              | US-2.1.1             | 2     |
 
 ---
 
@@ -872,14 +874,14 @@ Phase 1 MVP:                                    │
 
 These stories can be worked on in parallel after their dependencies are met:
 
-| After Completing | Can Start In Parallel |
-|------------------|----------------------|
-| US-0.1.1 | US-0.1.2, US-0.3.1 |
-| US-0.3.1 | US-0.2.1, US-0.3.2 |
-| US-0.2.1 | US-0.2.2, US-0.2.5 |
-| US-0.2.2 | US-0.2.7, US-0.2.8 |
-| US-1.2.1 | US-1.2.2, US-1.2.3, US-1.2.4, US-1.2.5, US-1.3.1 |
-| US-1.3.5 | US-2.1.1 |
+| After Completing | Can Start In Parallel                            |
+| ---------------- | ------------------------------------------------ |
+| US-0.1.1         | US-0.1.2, US-0.3.1                               |
+| US-0.3.1         | US-0.2.1, US-0.3.2                               |
+| US-0.2.1         | US-0.2.2, US-0.2.5                               |
+| US-0.2.2         | US-0.2.7, US-0.2.8                               |
+| US-1.2.1         | US-1.2.2, US-1.2.3, US-1.2.4, US-1.2.5, US-1.3.1 |
+| US-1.3.5         | US-2.1.1                                         |
 
 ---
 
@@ -1170,7 +1172,7 @@ These stories can be worked on in parallel after their dependencies are met:
 
 - **Bị chặn bởi**: US-1.1.3
 
-- **Ghi chú**: 
+- **Ghi chú**:
   - Định dạng Sample ID: `2602A-00931.001` → `.001` nghĩa là sample 1, max = tổng samples
   - Cần cập nhật schema: model `OrderSample` mới
   - Cần nâng cấp parser Excel
@@ -1509,29 +1511,29 @@ These stories can be worked on in parallel after their dependencies are met:
 
 ---
 
-**US-2.1.2: Xuất Báo cáo Hiệu suất & Đơn hàng ra Excel**
+**US-2.1.2: Xuất Đơn hàng Đã hoàn thành ra Excel**
 
-- **Mô tả**: Là Admin / Super Admin, tôi cần xuất báo cáo tổng hợp hiệu suất (so sánh với trung bình team) và/hoặc danh sách đơn đã hoàn thành ra file Excel từ dashboard, để làm báo cáo KPI và đánh giá nhân viên.
+- **Mô tả**: Là Admin / Super Admin, tôi cần xuất danh sách đơn hàng đã hoàn thành (đã lọc) từ tab Completed ra file Excel, để lưu trữ và báo cáo offline.
 
 - **Tiêu chí nghiệm thu**:
-  - AC1: Nút "Xuất Tổng hợp" tạo file `.xlsx` với chỉ số KPI cho phạm vi và khoảng thời gian đã chọn
-  - AC2: Excel Tổng hợp: các dòng theo user (Tên, Số đơn HT, % Đúng hạn, TG TB, Số Quá hạn) + dòng "Trung bình Team" để so sánh
-  - AC3: Mỗi dòng user có cột chỉ báo trên/dưới trung bình team
-  - AC4: Nút "Xuất Đơn hàng" tạo file `.xlsx` với danh sách đơn đã hoàn thành theo bộ lọc hiện tại
-  - AC5: Cột Excel đơn hàng: Mã Job, Khách hàng, Priority, Ngày nhận, Ngày yêu cầu, Ngày hoàn thành, Người hoàn thành, TG Thực tế, Đúng hạn/Quá hạn
-  - AC6: Xuất file tuân thủ tất cả bộ lọc hiện tại: thời gian, phạm vi, tìm kiếm
-  - AC7: Đặt tên file: `performance-report-{scope}-{dateRange}.xlsx`, `completed-orders-{scope}-{dateRange}.xlsx`
-  - AC8: Tạo Excel phía server (Server Action) dùng thư viện `exceljs` hoặc `xlsx`
-  - AC9: Hiển thị loading indicator khi đang tạo file
-  - AC10: Giới hạn xuất hợp lý (VD: 10,000 đơn) với cảnh báo nếu vượt quá
+  - AC1: Nút "Export Excel" trên tab Completed Orders, chỉ hiển thị cho Admin và Super Admin
+  - AC2: Nhấn Export sẽ fetch tất cả completed orders phù hợp với search/filter/sort hiện tại theo batch
+  - AC3: File Excel được tạo hoàn toàn ở phía client bằng thư viện ExcelJS
+  - AC4: File tải về là `.xlsx` hợp lệ với tiêu đề cột và dữ liệu được định dạng đúng
+  - AC5: Cột Excel: Mã Job, Người đăng ký, Ngày đăng ký, Ngày nhận mẫu, Ngày yêu cầu, Priority, Số mẫu, Ngày hoàn thành, Người hoàn thành
+  - AC6: Xuất file tuân thủ tất cả bộ lọc hiện tại: search, registeredBy, khoảng ngày, sắp xếp
+  - AC7: Đặt tên file: `completed-orders-YYYY-MM-DD.xlsx`
+  - AC8: Hiển thị thanh tiến trình khi đang fetch batch
+  - AC9: Nút Export bị vô hiệu khi đang export
+  - AC10: Người dùng STAFF không thể thấy hoặc sử dụng nút export
 
 - **Bị chặn bởi**: US-2.1.1
 
 - **Ghi chú**:
-  - Thư viện Excel: `exceljs` hoặc `xlsx` — đánh giá khi triển khai
-  - Server Action tạo buffer, trả về file tải xuống
-  - Dòng trung bình team giúp so sánh nhanh để đánh giá nhân viên
-  - Nút xuất đặt gần phần biểu đồ/bảng trên dashboard
+  - Thư viện Excel: `exceljs` — tạo file phía client bằng `writeBuffer()`
+  - Client fetch dữ liệu theo batch qua API `/api/orders/completed` hiện có cho đến khi lấy hết, rồi tạo file và trigger download
+  - Không tạo file phía server — mọi xử lý diễn ra trên trình duyệt
+  - Xuất báo cáo tổng hợp hiệu suất hoãn sang US tương lai
 
 ---
 
