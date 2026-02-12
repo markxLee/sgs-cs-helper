@@ -177,14 +177,14 @@ export function CompletedOrdersTable({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "An error occurred");
+        throw new Error(result.error || "Có lỗi xảy ra");
       }
 
       // Success — close modal and notify parent
       setModalState({ isOpen: false, order: null });
       onUndoSuccess();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "An error occurred");
+      alert(error instanceof Error ? error.message : "Có lỗi xảy ra");
     } finally {
       setIsUndoLoading(false);
     }
@@ -201,7 +201,8 @@ export function CompletedOrdersTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[120px]">Job Number</TableHead>
+              <TableHead className="w-[120px]">Số đơn hàng</TableHead>
+              <TableHead className="w-[140px]">CS</TableHead>
               <TableHead
                 className={cn(
                   "w-[160px]",
@@ -209,28 +210,14 @@ export function CompletedOrdersTable({
                 )}
               >
                 <SortableHeader
-                  label="Registered Date"
-                  field="registeredDate"
-                  currentSort={sortConfig}
-                  onSort={onSort}
-                />
-              </TableHead>
-              <TableHead className="w-[140px]">Registered By</TableHead>
-              <TableHead
-                className={cn(
-                  "w-[160px]",
-                  "hover:bg-muted/50 transition-colors"
-                )}
-              >
-                <SortableHeader
-                  label="Required Date"
+                  label="Ngày trả kết quả"
                   field="requiredDate"
                   currentSort={sortConfig}
                   onSort={onSort}
                 />
               </TableHead>
-              <TableHead className="w-[100px]">Priority</TableHead>
-              <TableHead className="w-[100px]">Total Samples</TableHead>
+              <TableHead className="w-[100px]">Độ ưu tiên</TableHead>
+              <TableHead className="w-[100px]">Tổng mẫu</TableHead>
               <TableHead
                 className={cn(
                   "w-[170px]",
@@ -238,7 +225,7 @@ export function CompletedOrdersTable({
                 )}
               >
                 <SortableHeader
-                  label="Completed At"
+                  label="Hoàn thành lúc"
                   field="completedAt"
                   currentSort={sortConfig}
                   onSort={onSort}
@@ -251,14 +238,14 @@ export function CompletedOrdersTable({
                 )}
               >
                 <SortableHeader
-                  label="Completed By"
+                  label="Người hoàn thành"
                   field="completedBy"
                   currentSort={sortConfig}
                   onSort={onSort}
                 />
               </TableHead>
-              <TableHead className="w-[150px]">Actual Duration</TableHead>
-              {canUndo && <TableHead className="w-[100px]">Action</TableHead>}
+              <TableHead className="w-[150px]">Thời gian thực tế</TableHead>
+              {canUndo && <TableHead className="w-[100px]">Thao tác</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -277,12 +264,12 @@ export function CompletedOrdersTable({
             {!isLoading && orders.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={canUndo ? 10 : 9}
+                  colSpan={canUndo ? 9 : 8}
                   className="h-32 text-center"
                 >
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <PackageOpen className="h-8 w-8" />
-                    <p>No completed orders found</p>
+                    <p>Không có đơn hàng đã hoàn thành</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -295,7 +282,6 @@ export function CompletedOrdersTable({
                 className={isLoading ? "opacity-50" : ""}
               >
                 <TableCell className="font-medium">{order.jobNumber}</TableCell>
-                <TableCell>{formatDate(order.registeredDate)}</TableCell>
                 <TableCell className="max-w-[140px]">
                   <span
                     className="truncate block"
@@ -312,7 +298,9 @@ export function CompletedOrdersTable({
                     {getPriorityLabel(order.priority)}
                   </span>
                 </TableCell>
-                <TableCell className="text-center">{order.sampleCount}</TableCell>
+                <TableCell className="text-center">
+                  {order.sampleCount}
+                </TableCell>
                 <TableCell>
                   {order.completedAt ? (
                     <span className="text-green-700 font-medium">
@@ -381,12 +369,12 @@ export function CompletedOrdersTable({
                           </span>
                           {overdueDurationMs != null && (
                             <span className="block text-xs text-purple-500">
-                              Overdue: {formatDuration(overdueDurationMs)}
+                              Trễ: {formatDuration(overdueDurationMs)}
                             </span>
                           )}
                           {earlyDurationMs != null && (
                             <span className="block text-xs text-green-500">
-                              Early: {formatDuration(earlyDurationMs)}
+                              Sớm: {formatDuration(earlyDurationMs)}
                             </span>
                           )}
                         </div>
@@ -402,10 +390,10 @@ export function CompletedOrdersTable({
                       variant="outline"
                       size="sm"
                       onClick={() => setModalState({ isOpen: true, order })}
-                      aria-label={`Undo completion of order ${order.jobNumber}`}
+                      aria-label={`Hoàn tác đơn ${order.jobNumber}`}
                     >
                       <Undo2 className="h-4 w-4 mr-1" />
-                      Undo
+                      Hoàn tác
                     </Button>
                   </TableCell>
                 )}
@@ -419,7 +407,7 @@ export function CompletedOrdersTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
+            Trang {page} / {totalPages}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -429,7 +417,7 @@ export function CompletedOrdersTable({
               disabled={page <= 1 || isLoading}
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              Trước
             </Button>
             <Button
               variant="outline"
@@ -437,7 +425,7 @@ export function CompletedOrdersTable({
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages || isLoading}
             >
-              Next
+              Sau
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>

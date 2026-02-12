@@ -95,7 +95,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          In Progress
+          Đang xử lý
           {activeTab === "in-progress" ? ` (${inProgressCount})` : ""}
         </Link>
         <Link
@@ -106,7 +106,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          Completed
+          Đã hoàn thành
         </Link>
       </div>
 

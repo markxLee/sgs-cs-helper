@@ -58,10 +58,10 @@ export function ExportExcelButton({
         size="sm"
         disabled={isExporting}
         onClick={exportExcel}
-        aria-label="Export completed orders to Excel"
+        aria-label="Xuất đơn hoàn thành ra Excel"
       >
         <Download className="mr-1 h-4 w-4" />
-        {isExporting ? "Exporting..." : "Export Excel"}
+        {isExporting ? "Đang xuất..." : "Xuất Excel"}
       </Button>
       {isExporting && <Progress value={progress} className="h-2 w-full" />}
     </div>

@@ -20,10 +20,10 @@ export function UndoCompleteModal({
   return (
     <ConfirmDialog
       isOpen={isOpen}
-      title="Confirm Undo Completion"
-      message={`Are you sure you want to undo order ${jobNumber} back to In Progress?`}
-      confirmText={isLoading ? "Processing..." : "Undo Complete"}
-      cancelText="Cancel"
+      title="Xác nhận hoàn tác"
+      message={`Bạn có chắc muốn hoàn tác đơn ${jobNumber} về trạng thái đang xử lý?`}
+      confirmText={isLoading ? "Đang xử lý..." : "Hoàn tác"}
+      cancelText="Hủy"
       onConfirm={onConfirm}
       onCancel={onCancel}
       danger={false}

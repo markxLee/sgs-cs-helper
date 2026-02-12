@@ -10,18 +10,8 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, ChevronsUpDown, X, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -30,6 +20,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
 // ============================================================================
 // Types
@@ -111,9 +111,9 @@ export function OrderFiltersComponent({
 
   const triggerLabel = useMemo(() => {
     const count = filters.registeredBy.length;
-    if (count === 0) return "Registered By";
+    if (count === 0) return "CS";
     if (count === 1) return filters.registeredBy[0];
-    return `${count} selected`;
+    return `${count} đã chọn`;
   }, [filters.registeredBy]);
 
   // ---- Render ----
@@ -122,7 +122,7 @@ export function OrderFiltersComponent({
     <>
       {/* Registered By Multi-Select Filter */}
       <div className="flex flex-col gap-1.5">
-        <Label className="text-sm font-medium">Registered By</Label>
+        <Label className="text-sm font-medium">CS</Label>
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -130,13 +130,13 @@ export function OrderFiltersComponent({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              aria-label="Select registrants to filter by"
+              aria-label="Chọn CS để lọc"
               className="w-[200px] justify-between font-normal"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading…
+                  Đang tải…
                 </span>
               ) : (
                 <span className="truncate">{triggerLabel}</span>
@@ -147,9 +147,9 @@ export function OrderFiltersComponent({
 
           <PopoverContent className="w-[220px] p-0" align="start">
             <Command>
-              <CommandInput placeholder="Search registrant…" />
+              <CommandInput placeholder="Tìm CS..." />
               <CommandList>
-                <CommandEmpty>No registrant found.</CommandEmpty>
+                <CommandEmpty>Không tìm thấy CS.</CommandEmpty>
                 <CommandGroup>
                   {registrants.map((name) => {
                     const isSelected = filters.registeredBy.includes(name);
@@ -183,7 +183,7 @@ export function OrderFiltersComponent({
       {/* Required Date From */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="dateFrom" className="text-sm font-medium">
-          Due Date From
+          Hạn từ ngày
         </Label>
         <Input
           id="dateFrom"
@@ -197,7 +197,7 @@ export function OrderFiltersComponent({
       {/* Required Date To */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="dateTo" className="text-sm font-medium">
-          To Date
+          Đến ngày
         </Label>
         <Input
           id="dateTo"
@@ -217,7 +217,7 @@ export function OrderFiltersComponent({
           className="h-10"
         >
           <X className="h-4 w-4 mr-1" />
-          Clear Filters
+          Xóa bộ lọc
         </Button>
       )}
 
@@ -233,7 +233,7 @@ export function OrderFiltersComponent({
               {name}
               <button
                 type="button"
-                aria-label={`Remove ${name}`}
+                aria-label={`Xóa ${name}`}
                 className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 onClick={() => handleRemoveRegistrant(name)}
               >

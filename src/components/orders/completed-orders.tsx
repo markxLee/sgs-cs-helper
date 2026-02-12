@@ -164,7 +164,7 @@ export function CompletedOrders({
       {/* Total count */}
       {!isLoading && total > 0 && (
         <p className="text-sm text-muted-foreground">
-          {total} completed order{total !== 1 ? "s" : ""}
+          {total} đơn đã hoàn thành
         </p>
       )}
 
