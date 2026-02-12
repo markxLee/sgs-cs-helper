@@ -157,7 +157,7 @@ export function OrdersHeader({ canScan }: OrdersHeaderProps) {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Đơn hàng</h1>
           <p className="text-muted-foreground mt-2">
-            Xem tất cả đơn hàng phòng thí nghiệm và tiến độ xử lý
+            Xem tất cả đơn hàng phòng và tiến độ xử lý
           </p>
         </div>
 
